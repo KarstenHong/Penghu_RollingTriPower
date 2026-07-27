@@ -1,0 +1,54 @@
+@page "/member/register"
+@inject FirebaseAuthService AuthService
+@inject FirestoreService Firestore
+@inject NavigationManager Nav
+
+<PageTitle>會員註冊</PageTitle>
+
+<h1>會員註冊</h1>
+
+<EditForm Model="model" OnValidSubmit="HandleRegister" class="member-form">
+    <label>
+        姓名
+        <InputText @bind-Value="model.Name" />
+    </label>
+    <label>
+        電子郵件
+        <InputText @bind-Value="model.Email" />
+    </label>
+    <label>
+        密碼（至少 6 碼）
+        <InputText @bind-Value="model.Password" type="password" />
+    </label>
+    <button type="submit" class="primary-button">註冊</button>
+</EditForm>
+
+@if (error is not null)
+{
+    <p class="error-text">註冊失敗，請確認電子郵件格式與密碼長度（至少 6 碼）。</p>
+}
+
+<p>已經有帳號了嗎？<a href="/member/login">前往登入</a></p>
+
+@code {
+    private readonly RegisterModel model = new();
+    private string? error;
+
+    private async Task HandleRegister()
+    {
+        error = await AuthService.RegisterAsync(model.Email, model.Password);
+        if (error is null && AuthService.CurrentUser is not null)
+        {
+            var profile = new UserProfile { Uid = AuthService.CurrentUser.Uid, Name = model.Name };
+            await Firestore.SetAsync("users", AuthService.CurrentUser.Uid, profile);
+            Nav.NavigateTo("/member/profile");
+        }
+    }
+
+    private class RegisterModel
+    {
+        public string Name { get; set; } = "";
+        public string Email { get; set; } = "";
+        public string Password { get; set; } = "";
+    }
+}

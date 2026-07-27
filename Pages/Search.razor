@@ -1,0 +1,78 @@
+@page "/search"
+@inject FirestoreService Firestore
+
+<PageTitle>社區活動查詢</PageTitle>
+
+<h1>社區活動查詢</h1>
+
+<div class="search-filters">
+    <label>
+        關鍵字
+        <input @bind="keyword" @bind:event="oninput" placeholder="輸入據點名稱或地址" />
+    </label>
+
+    <label>
+        鄉鎮
+        <select @bind="townshipFilter">
+            <option value="">全部</option>
+            @foreach (var t in Townships.All)
+            {
+                <option value="@t.Id">@t.Name</option>
+            }
+        </select>
+    </label>
+
+    <label>
+        運動類型
+        <select @bind="sportFilter">
+            <option value="">全部</option>
+            @foreach (var s in SportTypes.All)
+            {
+                <option value="@s.Id">@s.Name</option>
+            }
+        </select>
+    </label>
+</div>
+
+@if (loading)
+{
+    <p>載入中...</p>
+}
+else if (!FilteredVenues.Any())
+{
+    <p class="hint-text">找不到符合條件的據點，請調整篩選條件。</p>
+}
+else
+{
+    <div class="venue-list">
+        @foreach (var venue in FilteredVenues)
+        {
+            <div class="venue-card">
+                <h3>@venue.Name <span class="venue-type">(@VenueTypes.NameOf(venue.Type))</span> <FavoriteToggle VenueId="@venue.Id" /></h3>
+                <p>鄉鎮：@Townships.NameOf(venue.Township)</p>
+                <p>地址：@venue.Address</p>
+                <p>電話：@venue.Phone</p>
+                <p>運動項目：@string.Join("、", venue.SportTypes.Select(SportTypes.NameOf))</p>
+            </div>
+        }
+    </div>
+}
+
+@code {
+    private List<Venue> venues = new();
+    private bool loading = true;
+    private string keyword = "";
+    private string townshipFilter = "";
+    private string sportFilter = "";
+
+    private IEnumerable<Venue> FilteredVenues => venues.Where(v =>
+        (string.IsNullOrWhiteSpace(keyword) || v.Name.Contains(keyword, StringComparison.OrdinalIgnoreCase) || v.Address.Contains(keyword, StringComparison.OrdinalIgnoreCase)) &&
+        (string.IsNullOrEmpty(townshipFilter) || v.Township == townshipFilter) &&
+        (string.IsNullOrEmpty(sportFilter) || v.SportTypes.Contains(sportFilter)));
+
+    protected override async Task OnInitializedAsync()
+    {
+        venues = await Firestore.GetAllAsync<Venue>("venues");
+        loading = false;
+    }
+}

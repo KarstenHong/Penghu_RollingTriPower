@@ -1,0 +1,39 @@
+@page "/post/{Id}"
+@inject FirestoreService Firestore
+
+<PageTitle>@(post?.Title ?? "公告")</PageTitle>
+
+@if (loading)
+{
+    <p>載入中...</p>
+}
+else if (post is null)
+{
+    <p class="hint-text">找不到這則公告。</p>
+}
+else
+{
+    <a href="@($"/posts/{post.Category}")" class="back-button">&larr; 返回列表</a>
+    <h1>@post.Title</h1>
+    <p class="post-date">@post.Date</p>
+    @if (!string.IsNullOrWhiteSpace(post.ImageUrl))
+    {
+        <img class="post-detail-image" src="@post.ImageUrl" alt="" />
+    }
+    <p class="post-content">@post.Content</p>
+}
+
+@code {
+    [Parameter]
+    public string Id { get; set; } = "";
+
+    private Post? post;
+    private bool loading = true;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        loading = true;
+        post = await Firestore.GetByIdAsync<Post>("posts", Id);
+        loading = false;
+    }
+}

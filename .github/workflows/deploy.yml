@@ -1,0 +1,37 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Publish
+        run: dotnet publish PenghuSportsFinder.csproj -c Release -o release --nologo
+
+      # GitHub Pages 專案頁面會被放在 /<repo名稱>/ 這個子路徑，
+      # 所以要把 index.html 裡的 <base href="/" /> 改成對應的子路徑，Blazor 才能正確載入資源。
+      - name: Fix base href for GitHub Pages subpath
+        run: sed -i "s|<base href=\"/\" />|<base href=\"/${{ github.event.repository.name }}/\" />|" release/wwwroot/index.html
+
+      - name: Add .nojekyll
+        run: touch release/wwwroot/.nojekyll
+
+      - name: Deploy to gh-pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: release/wwwroot
+          publish_branch: gh-pages

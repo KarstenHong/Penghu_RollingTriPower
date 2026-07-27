@@ -1,0 +1,50 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return isSignedIn() &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == "admin";
+    }
+
+    // 公開資料：所有人可讀，只有 admin 角色可寫（後台維護）
+    match /venues/{id} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /courses/{id} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /posts/{id} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /faq/{id} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /associations/{id} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // 會員資料：本人可讀寫自己的文件；admin 可讀所有人（後台管理會員時可擴充）
+    // role 欄位只能由已經是 admin 的人變更，避免使用者自行把自己升級成 admin
+    match /users/{uid} {
+      allow read: if isSignedIn() && (request.auth.uid == uid || isAdmin());
+      allow create: if isSignedIn() && request.auth.uid == uid && request.resource.data.role == "user";
+      allow update: if isSignedIn() && request.auth.uid == uid &&
+                       request.resource.data.role == resource.data.role;
+      allow delete: if false;
+    }
+  }
+}

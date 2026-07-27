@@ -1,0 +1,43 @@
+@page "/contact"
+@inject FirestoreService Firestore
+
+<PageTitle>聯絡我們</PageTitle>
+
+<h1>聯絡我們（各社區協會）</h1>
+
+@if (loading)
+{
+    <p>載入中...</p>
+}
+else if (!associations.Any())
+{
+    <p class="hint-text">目前沒有聯絡資料。</p>
+}
+else
+{
+    @foreach (var group in associations.GroupBy(a => a.Township))
+    {
+        <h2>@Townships.NameOf(group.Key)</h2>
+        <div class="venue-list">
+            @foreach (var a in group)
+            {
+                <div class="venue-card">
+                    <h3>@a.Name</h3>
+                    <p>電話：@a.Phone</p>
+                    <p>地址：@a.Address</p>
+                </div>
+            }
+        </div>
+    }
+}
+
+@code {
+    private List<Association> associations = new();
+    private bool loading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        associations = await Firestore.GetAllAsync<Association>("associations");
+        loading = false;
+    }
+}

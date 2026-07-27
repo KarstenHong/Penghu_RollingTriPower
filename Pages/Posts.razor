@@ -1,0 +1,50 @@
+@page "/posts/{Category}"
+@inject FirestoreService Firestore
+
+<PageTitle>@Title</PageTitle>
+
+<h1>@Title</h1>
+
+@if (loading)
+{
+    <p>載入中...</p>
+}
+else if (!posts.Any())
+{
+    <p class="hint-text">目前沒有@(Title)。</p>
+}
+else
+{
+    <div class="post-list">
+        @foreach (var post in posts.OrderByDescending(p => p.Date))
+        {
+            <a class="post-card" href="@($"/post/{post.Id}")">
+                @if (!string.IsNullOrWhiteSpace(post.ImageUrl))
+                {
+                    <img src="@post.ImageUrl" alt="" />
+                }
+                <div>
+                    <h3>@post.Title</h3>
+                    <p class="post-date">@post.Date</p>
+                </div>
+            </a>
+        }
+    </div>
+}
+
+@code {
+    [Parameter]
+    public string Category { get; set; } = "news";
+
+    private List<Post> posts = new();
+    private bool loading = true;
+
+    private string Title => Category == "event" ? "活動資訊" : "最新消息";
+
+    protected override async Task OnParametersSetAsync()
+    {
+        loading = true;
+        posts = await Firestore.GetWhereAsync<Post>("posts", "category", Category);
+        loading = false;
+    }
+}

@@ -1,0 +1,148 @@
+@page "/admin/venues"
+@attribute [Authorize(Roles = "admin")]
+@inject FirestoreService Firestore
+
+<PageTitle>場域管理</PageTitle>
+
+<a href="/admin" class="back-button">&larr; 返回後台首頁</a>
+<h1>場域管理</h1>
+
+@if (loading)
+{
+    <p>載入中...</p>
+}
+else
+{
+    <table class="admin-table">
+        <thead>
+            <tr><th>名稱</th><th>鄉鎮</th><th>類型</th><th></th></tr>
+        </thead>
+        <tbody>
+            @foreach (var v in venues)
+            {
+                <tr>
+                    <td>@v.Name</td>
+                    <td>@Townships.NameOf(v.Township)</td>
+                    <td>@VenueTypes.NameOf(v.Type)</td>
+                    <td>
+                        <button @onclick="() => Edit(v)">編輯</button>
+                        <button @onclick="() => Delete(v)">刪除</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <button class="primary-button" @onclick="NewVenue">+ 新增場域</button>
+
+    @if (editing is not null)
+    {
+        <EditForm Model="editing" OnValidSubmit="Save" class="member-form">
+            <label>名稱 <InputText @bind-Value="editing.Name" /></label>
+            <label>
+                鄉鎮
+                <InputSelect @bind-Value="editing.Township">
+                    <option value="">請選擇</option>
+                    @foreach (var t in Townships.All)
+                    {
+                        <option value="@t.Id">@t.Name</option>
+                    }
+                </InputSelect>
+            </label>
+            <label>
+                類型
+                <InputSelect @bind-Value="editing.Type">
+                    <option value="">請選擇</option>
+                    @foreach (var t in VenueTypes.All)
+                    {
+                        <option value="@t.Id">@t.Name</option>
+                    }
+                </InputSelect>
+            </label>
+            <label>地址 <InputText @bind-Value="editing.Address" /></label>
+            <label>電話 <InputText @bind-Value="editing.Phone" /></label>
+
+            <fieldset>
+                <legend>提供的運動項目</legend>
+                @foreach (var sport in SportTypes.All)
+                {
+                    <label class="checkbox-line">
+                        <input type="checkbox"
+                               checked="@editing.SportTypes.Contains(sport.Id)"
+                               @onchange="e => ToggleSport(sport.Id, e.Value)" />
+                        @sport.Name
+                    </label>
+                }
+            </fieldset>
+
+            <button type="submit" class="primary-button">儲存</button>
+            <button type="button" class="secondary-button" @onclick="() => editing = null">取消</button>
+        </EditForm>
+    }
+}
+
+@code {
+    private List<Venue> venues = new();
+    private Venue? editing;
+    private bool loading = true;
+
+    protected override async Task OnInitializedAsync() => await Reload();
+
+    private async Task Reload()
+    {
+        loading = true;
+        venues = await Firestore.GetAllAsync<Venue>("venues");
+        loading = false;
+    }
+
+    private void NewVenue() => editing = new Venue();
+
+    private void Edit(Venue v) => editing = new Venue
+    {
+        Id = v.Id,
+        Name = v.Name,
+        Township = v.Township,
+        Type = v.Type,
+        Address = v.Address,
+        Phone = v.Phone,
+        SportTypes = new List<string>(v.SportTypes),
+    };
+
+    private void ToggleSport(string sportId, object? isChecked)
+    {
+        if (isChecked is true)
+        {
+            if (!editing!.SportTypes.Contains(sportId))
+            {
+                editing.SportTypes.Add(sportId);
+            }
+        }
+        else
+        {
+            editing!.SportTypes.Remove(sportId);
+        }
+    }
+
+    private async Task Save()
+    {
+        if (editing!.Id is null)
+        {
+            await Firestore.AddAsync("venues", editing);
+        }
+        else
+        {
+            await Firestore.SetAsync("venues", editing.Id, editing);
+        }
+        editing = null;
+        await Reload();
+    }
+
+    private async Task Delete(Venue v)
+    {
+        if (v.Id is not null)
+        {
+            await Firestore.DeleteAsync("venues", v.Id);
+            await Reload();
+        }
+    }
+}
