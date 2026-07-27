@@ -1,12 +1,13 @@
 // Firebase Authentication 包裝（Email/Password）
 
-async function registerUser(email, password, name) {
+async function registerUser(email, password, name, birthDate, nationalId) {
   const cred = await auth.createUserWithEmailAndPassword(email, password);
   await setItem("users", cred.user.uid, {
     name,
+    birthDate,
+    nationalId,
     role: "user",
     phone: "",
-    birthDate: "",
     township: "",
     favoriteSports: [],
     favoriteVenueIds: [],
@@ -21,6 +22,10 @@ async function loginUser(email, password) {
 
 async function logoutUser() {
   await auth.signOut();
+}
+
+async function sendPasswordReset(email) {
+  await auth.sendPasswordResetEmail(email);
 }
 
 // Firebase 還原登入狀態是非同步的，第一次呼叫要等它確定完成才知道有沒有登入

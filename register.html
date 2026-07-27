@@ -17,31 +17,49 @@
   <div id="nav"></div>
   <main>
     <h1>會員註冊</h1>
+    <p class="hint-text">註冊完成後，還會請您接著填寫聯絡電話、所在鄉鎮等完整會員資料</p>
 
     <form class="member-form" id="register-form">
       <label>姓名 <input type="text" id="name" required /></label>
+      <label>出生年月日 <input type="date" id="birthDate" required /></label>
+      <label>身分證字號 <input type="text" id="nationalId" maxlength="10" placeholder="例如 A123456789" required /></label>
       <label>電子郵件 <input type="email" id="email" required /></label>
-      <label>密碼（至少 6 碼） <input type="password" id="password" minlength="6" required /></label>
+      <label>密碼（至少 6 碼，請自行設定並記住） <input type="password" id="password" minlength="6" required /></label>
       <button type="submit" class="primary-button">註冊</button>
     </form>
 
-    <p class="error-text" id="error" style="display: none;">註冊失敗，請確認電子郵件格式與密碼長度（至少 6 碼）。</p>
+    <p class="error-text" id="error" style="display: none;"></p>
     <p>已經有帳號了嗎？<a href="login.html">前往登入</a></p>
   </main>
 
   <script>
+    function showError(message) {
+      const el = document.getElementById("error");
+      el.textContent = message;
+      el.style.display = "block";
+    }
+
     document.getElementById("register-form").addEventListener("submit", async (e) => {
       e.preventDefault();
       document.getElementById("error").style.display = "none";
+
+      const nationalId = document.getElementById("nationalId").value.toUpperCase();
+      if (!isValidTaiwanId(nationalId)) {
+        showError("身分證字號格式不正確，請確認後再輸入一次。");
+        return;
+      }
+
       try {
         await registerUser(
           document.getElementById("email").value,
           document.getElementById("password").value,
-          document.getElementById("name").value
+          document.getElementById("name").value,
+          document.getElementById("birthDate").value,
+          nationalId
         );
         location.href = "profile.html";
       } catch (err) {
-        document.getElementById("error").style.display = "block";
+        showError("註冊失敗，請確認電子郵件格式是否正確、密碼是否至少 6 碼，或這個信箱是否已經註冊過。");
       }
     });
   </script>
