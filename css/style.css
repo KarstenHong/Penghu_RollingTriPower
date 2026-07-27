@@ -50,7 +50,7 @@ main {
 
 .photo-strip {
   position: relative;
-  margin: -1.5rem -2rem 0.3rem;
+  margin: -1.5rem -2rem 1.5rem;
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 2px;
@@ -59,9 +59,6 @@ main {
 }
 
   .photo-strip img { width: 100%; height: 100%; object-fit: cover; display: block; }
-
-.photo-credit-line { font-size: 0.75em; color: #999; margin: 0 0 1.2rem; }
-  .photo-credit-line a { color: inherit; }
 
 .bg-credit {
   position: absolute;
@@ -164,13 +161,47 @@ main {
 /* 首頁地圖 */
 
 .map-wrap {
-  max-width: 480px;
+  max-width: 620px;
   margin: 0 auto;
   padding: 1rem;
   background: linear-gradient(180deg, #cdeefb 0%, #e3f4fb 100%);
   border-radius: 16px;
   box-shadow: inset 0 2px 10px rgba(10, 92, 120, 0.15);
 }
+
+/* 地圖上的小島不好點準時，直接點鄉鎮名稱一樣能到達，兩種方式並存 */
+.township-buttons {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.7rem;
+  max-width: 620px;
+  margin: 1.2rem auto 0;
+}
+
+.township-button {
+  display: block;
+  min-height: 52px;
+  padding: 0.6rem;
+  border-radius: 12px;
+  background: white;
+  border: 2px solid #14919b;
+  color: #0a5c78;
+  font-weight: bold;
+  font-size: 1.05rem;
+  text-align: center;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+  .township-button:hover {
+    background: #0a5c78;
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 14px rgba(10, 92, 120, 0.25);
+  }
 
 .township-shape {
   cursor: pointer;
@@ -473,9 +504,11 @@ svg text {
   .icon-grid { grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); }
 
   .page-banner { margin: -1.1rem -1.1rem 1.1rem; height: 140px; }
-  .photo-strip { margin: -1.1rem -1.1rem 0.3rem; height: 110px; }
+  .photo-strip { margin: -1.1rem -1.1rem 1.1rem; height: 110px; }
 
   /* 手機地圖太小很難點準，把地圖區塊的內距縮小，讓地圖本身盡量畫大一點 */
   .map-wrap { padding: 0.5rem; }
   main:has(.map-wrap) { padding-left: 0.6rem; padding-right: 0.6rem; }
+
+  .township-buttons { grid-template-columns: repeat(2, 1fr); }
 }
