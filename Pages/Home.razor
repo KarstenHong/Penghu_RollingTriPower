@@ -1,0 +1,63 @@
+@page "/"
+@inject NavigationManager Nav
+
+<PageTitle>澎湖縣社區運動資源查詢</PageTitle>
+
+<h1>澎湖縣社區運動資源查詢</h1>
+<p class="hint-text">請點選地圖上您想查詢的鄉鎮</p>
+
+<div class="map-wrap">
+    <svg viewBox="0 0 400 420" role="img" aria-label="澎湖縣地圖">
+        @foreach (var t in Townships.All)
+        {
+            <g class="township-shape" tabindex="0"
+               @onclick="() => GoTo(t.Id)"
+               @onkeydown="e => OnKeyDown(e, t.Id)">
+                <polygon points="@Shapes[t.Id]" fill="@Colors[t.Id]" stroke="white" stroke-width="3" />
+                <text x="@LabelPos[t.Id].x" y="@LabelPos[t.Id].y" text-anchor="middle">@t.Name</text>
+            </g>
+        }
+    </svg>
+</div>
+
+@code {
+    private static readonly Dictionary<string, string> Shapes = new()
+    {
+        ["baisha"] = "150,30 260,30 245,110 155,110",
+        ["xiyu"] = "50,120 145,120 135,190 55,190",
+        ["magong"] = "150,120 265,120 275,225 140,225",
+        ["huxi"] = "265,110 350,120 340,205 265,205",
+        ["wangan"] = "120,270 190,270 190,330 120,330",
+        ["qimei"] = "125,350 185,350 185,400 125,400",
+    };
+
+    private static readonly Dictionary<string, string> Colors = new()
+    {
+        ["baisha"] = "#6a994e",
+        ["xiyu"] = "#457b9d",
+        ["magong"] = "#e76f51",
+        ["huxi"] = "#e9c46a",
+        ["wangan"] = "#bc4749",
+        ["qimei"] = "#264653",
+    };
+
+    private static readonly Dictionary<string, (int x, int y)> LabelPos = new()
+    {
+        ["baisha"] = (200, 75),
+        ["xiyu"] = (95, 160),
+        ["magong"] = (205, 175),
+        ["huxi"] = (305, 160),
+        ["wangan"] = (155, 305),
+        ["qimei"] = (155, 380),
+    };
+
+    private void GoTo(string townshipId) => Nav.NavigateTo($"/township/{townshipId}");
+
+    private void OnKeyDown(Microsoft.AspNetCore.Components.Web.KeyboardEventArgs e, string townshipId)
+    {
+        if (e.Key == "Enter" || e.Key == " ")
+        {
+            GoTo(townshipId);
+        }
+    }
+}

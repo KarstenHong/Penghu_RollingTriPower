@@ -1,0 +1,88 @@
+@page "/admin/faq"
+@attribute [Authorize(Roles = "admin")]
+@inject FirestoreService Firestore
+
+<PageTitle>常見問題管理</PageTitle>
+
+<a href="/admin" class="back-button">&larr; 返回後台首頁</a>
+<h1>常見問題管理</h1>
+
+@if (loading)
+{
+    <p>載入中...</p>
+}
+else
+{
+    <table class="admin-table">
+        <thead>
+            <tr><th>問題</th><th></th></tr>
+        </thead>
+        <tbody>
+            @foreach (var f in faqs)
+            {
+                <tr>
+                    <td>@f.Question</td>
+                    <td>
+                        <button @onclick="() => Edit(f)">編輯</button>
+                        <button @onclick="() => Delete(f)">刪除</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <button class="primary-button" @onclick="NewFaq">+ 新增問題</button>
+
+    @if (editing is not null)
+    {
+        <EditForm Model="editing" OnValidSubmit="Save" class="member-form">
+            <label>問題 <InputText @bind-Value="editing.Question" /></label>
+            <label>答案 <InputTextArea @bind-Value="editing.Answer" /></label>
+
+            <button type="submit" class="primary-button">儲存</button>
+            <button type="button" class="secondary-button" @onclick="() => editing = null">取消</button>
+        </EditForm>
+    }
+}
+
+@code {
+    private List<Faq> faqs = new();
+    private Faq? editing;
+    private bool loading = true;
+
+    protected override async Task OnInitializedAsync() => await Reload();
+
+    private async Task Reload()
+    {
+        loading = true;
+        faqs = await Firestore.GetAllAsync<Faq>("faq");
+        loading = false;
+    }
+
+    private void NewFaq() => editing = new Faq();
+
+    private void Edit(Faq f) => editing = new Faq { Id = f.Id, Question = f.Question, Answer = f.Answer };
+
+    private async Task Save()
+    {
+        if (editing!.Id is null)
+        {
+            await Firestore.AddAsync("faq", editing);
+        }
+        else
+        {
+            await Firestore.SetAsync("faq", editing.Id, editing);
+        }
+        editing = null;
+        await Reload();
+    }
+
+    private async Task Delete(Faq f)
+    {
+        if (f.Id is not null)
+        {
+            await Firestore.DeleteAsync("faq", f.Id);
+            await Reload();
+        }
+    }
+}

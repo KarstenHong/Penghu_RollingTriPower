@@ -1,0 +1,80 @@
+@page "/township/{TownshipId}"
+@inject FirestoreService Firestore
+
+<PageTitle>@Townships.NameOf(TownshipId) - 運動資源</PageTitle>
+
+<a href="/" class="back-button">&larr; 返回地圖</a>
+<h1>@Townships.NameOf(TownshipId)</h1>
+
+@if (loading)
+{
+    <p>載入中...</p>
+}
+else if (!venues.Any())
+{
+    <p class="hint-text">目前這個鄉鎮還沒有資料。</p>
+}
+else
+{
+    <p class="hint-text">請點選運動圖示，查看提供這項運動的據點</p>
+
+    <div class="icon-grid">
+        @foreach (var sport in SportTypes.All.Where(s => AvailableSports.Contains(s.Id)))
+        {
+            <button class="icon-button @(selectedSport == sport.Id ? "selected" : "")"
+                    @onclick="() => SelectSport(sport.Id)">
+                <img src="images/icons/@sport.IconFile" alt="@sport.Name" />
+                <span>@sport.Name</span>
+            </button>
+        }
+    </div>
+
+    @if (selectedSport is not null)
+    {
+        <h2>@SportTypes.NameOf(selectedSport) 據點</h2>
+        <div class="venue-list">
+            @foreach (var (venue, courses) in VenuesForSelectedSport)
+            {
+                <div class="venue-card">
+                    <h3>@venue.Name <span class="venue-type">(@VenueTypes.NameOf(venue.Type))</span> <FavoriteToggle VenueId="@venue.Id" /></h3>
+                    <p>地址：@venue.Address</p>
+                    <p>電話：@venue.Phone</p>
+                    @foreach (var c in courses)
+                    {
+                        <p class="course-line">課程時間：@c.Schedule ｜ @c.Description</p>
+                    }
+                </div>
+            }
+        </div>
+    }
+}
+
+@code {
+    [Parameter]
+    public string TownshipId { get; set; } = "";
+
+    private List<Venue> venues = new();
+    private List<Course> coursesForSelectedSport = new();
+    private string? selectedSport;
+    private bool loading = true;
+
+    private IEnumerable<string> AvailableSports => venues.SelectMany(v => v.SportTypes).Distinct();
+
+    private IEnumerable<(Venue venue, List<Course> courses)> VenuesForSelectedSport =>
+        venues.Where(v => v.SportTypes.Contains(selectedSport!))
+              .Select(v => (v, coursesForSelectedSport.Where(c => c.VenueId == v.Id).ToList()));
+
+    protected override async Task OnParametersSetAsync()
+    {
+        loading = true;
+        selectedSport = null;
+        venues = await Firestore.GetWhereAsync<Venue>("venues", "township", TownshipId);
+        loading = false;
+    }
+
+    private async Task SelectSport(string sportId)
+    {
+        selectedSport = sportId;
+        coursesForSelectedSport = await Firestore.GetWhereAsync<Course>("courses", "sportType", sportId);
+    }
+}
