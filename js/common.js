@@ -79,7 +79,7 @@ function renderNav() {
     const authEl = document.getElementById("nav-auth-links");
     if (!authEl) return;
     if (!user) {
-      authEl.innerHTML = `<a href="login.html">會員登入</a><a href="register.html">會員註冊</a>`;
+      authEl.innerHTML = `<a href="login.html" class="nav-cta">會員登入 / 註冊</a>`;
       return;
     }
     const profile = await getById("users", user.uid);
