@@ -31,3 +31,22 @@ const TOWNSHIP_HIGHLIGHTS = {
     sourceUrl: "https://commons.wikimedia.org/wiki/File:Double-Heart_of_Stacked_Stones_20150721.jpg",
   },
 };
+
+// 首頁用的綜合縣景照片（不限特定鄉鎮），讓首頁的照片輪播更豐富
+const GENERAL_PHOTOS = [
+  {
+    image: "images/scenery/qimei.jpg",
+    credit: "Zeze0729 / Wikimedia Commons, CC BY-SA 3.0",
+    sourceUrl: "https://commons.wikimedia.org/wiki/File:Double-Heart_of_Stacked_Stones_20150721.jpg",
+  },
+  {
+    image: "images/scenery/beach.jpg",
+    credit: "Chia Chia Kuo / Wikimedia Commons, CC BY-SA 4.0",
+    sourceUrl: "https://commons.wikimedia.org/wiki/File:Dream_Beach_in_penghu.jpg",
+  },
+  {
+    image: "images/scenery/bridge.jpg",
+    credit: "翁維德 (Wei-Te Wong) / Wikimedia Commons, CC BY-SA 2.0",
+    sourceUrl: "https://commons.wikimedia.org/wiki/File:Penghu_Great_Bridge_20150619.jpg",
+  },
+];

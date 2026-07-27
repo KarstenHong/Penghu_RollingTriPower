@@ -110,6 +110,11 @@ function renderPenghuMap(containerId) {
     const t = PENGHU_MAP.townships[id];
     svg += `<path class="township-shape" tabindex="0" data-township="${id}" d="${t.d}" fill="${TOWNSHIP_COLORS[id]}" fill-rule="evenodd" />`;
   }
+  // 望安、七美這些小島在地圖上的實際形狀很小，手機上很難點準；疊一個透明的大圓當作保底的點擊熱區
+  for (const id in PENGHU_MAP.townships) {
+    const t = PENGHU_MAP.townships[id];
+    svg += `<circle class="township-shape township-hit-area" tabindex="-1" data-township="${id}" cx="${t.labelX}" cy="${t.labelY}" r="32" fill="transparent" />`;
+  }
   for (const id in PENGHU_MAP.townships) {
     const t = PENGHU_MAP.townships[id];
     svg += `<text x="${t.labelX}" y="${t.labelY}" text-anchor="middle">${t.name}</text>`;
