@@ -64,7 +64,7 @@
 
     function render() {
       let html = `
-        <table class="admin-table">
+        <div class="table-scroll"><table class="admin-table">
           <thead><tr><th>分類</th><th>標題</th><th>日期</th><th></th></tr></thead>
           <tbody>
             ${posts.map((p) => `
@@ -79,7 +79,7 @@
               </tr>
             `).join("")}
           </tbody>
-        </table>
+        </table></div>
         <button class="primary-button" onclick="newPost()">+ 新增公告</button>
       `;
 

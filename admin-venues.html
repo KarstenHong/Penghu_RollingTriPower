@@ -68,7 +68,7 @@
 
     function render() {
       let html = `
-        <table class="admin-table">
+        <div class="table-scroll"><table class="admin-table">
           <thead><tr><th>名稱</th><th>鄉鎮</th><th>類型</th><th></th></tr></thead>
           <tbody>
             ${venues.map((v) => `
@@ -83,7 +83,7 @@
               </tr>
             `).join("")}
           </tbody>
-        </table>
+        </table></div>
         <button class="primary-button" onclick="newVenue()">+ 新增場域</button>
       `;
 

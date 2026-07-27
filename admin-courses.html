@@ -69,7 +69,7 @@
 
     function render() {
       let html = `
-        <table class="admin-table">
+        <div class="table-scroll"><table class="admin-table">
           <thead><tr><th>場域</th><th>運動類型</th><th>時間</th><th></th></tr></thead>
           <tbody>
             ${courses.map((c) => `
@@ -84,7 +84,7 @@
               </tr>
             `).join("")}
           </tbody>
-        </table>
+        </table></div>
         <button class="primary-button" onclick="newCourse()">+ 新增課程</button>
       `;
 
