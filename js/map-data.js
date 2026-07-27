@@ -16,6 +16,12 @@ const PENGHU_MAP = {
       "labelY": 303,
       "bbox": [
         339,
+        224,
+        480,
+        354
+      ],
+      "mainBbox": [
+        339,
         264,
         444,
         336
@@ -31,6 +37,12 @@ const PENGHU_MAP = {
         742,
         173,
         784
+      ],
+      "mainBbox": [
+        130,
+        742,
+        173,
+        784
       ]
     },
     "magong": {
@@ -39,6 +51,12 @@ const PENGHU_MAP = {
       "labelX": 326,
       "labelY": 339,
       "bbox": [
+        236,
+        262,
+        377,
+        421
+      ],
+      "mainBbox": [
         270,
         284,
         377,
@@ -51,6 +69,12 @@ const PENGHU_MAP = {
       "labelX": 229,
       "labelY": 556,
       "bbox": [
+        20,
+        511,
+        432,
+        728
+      ],
+      "mainBbox": [
         213,
         526,
         247,
@@ -63,6 +87,12 @@ const PENGHU_MAP = {
       "labelX": 322,
       "labelY": 213,
       "bbox": [
+        272,
+        20,
+        417,
+        270
+      ],
+      "mainBbox": [
         274,
         183,
         351,
@@ -75,6 +105,12 @@ const PENGHU_MAP = {
       "labelX": 235,
       "labelY": 271,
       "bbox": [
+        188,
+        208,
+        276,
+        329
+      ],
+      "mainBbox": [
         188,
         210,
         274,
@@ -146,13 +182,14 @@ function renderPenghuMap(containerId, ids) {
   });
 }
 
-// 離島小地圖（望安、七美）：像放大鏡一樣單獨顯示，不必照實際地理位置擺放
+// 離島小地圖（望安、七美）：像放大鏡一樣單獨顯示，不必照實際地理位置擺放。
+// 用 mainBbox（只放大本島）而不是完整 bbox，縮圖才不會因為離島太分散而把本島縮到看不清楚
 function renderMapInset(containerId, townshipId) {
   const el = document.getElementById(containerId);
   const t = PENGHU_MAP.townships[townshipId];
   if (!el || !t) return;
 
-  const [bx0, by0, bx1, by1] = t.bbox;
+  const [bx0, by0, bx1, by1] = t.mainBbox;
   const pad = Math.max(8, (bx1 - bx0) * 0.2);
   const vx = bx0 - pad, vy = by0 - pad, vw = (bx1 - bx0) + pad * 2, vh = (by1 - by0) + pad * 2;
 
@@ -171,7 +208,7 @@ function renderMapInset(containerId, townshipId) {
   });
 }
 
-// 畫單一鄉鎮的放大地圖（只顯示該鄉鎮的形狀，視角縮放到本島範圍）
+// 畫單一鄉鎮的放大地圖（顯示該鄉鎮的完整轄區，包含所有離島）
 function renderTownshipMap(containerId, townshipId) {
   const el = document.getElementById(containerId);
   const t = PENGHU_MAP.townships[townshipId];
