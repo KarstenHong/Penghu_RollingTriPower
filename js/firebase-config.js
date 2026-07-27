@@ -1,9 +1,8 @@
-// 請至 Firebase Console > 專案設定 取得您自己的設定值，貼到下面。
 export const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_PROJECT_ID.appspot.com",
-  messagingSenderId: "YOUR_SENDER_ID",
-  appId: "YOUR_APP_ID",
+  apiKey: "AIzaSyD_nRu9voYABex_G2_sQpdQIVYpQUc4Sx8",
+  authDomain: "penghusportsfinder.firebaseapp.com",
+  projectId: "penghusportsfinder",
+  storageBucket: "penghusportsfinder.firebasestorage.app",
+  messagingSenderId: "945088002548",
+  appId: "1:945088002548:web:0956c5d42114b1838461a1",
 };
