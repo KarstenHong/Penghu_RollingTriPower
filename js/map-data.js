@@ -208,13 +208,14 @@ function renderMapInset(containerId, townshipId) {
   });
 }
 
-// 畫單一鄉鎮的放大地圖（顯示該鄉鎮的完整轄區，包含所有離島）
+// 畫單一鄉鎮的放大地圖。大部分鄉鎮顯示完整轄區（含離島）；
+// 望安鄉的離島散得太開，照實際比例縮放會讓本島小到看不清楚，這裡改成只放大顯示本島，犧牲地理比例換取清晰度
 function renderTownshipMap(containerId, townshipId) {
   const el = document.getElementById(containerId);
   const t = PENGHU_MAP.townships[townshipId];
   if (!el || !t) return;
 
-  const [bx0, by0, bx1, by1] = t.bbox;
+  const [bx0, by0, bx1, by1] = townshipId === "wangan" ? t.mainBbox : t.bbox;
   const pad = Math.max(10, (bx1 - bx0) * 0.08);
   const vx = bx0 - pad, vy = by0 - pad, vw = (bx1 - bx0) + pad * 2, vh = (by1 - by0) + pad * 2;
 
