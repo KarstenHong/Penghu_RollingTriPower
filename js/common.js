@@ -63,6 +63,45 @@ const NAV_LINKS = [
   { href: "contact.html", label: "聯絡我們" },
 ];
 
+// 每個網頁都是獨立的頁面（沒有用單頁式框架），每次點連結都會整頁重新載入，
+// Firebase 每次都要重新非同步確認登入狀態，這段時間導覽列一開始只能顯示「未登入」，
+// 確認完才變成「已登入」，畫面上就會看到頁籤閃一下、跳兩次。
+// 用 localStorage 記住上一次確認過的登入狀態，一開始就直接照這個狀態畫，不用等 Firebase 再問一次；
+// Firebase 確認完之後才拿真正結果覆蓋回去（萬一跟快取的不一樣，例如在別的分頁登出了）。
+function getCachedAuth() {
+  try {
+    return JSON.parse(localStorage.getItem("authCache"));
+  } catch {
+    return null;
+  }
+}
+
+function setCachedAuth(value) {
+  if (value) {
+    localStorage.setItem("authCache", JSON.stringify(value));
+  } else {
+    localStorage.removeItem("authCache");
+  }
+}
+
+function authLinksHtml(role) {
+  let html = `<a href="profile.html">會員資料</a><a href="favorites.html">我的最愛</a>`;
+  if (role === "admin") {
+    html += `<a href="admin.html">後台維護</a>`;
+  }
+  html += `<a href="#" id="nav-logout">登出</a>`;
+  return html;
+}
+
+function wireLogoutButton() {
+  document.getElementById("nav-logout")?.addEventListener("click", async (e) => {
+    e.preventDefault();
+    await logoutUser();
+    setCachedAuth(null);
+    location.href = "index.html";
+  });
+}
+
 function renderNav() {
   const el = document.getElementById("nav");
   if (!el) return;
@@ -75,25 +114,26 @@ function renderNav() {
     </div>
   `;
 
+  const authEl = document.getElementById("nav-auth-links");
+  const cached = getCachedAuth();
+  if (cached) {
+    authEl.innerHTML = authLinksHtml(cached.role);
+    wireLogoutButton();
+  } else {
+    authEl.innerHTML = `<a href="login.html" class="nav-cta">會員登入 / 註冊</a>`;
+  }
+
   onAuthReady(async (user) => {
-    const authEl = document.getElementById("nav-auth-links");
-    if (!authEl) return;
     if (!user) {
+      setCachedAuth(null);
       authEl.innerHTML = `<a href="login.html" class="nav-cta">會員登入 / 註冊</a>`;
       return;
     }
     const profile = await getById("users", user.uid);
-    let html = `<a href="profile.html">會員資料</a><a href="favorites.html">我的最愛</a>`;
-    if (profile && profile.role === "admin") {
-      html += `<a href="admin.html">後台維護</a>`;
-    }
-    html += `<a href="#" id="nav-logout">登出</a>`;
-    authEl.innerHTML = html;
-    document.getElementById("nav-logout").addEventListener("click", async (e) => {
-      e.preventDefault();
-      await logoutUser();
-      location.href = "index.html";
-    });
+    const role = profile && profile.role === "admin" ? "admin" : "user";
+    setCachedAuth({ uid: user.uid, role });
+    authEl.innerHTML = authLinksHtml(role);
+    wireLogoutButton();
   });
 }
 
