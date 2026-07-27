@@ -1,0 +1,284 @@
+/* 澎湖縣社區運動資源查詢 - 共用樣式（長者易用性優先：大字體、大按鈕、高對比） */
+
+* { box-sizing: border-box; }
+
+body {
+  font-family: "Microsoft JhengHei", "PingFang TC", "Helvetica Neue", Arial, sans-serif;
+  font-size: 1.15rem;
+  color: #1a1a1a;
+  margin: 0;
+  background: #fafafa;
+}
+
+body.text-large { font-size: 1.4rem; }
+body.text-xlarge { font-size: 1.75rem; }
+
+h1 { font-size: 1.8em; }
+h2 { font-size: 1.4em; }
+
+main {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 1rem 1.5rem 3rem;
+}
+
+.hint-text { font-size: 1.05em; color: #333; }
+
+/* 導覽列 */
+
+.nav-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem;
+  background: #1b6ec2;
+  color: white;
+  padding: 0.75rem 1.5rem;
+}
+
+.nav-brand {
+  color: white;
+  font-weight: bold;
+  font-size: 1.2rem;
+  text-decoration: none;
+  margin-right: auto;
+}
+
+.nav-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.9rem;
+}
+
+  .nav-links a {
+    color: white;
+    text-decoration: none;
+    font-size: 1rem;
+  }
+
+  .nav-links a:hover {
+    text-decoration: underline;
+  }
+
+/* 字級切換 */
+
+.font-size-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin: 1rem 0;
+}
+
+.font-size-controls button {
+  min-height: 44px;
+  padding: 0.3rem 0.9rem;
+  border: 2px solid #1b6ec2;
+  border-radius: 6px;
+  background: white;
+  color: #1b6ec2;
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+/* 首頁地圖 */
+
+.map-wrap {
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+.township-shape {
+  cursor: pointer;
+}
+
+  .township-shape:hover,
+  .township-shape:focus {
+    opacity: 0.75;
+    outline: none;
+  }
+
+svg text {
+  font-size: 20px;
+  font-weight: bold;
+  fill: white;
+  paint-order: stroke;
+  stroke: rgba(0, 0, 0, 0.5);
+  stroke-width: 3px;
+  pointer-events: none;
+}
+
+/* 運動圖示 */
+
+.icon-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 1rem;
+  margin: 1rem 0;
+}
+
+.icon-button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+  min-height: 110px;
+  padding: 0.75rem;
+  border: 3px solid #ccc;
+  border-radius: 12px;
+  background: white;
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+  .icon-button img { width: 56px; height: 56px; }
+  .icon-button.selected { border-color: #1b6ec2; background: #eaf3fc; }
+
+/* 據點卡片 */
+
+.venue-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1rem;
+  margin: 1rem 0;
+}
+
+.venue-card {
+  border: 2px solid #ddd;
+  border-radius: 10px;
+  padding: 1rem;
+  background: white;
+}
+
+.venue-type { font-size: 0.85em; color: #555; }
+
+.favorite-toggle {
+  background: none;
+  border: none;
+  font-size: 1.4rem;
+  color: #e9a400;
+  cursor: pointer;
+  vertical-align: middle;
+}
+
+/* 公告 / 常見問題 */
+
+.post-list { display: flex; flex-direction: column; gap: 1rem; }
+
+.post-card {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  border: 2px solid #ddd;
+  border-radius: 10px;
+  padding: 1rem;
+  text-decoration: none;
+  color: inherit;
+  background: white;
+}
+
+  .post-card img { width: 80px; height: 80px; object-fit: cover; border-radius: 8px; }
+
+.post-date { color: #555; font-size: 0.9em; }
+.post-content { white-space: pre-wrap; line-height: 1.6; }
+.post-detail-image { max-width: 100%; border-radius: 10px; }
+
+.faq-list { display: flex; flex-direction: column; gap: 0.75rem; }
+
+.faq-item {
+  border: 2px solid #ddd;
+  border-radius: 10px;
+  padding: 0.75rem 1rem;
+  background: white;
+}
+
+  .faq-item summary { font-weight: bold; cursor: pointer; }
+
+/* 表單 / 按鈕 */
+
+.member-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  max-width: 480px;
+}
+
+  .member-form label { display: flex; flex-direction: column; gap: 0.3rem; font-weight: bold; }
+
+  .member-form input,
+  .member-form select,
+  .member-form textarea {
+    min-height: 44px;
+    font-size: 1rem;
+    padding: 0.4rem;
+    border: 2px solid #bbb;
+    border-radius: 6px;
+    font-family: inherit;
+  }
+
+.checkbox-line {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: normal;
+}
+
+.primary-button, .secondary-button, .back-button {
+  display: inline-block;
+  min-height: 48px;
+  padding: 0.5rem 1.5rem;
+  border-radius: 8px;
+  font-size: 1.05rem;
+  cursor: pointer;
+  text-decoration: none;
+  text-align: center;
+  font-family: inherit;
+}
+
+.primary-button { background: #1b6ec2; color: white; border: none; }
+.secondary-button { background: white; color: #1b6ec2; border: 2px solid #1b6ec2; }
+.back-button { display: inline-block; margin-bottom: 1rem; color: #1b6ec2; font-weight: bold; }
+
+.error-text { color: #b32121; font-weight: bold; }
+.success-text { color: #26742d; font-weight: bold; }
+
+/* 搜尋篩選 */
+
+.search-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+  .search-filters label { display: flex; flex-direction: column; gap: 0.3rem; font-weight: bold; }
+
+  .search-filters input,
+  .search-filters select {
+    min-height: 44px;
+    padding: 0.4rem;
+    font-size: 1rem;
+    border: 2px solid #bbb;
+    border-radius: 6px;
+  }
+
+/* 後台管理 */
+
+.admin-nav { list-style: none; padding: 0; display: flex; flex-direction: column; gap: 0.75rem; }
+
+  .admin-nav a {
+    display: block;
+    padding: 1rem;
+    border: 2px solid #ddd;
+    border-radius: 10px;
+    text-decoration: none;
+    font-size: 1.1rem;
+    color: inherit;
+    background: white;
+  }
+
+.admin-table { width: 100%; border-collapse: collapse; margin-bottom: 1rem; background: white; }
+
+  .admin-table th, .admin-table td { border: 1px solid #ccc; padding: 0.5rem; text-align: left; }
+  .admin-table button { min-height: 36px; margin-right: 0.4rem; }

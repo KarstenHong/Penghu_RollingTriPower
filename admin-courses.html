@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>運動課程管理 - 澎湖縣社區運動資源查詢</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+  <script src="js/firebase-config.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/common.js"></script>
+</head>
+<body>
+  <div id="nav"></div>
+  <main>
+    <a href="admin.html" class="back-button">&larr; 返回後台首頁</a>
+    <h1>運動課程管理</h1>
+    <div id="content"><p>載入中...</p></div>
+  </main>
+
+  <script>
+    let courses = [];
+    let venues = [];
+    let editing = null;
+
+    function venueName(id) {
+      return venues.find((v) => v.id === id)?.name || id;
+    }
+
+    async function reload() {
+      courses = await getAll("courses");
+      render();
+    }
+
+    function newCourse() {
+      editing = { venueId: "", sportType: "", schedule: "", description: "" };
+      render();
+    }
+
+    function editCourse(id) {
+      editing = JSON.parse(JSON.stringify(courses.find((c) => c.id === id)));
+      render();
+    }
+
+    async function deleteCourse(id) {
+      await deleteItem("courses", id);
+      await reload();
+    }
+
+    async function saveCourse(e) {
+      e.preventDefault();
+      editing.venueId = document.getElementById("f-venue").value;
+      editing.sportType = document.getElementById("f-sport").value;
+      editing.schedule = document.getElementById("f-schedule").value;
+      editing.description = document.getElementById("f-description").value;
+      editing.iconKey = editing.sportType;
+
+      if (editing.id) {
+        await setItem("courses", editing.id, editing);
+      } else {
+        await addItem("courses", editing);
+      }
+      editing = null;
+      await reload();
+    }
+
+    function render() {
+      let html = `
+        <table class="admin-table">
+          <thead><tr><th>場域</th><th>運動類型</th><th>時間</th><th></th></tr></thead>
+          <tbody>
+            ${courses.map((c) => `
+              <tr>
+                <td>${escapeHtml(venueName(c.venueId))}</td>
+                <td>${sportName(c.sportType)}</td>
+                <td>${escapeHtml(c.schedule)}</td>
+                <td>
+                  <button onclick="editCourse('${c.id}')">編輯</button>
+                  <button onclick="deleteCourse('${c.id}')">刪除</button>
+                </td>
+              </tr>
+            `).join("")}
+          </tbody>
+        </table>
+        <button class="primary-button" onclick="newCourse()">+ 新增課程</button>
+      `;
+
+      if (editing) {
+        html += `
+          <form class="member-form" id="course-form">
+            <label>場域
+              <select id="f-venue">
+                <option value="">請選擇</option>
+                ${venues.map((v) => `<option value="${v.id}" ${editing.venueId === v.id ? "selected" : ""}>${escapeHtml(v.name)}</option>`).join("")}
+              </select>
+            </label>
+            <label>運動類型
+              <select id="f-sport">
+                <option value="">請選擇</option>
+                ${SPORT_TYPES.map((s) => `<option value="${s.id}" ${editing.sportType === s.id ? "selected" : ""}>${s.name}</option>`).join("")}
+              </select>
+            </label>
+            <label>上課時間 <input type="text" id="f-schedule" value="${escapeHtml(editing.schedule)}" placeholder="例如：每週二、四 09:00-10:00" /></label>
+            <label>說明 <textarea id="f-description">${escapeHtml(editing.description)}</textarea></label>
+            <button type="submit" class="primary-button">儲存</button>
+            <button type="button" class="secondary-button" onclick="editing = null; render();">取消</button>
+          </form>
+        `;
+      }
+
+      document.getElementById("content").innerHTML = html;
+      if (editing) {
+        document.getElementById("course-form").addEventListener("submit", saveCourse);
+      }
+    }
+
+    requireAdmin(async () => {
+      venues = await getAll("venues");
+      await reload();
+    });
+  </script>
+</body>
+</html>

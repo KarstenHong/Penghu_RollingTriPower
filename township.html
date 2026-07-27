@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>鄉鎮運動資源 - 澎湖縣社區運動資源查詢</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+  <script src="js/firebase-config.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/common.js"></script>
+</head>
+<body>
+  <div id="nav"></div>
+  <main>
+    <a href="index.html" class="back-button">&larr; 返回地圖</a>
+    <h1 id="township-title"></h1>
+    <div id="content"><p>載入中...</p></div>
+  </main>
+
+  <script>
+    const townshipId = new URLSearchParams(location.search).get("id") || "";
+    document.getElementById("township-title").textContent = townshipName(townshipId);
+
+    let venues = [];
+    let selectedSport = null;
+
+    async function init() {
+      venues = await getWhere("venues", "township", townshipId);
+      render();
+    }
+
+    function availableSports() {
+      const ids = new Set();
+      venues.forEach((v) => (v.sportTypes || []).forEach((s) => ids.add(s)));
+      return SPORT_TYPES.filter((s) => ids.has(s.id));
+    }
+
+    async function selectSport(sportId) {
+      selectedSport = sportId;
+      render();
+      const courses = await getWhere("courses", "sportType", sportId);
+      renderVenueList(courses);
+    }
+
+    function render() {
+      const el = document.getElementById("content");
+      if (!venues.length) {
+        el.innerHTML = '<p class="hint-text">目前這個鄉鎮還沒有資料。</p>';
+        return;
+      }
+
+      const sports = availableSports();
+      let html = '<p class="hint-text">請點選運動圖示，查看提供這項運動的據點</p><div class="icon-grid">';
+      sports.forEach((s) => {
+        html += `
+          <button class="icon-button ${selectedSport === s.id ? "selected" : ""}" onclick="selectSport('${s.id}')">
+            <img src="images/icons/${s.icon}" alt="${s.name}" />
+            <span>${s.name}</span>
+          </button>`;
+      });
+      html += '</div><div id="venue-results"></div>';
+      el.innerHTML = html;
+    }
+
+    function renderVenueList(courses) {
+      const target = document.getElementById("venue-results");
+      if (!target) return;
+
+      const matching = venues.filter((v) => (v.sportTypes || []).includes(selectedSport));
+      let html = `<h2>${sportName(selectedSport)} 據點</h2><div class="venue-list">`;
+      matching.forEach((v) => {
+        const venueCourses = courses.filter((c) => c.venueId === v.id);
+        html += `
+          <div class="venue-card">
+            <h3>${escapeHtml(v.name)} <span class="venue-type">(${venueTypeName(v.type)})</span> <span class="fav-slot" data-venue="${encodeURIComponent(v.id)}"></span></h3>
+            <p>地址：${escapeHtml(v.address)}</p>
+            <p>電話：${escapeHtml(v.phone)}</p>
+            ${venueCourses.map((c) => `<p class="course-line">課程時間：${escapeHtml(c.schedule)}｜${escapeHtml(c.description)}</p>`).join("")}
+          </div>`;
+      });
+      html += "</div>";
+      target.innerHTML = html;
+      renderFavoriteToggles();
+    }
+
+    init();
+  </script>
+  <script src="js/favorites-widget.js"></script>
+</body>
+</html>

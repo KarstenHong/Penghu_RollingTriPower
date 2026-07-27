@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>會員註冊 - 澎湖縣社區運動資源查詢</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+  <script src="js/firebase-config.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/common.js"></script>
+</head>
+<body>
+  <div id="nav"></div>
+  <main>
+    <h1>會員註冊</h1>
+
+    <form class="member-form" id="register-form">
+      <label>姓名 <input type="text" id="name" required /></label>
+      <label>電子郵件 <input type="email" id="email" required /></label>
+      <label>密碼（至少 6 碼） <input type="password" id="password" minlength="6" required /></label>
+      <button type="submit" class="primary-button">註冊</button>
+    </form>
+
+    <p class="error-text" id="error" style="display: none;">註冊失敗，請確認電子郵件格式與密碼長度（至少 6 碼）。</p>
+    <p>已經有帳號了嗎？<a href="login.html">前往登入</a></p>
+  </main>
+
+  <script>
+    document.getElementById("register-form").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      document.getElementById("error").style.display = "none";
+      try {
+        await registerUser(
+          document.getElementById("email").value,
+          document.getElementById("password").value,
+          document.getElementById("name").value
+        );
+        location.href = "profile.html";
+      } catch (err) {
+        document.getElementById("error").style.display = "block";
+      }
+    });
+  </script>
+</body>
+</html>
