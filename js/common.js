@@ -104,13 +104,14 @@ function authLinksHtml(role) {
   if (role === "admin") {
     html += `<a href="admin.html">後台維護</a>`;
   }
-  html += `<a href="#" id="nav-logout">登出</a>`;
+  html += `<a href="#" id="nav-logout" class="nav-logout-link">登出</a>`;
   return html;
 }
 
 function wireLogoutButton() {
   document.getElementById("nav-logout")?.addEventListener("click", async (e) => {
     e.preventDefault();
+    if (!confirm("確定要登出嗎？")) return;
     await logoutUser();
     setCachedAuth(null);
     location.href = "index.html";
