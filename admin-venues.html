@@ -31,7 +31,7 @@
     }
 
     function newVenue() {
-      editing = { name: "", township: "", type: "", address: "", phone: "", sportTypes: [] };
+      editing = { name: "", township: "", type: "", address: "", phone: "", sportTypes: [], lat: "", lng: "" };
       render();
     }
 
@@ -53,6 +53,8 @@
       editing.type = document.getElementById("f-type").value;
       editing.address = document.getElementById("f-address").value;
       editing.phone = document.getElementById("f-phone").value;
+      editing.lat = parseFloat(document.getElementById("f-lat").value) || null;
+      editing.lng = parseFloat(document.getElementById("f-lng").value) || null;
       editing.sportTypes = Array.from(document.querySelectorAll(".f-sport:checked")).map((c) => c.value);
 
       if (editing.id) {
@@ -103,6 +105,12 @@
             </label>
             <label>地址 <input type="text" id="f-address" value="${escapeHtml(editing.address)}" /></label>
             <label>電話 <input type="text" id="f-phone" value="${escapeHtml(editing.phone)}" /></label>
+            <label>緯度 Latitude（用於在鄉鎮地圖上標示位置，可到 Google 地圖上按右鍵複製座標）
+              <input type="number" step="any" id="f-lat" value="${editing.lat ?? ""}" placeholder="例如 23.5654" />
+            </label>
+            <label>經度 Longitude
+              <input type="number" step="any" id="f-lng" value="${editing.lng ?? ""}" placeholder="例如 119.5654" />
+            </label>
             <fieldset>
               <legend>提供的運動項目</legend>
               ${SPORT_TYPES.map((s) => `

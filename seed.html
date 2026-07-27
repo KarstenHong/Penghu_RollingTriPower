@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>匯入範例資料 - 澎湖縣社區運動資源查詢</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+  <script src="js/firebase-config.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/common.js"></script>
+</head>
+<body>
+  <div id="nav"></div>
+  <main>
+    <a href="admin.html" class="back-button">&larr; 返回後台首頁</a>
+    <h1>匯入範例資料</h1>
+    <p class="hint-text">給客戶展示用：一鍵匯入六個鄉鎮的示範據點、課程、公告、常見問題、協會聯絡資訊（含真實座標，地圖上看得到圖釘）。重複點擊會產生重複資料，請留意。</p>
+    <button class="primary-button" id="seed-button" onclick="seed()">一鍵匯入範例資料</button>
+    <div id="status"></div>
+  </main>
+
+  <script>
+    const SAMPLE_VENUES_COURSES = {
+  "venues": [
+    {
+      "name": "馬公市社區活動中心",
+      "township": "magong",
+      "type": "community_center",
+      "address": "澎湖縣馬公市中山路10號",
+      "phone": "06-9910000",
+      "lat": 23.50625,
+      "lng": 119.58572,
+      "sportTypes": [
+        "taichi",
+        "folkdance"
+      ]
+    },
+    {
+      "name": "馬公市衛生所",
+      "township": "magong",
+      "type": "health_center",
+      "address": "澎湖縣馬公市中山路11號",
+      "phone": "06-9910001",
+      "lat": 23.5518,
+      "lng": 119.59947,
+      "sportTypes": [
+        "folkdance",
+        "croquet"
+      ]
+    },
+    {
+      "name": "湖西鄉社區活動中心",
+      "township": "huxi",
+      "type": "community_center",
+      "address": "澎湖縣湖西鄉中山路12號",
+      "phone": "06-9910002",
+      "lat": 23.57103,
+      "lng": 119.66776,
+      "sportTypes": [
+        "croquet",
+        "tabletennis"
+      ]
+    },
+    {
+      "name": "湖西鄉衛生所",
+      "township": "huxi",
+      "type": "health_center",
+      "address": "澎湖縣湖西鄉中山路13號",
+      "phone": "06-9910003",
+      "lat": 23.56685,
+      "lng": 119.67682,
+      "sportTypes": [
+        "tabletennis",
+        "badminton"
+      ]
+    },
+    {
+      "name": "白沙鄉社區活動中心",
+      "township": "baisha",
+      "type": "community_center",
+      "address": "澎湖縣白沙鄉中山路14號",
+      "phone": "06-9910004",
+      "lat": 23.66077,
+      "lng": 119.57967,
+      "sportTypes": [
+        "badminton",
+        "aerobics"
+      ]
+    },
+    {
+      "name": "白沙鄉衛生所",
+      "township": "baisha",
+      "type": "health_center",
+      "address": "澎湖縣白沙鄉中山路15號",
+      "phone": "06-9910005",
+      "lat": 23.60758,
+      "lng": 119.6027,
+      "sportTypes": [
+        "aerobics",
+        "yoga"
+      ]
+    },
+    {
+      "name": "西嶼鄉社區活動中心",
+      "township": "xiyu",
+      "type": "community_center",
+      "address": "澎湖縣西嶼鄉中山路16號",
+      "phone": "06-9910006",
+      "lat": 23.59146,
+      "lng": 119.49313,
+      "sportTypes": [
+        "yoga",
+        "walking"
+      ]
+    },
+    {
+      "name": "西嶼鄉衛生所",
+      "township": "xiyu",
+      "type": "health_center",
+      "address": "澎湖縣西嶼鄉中山路17號",
+      "phone": "06-9910007",
+      "lat": 23.63153,
+      "lng": 119.51139,
+      "sportTypes": [
+        "walking",
+        "taichi"
+      ]
+    },
+    {
+      "name": "望安鄉社區活動中心",
+      "township": "wangan",
+      "type": "community_center",
+      "address": "澎湖縣望安鄉中山路18號",
+      "phone": "06-9910008",
+      "lat": 23.36782,
+      "lng": 119.50333,
+      "sportTypes": [
+        "taichi",
+        "folkdance"
+      ]
+    },
+    {
+      "name": "望安鄉衛生所",
+      "township": "wangan",
+      "type": "health_center",
+      "address": "澎湖縣望安鄉中山路19號",
+      "phone": "06-9910009",
+      "lat": 23.383,
+      "lng": 119.49491,
+      "sportTypes": [
+        "folkdance",
+        "croquet"
+      ]
+    },
+    {
+      "name": "七美鄉社區活動中心",
+      "township": "qimei",
+      "type": "community_center",
+      "address": "澎湖縣七美鄉中山路20號",
+      "phone": "06-9910010",
+      "lat": 23.20418,
+      "lng": 119.41778,
+      "sportTypes": [
+        "croquet",
+        "tabletennis"
+      ]
+    },
+    {
+      "name": "七美鄉衛生所",
+      "township": "qimei",
+      "type": "health_center",
+      "address": "澎湖縣七美鄉中山路21號",
+      "phone": "06-9910011",
+      "lat": 23.19203,
+      "lng": 119.43199,
+      "sportTypes": [
+        "tabletennis",
+        "badminton"
+      ]
+    }
+  ],
+  "courses": [
+    {
+      "venueRef": 0,
+      "sportType": "taichi",
+      "schedule": "每週一、三 09:00-10:00",
+      "description": "由在地師資帶領，歡迎長者踴躍參加"
+    },
+    {
+      "venueRef": 0,
+      "sportType": "folkdance",
+      "schedule": "每週二、四 15:00-16:00",
+      "description": "由在地師資帶領，歡迎長者踴躍參加"
+    },
+    {
+      "venueRef": 1,
+      "sportType": "folkdance",
+      "schedule": "每週一、三 09:00-10:00",
+      "description": "由在地師資帶領，歡迎長者踴躍參加"
+    },
+    {
+      "venueRef": 1,
+      "sportType": "croquet",
+      "schedule": "每週二、四 15:00-16:00",
+      "description": "由在地師資帶領，歡迎長者踴躍參加"
+    },
+    {
+      "venueRef": 2,
+      "sportType": "croquet",
+      "schedule": "每週一、三 09:00-10:00",
+      "description": "由在地師資帶領，歡迎長者踴躍參加"
+    },
+    {
+      "venueRef": 2,
+      "sportType": "tabletennis",
+      "schedule": "每週二、四 15:00-16:00",
+      "description": "由在地師資帶領，歡迎長者踴躍參加"
+    },
+    {
+      "venueRef": 3,
+      "sportType": "tabletennis",
+      "schedule": "每週一、三 09:00-10:00",
+      "description": "由在地師資帶領，歡迎長者踴躍參加"
+    },
+    {
+      "venueRef": 3,
+      "sportType": "badminton",
+      "schedule": "每週二、四 15:00-16:00",
+      "description": "由在地師資帶領，歡迎長者踴躍參加"
+    },
+    {
+      "venueRef": 4,
+      "sportType": "badminton",
+      "schedule": "每週一、三 09:00-10:00",
+      "description": "由在地師資帶領，歡迎長者踴躍參加"
+    },
+    {
+      "venueRef": 4,
+      "sportType": "aerobics",
+      "schedule": "每週二、四 15:00-16:00",
+      "description": "由在地師資帶領，歡迎長者踴躍參加"
+    },
+    {
+      "venueRef": 5,
+      "sportType": "aerobics",
+      "schedule": "每週一、三 09:00-10:00",
+      "description": "由在地師資帶領，歡迎長者踴躍參加"
+    },
+    {
+      "venueRef": 5,
+      "sportType": "yoga",
+      "schedule": "每週二、四 15:00-16:00",
+      "description": "由在地師資帶領，歡迎長者踴躍參加"
+    },
+    {
+      "venueRef": 6,
+      "sportType": "yoga",
+      "schedule": "每週一、三 09:00-10:00",
+      "description": "由在地師資帶領，歡迎長者踴躍參加"
+    },
+    {
+      "venueRef": 6,
+      "sportType": "walking",
+      "schedule": "每週二、四 15:00-16:00",
+      "description": "由在地師資帶領，歡迎長者踴躍參加"
+    },
+    {
+      "venueRef": 7,
+      "sportType": "walking",
+      "schedule": "每週一、三 09:00-10:00",
+      "description": "由在地師資帶領，歡迎長者踴躍參加"
+    },
+    {
+      "venueRef": 7,
+      "sportType": "taichi",
+      "schedule": "每週二、四 15:00-16:00",
+      "description": "由在地師資帶領，歡迎長者踴躍參加"
+    },
+    {
+      "venueRef": 8,
+      "sportType": "taichi",
+      "schedule": "每週一、三 09:00-10:00",
+      "description": "由在地師資帶領，歡迎長者踴躍參加"
+    },
+    {
+      "venueRef": 8,
+      "sportType": "folkdance",
+      "schedule": "每週二、四 15:00-16:00",
+      "description": "由在地師資帶領，歡迎長者踴躍參加"
+    },
+    {
+      "venueRef": 9,
+      "sportType": "folkdance",
+      "schedule": "每週一、三 09:00-10:00",
+      "description": "由在地師資帶領，歡迎長者踴躍參加"
+    },
+    {
+      "venueRef": 9,
+      "sportType": "croquet",
+      "schedule": "每週二、四 15:00-16:00",
+      "description": "由在地師資帶領，歡迎長者踴躍參加"
+    },
+    {
+      "venueRef": 10,
+      "sportType": "croquet",
+      "schedule": "每週一、三 09:00-10:00",
+      "description": "由在地師資帶領，歡迎長者踴躍參加"
+    },
+    {
+      "venueRef": 10,
+      "sportType": "tabletennis",
+      "schedule": "每週二、四 15:00-16:00",
+      "description": "由在地師資帶領，歡迎長者踴躍參加"
+    },
+    {
+      "venueRef": 11,
+      "sportType": "tabletennis",
+      "schedule": "每週一、三 09:00-10:00",
+      "description": "由在地師資帶領，歡迎長者踴躍參加"
+    },
+    {
+      "venueRef": 11,
+      "sportType": "badminton",
+      "schedule": "每週二、四 15:00-16:00",
+      "description": "由在地師資帶領，歡迎長者踴躍參加"
+    }
+  ]
+};
+    const SAMPLE_REST = {
+  "posts": [
+    {
+      "category": "news",
+      "title": "澎湖縣社區運動資源查詢網站正式上線",
+      "date": "2026-07-20",
+      "content": "為方便長者查詢各鄉鎮社區活動中心、社區協會、衛生所提供的運動課程資訊，本網站正式上線，歡迎多加利用！",
+      "imageUrl": ""
+    },
+    {
+      "category": "news",
+      "title": "115年度長者運動課程開始報名",
+      "date": "2026-08-01",
+      "content": "各鄉鎮社區活動中心陸續開放115年度長者運動課程報名，名額有限，請把握機會至各據點洽詢報名。",
+      "imageUrl": ""
+    },
+    {
+      "category": "news",
+      "title": "各鄉鎮衛生所辦理免費健康篩檢",
+      "date": "2026-07-15",
+      "content": "縣內各鄉鎮衛生所將於近期辦理長者免費健康篩檢活動，詳情請洽各衛生所。",
+      "imageUrl": ""
+    },
+    {
+      "category": "event",
+      "title": "馬公市槌球友誼賽",
+      "date": "2026-08-15",
+      "content": "邀請馬公市各社區槌球隊參與友誼賽，歡迎長者踴躍報名參加，活動當天備有茶水點心。",
+      "imageUrl": ""
+    },
+    {
+      "category": "event",
+      "title": "七美鄉土風舞成果發表會",
+      "date": "2026-08-20",
+      "content": "七美鄉社區活動中心土風舞班將舉辦成果發表會，歡迎鄉親蒞臨欣賞。",
+      "imageUrl": ""
+    }
+  ],
+  "faq": [
+    {
+      "question": "如何加入運動課程？",
+      "answer": "請直接至各社區活動中心、社區協會或衛生所現場報名，或撥打據點電話洽詢，詳細據點資訊可於「社區活動查詢」頁面找到。"
+    },
+    {
+      "question": "參加課程需要收費嗎？",
+      "answer": "大部分社區據點的長者運動課程由政府補助，多為免費參加，實際費用請以各據點公告為準。"
+    },
+    {
+      "question": "不是會員可以查詢據點資訊嗎？",
+      "answer": "可以，首頁地圖瀏覽與「社區活動查詢」都不需要登入會員即可使用，會員登入主要是為了使用「我的最愛」收藏功能。"
+    },
+    {
+      "question": "如何收藏喜歡的據點？",
+      "answer": "登入會員後，在據點卡片旁邊點選星號（☆）即可加入我的最愛，再點一次可以取消收藏。"
+    }
+  ],
+  "associations": [
+    {
+      "township": "magong",
+      "name": "馬公市社區發展協會",
+      "phone": "06-9920000",
+      "address": "澎湖縣澎湖縣馬公市文化路1號"
+    },
+    {
+      "township": "huxi",
+      "name": "湖西鄉社區發展協會",
+      "phone": "06-9920001",
+      "address": "澎湖縣澎湖縣湖西鄉文化路2號"
+    },
+    {
+      "township": "baisha",
+      "name": "白沙鄉社區發展協會",
+      "phone": "06-9920002",
+      "address": "澎湖縣澎湖縣白沙鄉文化路3號"
+    },
+    {
+      "township": "xiyu",
+      "name": "西嶼鄉社區發展協會",
+      "phone": "06-9920003",
+      "address": "澎湖縣澎湖縣西嶼鄉文化路4號"
+    },
+    {
+      "township": "wangan",
+      "name": "望安鄉社區發展協會",
+      "phone": "06-9920004",
+      "address": "澎湖縣澎湖縣望安鄉文化路5號"
+    },
+    {
+      "township": "qimei",
+      "name": "七美鄉社區發展協會",
+      "phone": "06-9920005",
+      "address": "澎湖縣澎湖縣七美鄉文化路6號"
+    }
+  ]
+};
+
+    async function seed() {
+      const btn = document.getElementById("seed-button");
+      const statusEl = document.getElementById("status");
+      btn.disabled = true;
+      statusEl.innerHTML = "<p>匯入中，請稍候...</p>";
+
+      const venueIds = [];
+      for (const v of SAMPLE_VENUES_COURSES.venues) {
+        const { name, township, type, address, phone, lat, lng, sportTypes } = v;
+        const id = await addItem("venues", { name, township, type, address, phone, lat, lng, sportTypes });
+        venueIds.push(id);
+      }
+
+      for (const c of SAMPLE_VENUES_COURSES.courses) {
+        await addItem("courses", {
+          venueId: venueIds[c.venueRef],
+          sportType: c.sportType,
+          schedule: c.schedule,
+          description: c.description,
+          iconKey: c.sportType,
+        });
+      }
+
+      for (const p of SAMPLE_REST.posts) await addItem("posts", p);
+      for (const f of SAMPLE_REST.faq) await addItem("faq", f);
+      for (const a of SAMPLE_REST.associations) await addItem("associations", a);
+
+      statusEl.innerHTML = `<p class="success-text">匯入完成！共新增 ${venueIds.length} 個據點、${SAMPLE_VENUES_COURSES.courses.length} 筆課程、${SAMPLE_REST.posts.length} 則公告、${SAMPLE_REST.faq.length} 筆常見問題、${SAMPLE_REST.associations.length} 筆協會聯絡資訊。</p>`;
+      btn.disabled = false;
+    }
+
+    requireAdmin(() => {});
+  </script>
+</body>
+</html>

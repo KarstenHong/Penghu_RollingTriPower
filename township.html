@@ -12,13 +12,18 @@
   <script src="js/data.js"></script>
   <script src="js/auth.js"></script>
   <script src="js/common.js"></script>
+  <script src="js/map-data.js"></script>
 </head>
 <body>
   <div id="nav"></div>
   <main>
     <a href="index.html" class="back-button">&larr; 返回地圖</a>
     <h1 id="township-title"></h1>
-    <div id="content"><p>載入中...</p></div>
+    <p class="hint-text">點選下方運動圖示，只看該運動在地圖上的據點；再點一次可恢復顯示全部</p>
+
+    <div class="map-wrap" id="township-map"></div>
+    <div id="sport-filters"></div>
+    <div id="venue-results"><p>載入中...</p></div>
   </main>
 
   <script>
@@ -26,11 +31,18 @@
     document.getElementById("township-title").textContent = townshipName(townshipId);
 
     let venues = [];
+    let courses = [];
     let selectedSport = null;
 
     async function init() {
-      venues = await getWhere("venues", "township", townshipId);
-      render();
+      renderTownshipMap("township-map", townshipId);
+      [venues, courses] = await Promise.all([
+        getWhere("venues", "township", townshipId),
+        getAll("courses"),
+      ]);
+      renderFilters();
+      renderMarkers();
+      renderVenueList();
     }
 
     function availableSports() {
@@ -39,46 +51,77 @@
       return SPORT_TYPES.filter((s) => ids.has(s.id));
     }
 
-    async function selectSport(sportId) {
-      selectedSport = sportId;
-      render();
-      const courses = await getWhere("courses", "sportType", sportId);
-      renderVenueList(courses);
+    function selectSport(sportId) {
+      selectedSport = selectedSport === sportId ? null : sportId;
+      renderFilters();
+      renderMarkers();
+      renderVenueList();
     }
 
-    function render() {
-      const el = document.getElementById("content");
+    function renderFilters() {
+      const el = document.getElementById("sport-filters");
       if (!venues.length) {
-        el.innerHTML = '<p class="hint-text">目前這個鄉鎮還沒有資料。</p>';
+        el.innerHTML = "";
+        return;
+      }
+      el.innerHTML = '<div class="icon-grid">' + availableSports().map((s) => `
+        <button class="icon-button ${selectedSport === s.id ? "selected" : ""}" onclick="selectSport('${s.id}')">
+          <img src="images/icons/${s.icon}" alt="${s.name}" />
+          <span>${s.name}</span>
+        </button>
+      `).join("") + "</div>";
+    }
+
+    // 把每個「據點＋運動」畫成地圖上的一個圖示圖釘，同一據點有多項運動時左右錯開避免疊在一起
+    function renderMarkers() {
+      const group = document.getElementById("township-map-markers");
+      const t = PENGHU_MAP.townships[townshipId];
+      if (!group || !t) return;
+
+      const byVenue = {};
+      venues.forEach((v) => {
+        if (v.lat == null || v.lng == null) return;
+        (v.sportTypes || []).forEach((sport) => {
+          if (selectedSport && sport !== selectedSport) return;
+          (byVenue[v.id] = byVenue[v.id] || { venue: v, sports: [] }).sports.push(sport);
+        });
+      });
+
+      const markerSize = (t.bbox[2] - t.bbox[0]) * 0.1;
+      let svg = "";
+      Object.values(byVenue).forEach(({ venue, sports }) => {
+        const [px, py] = projectLatLng(venue.lat, venue.lng);
+        sports.forEach((sport, i) => {
+          const offset = (i - (sports.length - 1) / 2) * markerSize * 0.85;
+          const x = px + offset - markerSize / 2;
+          const y = py - markerSize / 2;
+          svg += `<image href="images/icons/${sportIcon(sport)}" x="${x}" y="${y}" width="${markerSize}" height="${markerSize}" class="map-marker">
+            <title>${escapeHtml(venue.name)} - ${sportName(sport)}</title>
+          </image>`;
+        });
+      });
+      group.innerHTML = svg;
+    }
+
+    function renderVenueList() {
+      const target = document.getElementById("venue-results");
+      if (!venues.length) {
+        target.innerHTML = '<p class="hint-text">目前這個鄉鎮還沒有資料。</p>';
         return;
       }
 
-      const sports = availableSports();
-      let html = '<p class="hint-text">請點選運動圖示，查看提供這項運動的據點</p><div class="icon-grid">';
-      sports.forEach((s) => {
-        html += `
-          <button class="icon-button ${selectedSport === s.id ? "selected" : ""}" onclick="selectSport('${s.id}')">
-            <img src="images/icons/${s.icon}" alt="${s.name}" />
-            <span>${s.name}</span>
-          </button>`;
-      });
-      html += '</div><div id="venue-results"></div>';
-      el.innerHTML = html;
-    }
+      const matching = selectedSport ? venues.filter((v) => (v.sportTypes || []).includes(selectedSport)) : venues;
+      const heading = selectedSport ? `${sportName(selectedSport)} 據點` : "所有據點";
 
-    function renderVenueList(courses) {
-      const target = document.getElementById("venue-results");
-      if (!target) return;
-
-      const matching = venues.filter((v) => (v.sportTypes || []).includes(selectedSport));
-      let html = `<h2>${sportName(selectedSport)} 據點</h2><div class="venue-list">`;
+      let html = `<h2>${heading}</h2><div class="venue-list">`;
       matching.forEach((v) => {
-        const venueCourses = courses.filter((c) => c.venueId === v.id);
+        const venueCourses = courses.filter((c) => c.venueId === v.id && (!selectedSport || c.sportType === selectedSport));
         html += `
           <div class="venue-card">
             <h3>${escapeHtml(v.name)} <span class="venue-type">(${venueTypeName(v.type)})</span> <span class="fav-slot" data-venue="${encodeURIComponent(v.id)}"></span></h3>
             <p>地址：${escapeHtml(v.address)}</p>
             <p>電話：${escapeHtml(v.phone)}</p>
+            <p>運動項目：${(v.sportTypes || []).map(sportName).join("、")}</p>
             ${venueCourses.map((c) => `<p class="course-line">課程時間：${escapeHtml(c.schedule)}｜${escapeHtml(c.description)}</p>`).join("")}
           </div>`;
       });
