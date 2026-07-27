@@ -81,6 +81,20 @@ main {
     text-decoration: none;
   }
 
+  /* 未登入時的「會員登入 / 註冊」按鈕，故意跟其他導覽連結長得不一樣，讓它更顯眼 */
+  .nav-links a.nav-cta {
+    background: #f4a261;
+    color: #5a2d0c;
+    font-weight: bold;
+    padding: 0.4rem 1.1rem;
+    border-radius: 999px;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+  }
+
+  .nav-links a.nav-cta:hover {
+    background: #f7b787;
+  }
+
 /* 字級切換 */
 
 .font-size-controls {
