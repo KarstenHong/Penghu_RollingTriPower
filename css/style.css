@@ -36,56 +36,31 @@ main {
 
 .hint-text { font-size: 1.05em; color: #444; }
 
-/* 鄉鎮景點/美食介紹卡 */
+/* 澎湖景觀照當背景：內容卡片維持不透明白底（可讀性不受影響），
+   照片只會露出在卡片兩側與頁面周圍，用淡淡的疊色蓋一層讓畫面不會太搶眼 */
 
-.highlight-card {
-  display: flex;
-  gap: 1.2rem;
-  margin: 1rem 0 1.5rem;
-  border-radius: 16px;
-  overflow: hidden;
-  box-shadow: 0 6px 20px rgba(10, 92, 120, 0.15);
-  background: #fff;
+body.photo-bg-page {
+  background-image:
+    linear-gradient(rgba(227, 244, 251, 0.86), rgba(253, 246, 234, 0.8)),
+    var(--bg-photo);
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
 }
 
-  .highlight-card img {
-    width: 42%;
-    min-width: 220px;
-    object-fit: cover;
-  }
-
-  .highlight-text {
-    padding: 1rem 1.2rem 1rem 0;
-    flex: 1;
-  }
-
-  .highlight-text h3 { margin: 0.3rem 0; color: #0a5c78; font-size: 1.15em; }
-  .highlight-text p { margin: 0.2rem 0 0.6rem; }
-
-.photo-credit { font-size: 0.8em; color: #888; }
-  .photo-credit a { color: inherit; }
-
-/* 首頁景點宣傳橫幅 */
-
-.hero-banner {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 0.5rem;
-  border-radius: 16px;
-  overflow: hidden;
-  margin-bottom: 1.5rem;
-  box-shadow: 0 6px 20px rgba(10, 92, 120, 0.15);
+.bg-credit {
+  position: fixed;
+  right: 0.6rem;
+  bottom: 0.4rem;
+  font-size: 0.68rem;
+  color: rgba(0, 0, 0, 0.35);
+  background: rgba(255, 255, 255, 0.5);
+  padding: 0.1rem 0.4rem;
+  border-radius: 4px;
+  z-index: 5;
 }
 
-  .hero-banner img { width: 100%; height: 140px; object-fit: cover; display: block; }
-
-.hero-tagline {
-  text-align: center;
-  color: #0a5c78;
-  font-weight: bold;
-  font-size: 1.2em;
-  margin: -0.5rem 0 1.5rem;
-}
+  .bg-credit a { color: inherit; }
 
 /* 導覽列 */
 
@@ -482,12 +457,13 @@ svg text {
 
   h1 { font-size: 1.5em; }
 
-  .highlight-card { flex-direction: column; }
-  .highlight-card img { width: 100%; min-width: 0; height: 180px; }
-  .highlight-text { padding: 0 1rem 1rem; }
-
-  .hero-banner { grid-template-columns: repeat(2, 1fr); }
-  .hero-banner img { height: 100px; }
-
   .icon-grid { grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); }
+
+  /* 手機螢幕太窄，卡片兩側看不到背景照片，固定背景在部分手機瀏覽器也容易頓，直接關掉比較省效能 */
+  body.photo-bg-page {
+    background-image: linear-gradient(160deg, #e3f4fb 0%, #fdf6ea 55%, #fbe9dd 100%);
+    background-attachment: scroll;
+  }
+
+  .bg-credit { display: none; }
 }
