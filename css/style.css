@@ -442,7 +442,7 @@ svg text {
   font-weight: normal;
 }
 
-.primary-button, .secondary-button, .back-button {
+.primary-button, .secondary-button, .danger-button, .back-button {
   display: inline-block;
   min-height: 48px;
   padding: 0.6rem 1.6rem;
@@ -466,6 +466,53 @@ svg text {
 
 .secondary-button { background: white; color: #0a5c78; border: 2px solid #14919b; }
   .secondary-button:hover { background: #e3f4fb; }
+
+.danger-button {
+  background: linear-gradient(135deg, #e76f51 0%, #c0392b 100%);
+  color: white;
+  border: none;
+  box-shadow: 0 4px 12px rgba(192, 57, 43, 0.35);
+}
+
+  .danger-button:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(192, 57, 43, 0.45); }
+
+/* 自訂確認視窗（取代原生 confirm()） */
+
+.confirm-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(10, 30, 40, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  padding: 1rem;
+}
+
+.confirm-dialog {
+  background: white;
+  border-radius: 18px;
+  padding: 1.8rem;
+  max-width: 380px;
+  width: 100%;
+  box-shadow: 0 15px 45px rgba(0, 0, 0, 0.3);
+  text-align: center;
+}
+
+  .confirm-dialog p {
+    font-size: 1.15rem;
+    font-weight: bold;
+    color: #1a1a1a;
+    margin: 0 0 1.4rem;
+  }
+
+.confirm-buttons {
+  display: flex;
+  gap: 0.8rem;
+  justify-content: center;
+}
+
+  .confirm-buttons button { flex: 1; }
 
 .back-button { display: inline-block; margin-bottom: 1rem; color: #0a5c78; font-weight: bold; border: none; padding: 0; background: none; }
   .back-button:hover { text-decoration: underline; }
