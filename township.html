@@ -97,7 +97,8 @@
         });
       });
 
-      const markerSize = (t.bbox[2] - t.bbox[0]) * 0.1;
+      const [dbx0, , dbx1] = getTownshipDetailBbox(townshipId);
+      const markerSize = (dbx1 - dbx0) * 0.1;
       let svg = "";
       Object.values(byVenue).forEach(({ venue, sports }) => {
         const [px, py] = projectLatLng(venue.lat, venue.lng);
