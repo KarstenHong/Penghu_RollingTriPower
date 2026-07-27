@@ -22,9 +22,9 @@
 
   <script>
     requireLogin(async (user) => {
-      const profile = (await getById("users", user.uid)) || { favoriteSports: [], favoriteVenueIds: [] };
-      const allVenues = await getAll("venues");
-      const favoriteVenues = allVenues.filter((v) => (profile.favoriteVenueIds || []).includes(v.id));
+      const profile = (await getById("users", user.uid)) || { favoriteSports: [], favorites: [] };
+      const favorites = profile.favorites || [];
+      const [allVenues, allCourses] = await Promise.all([getAll("venues"), getAll("courses")]);
 
       let html = "<h2>喜愛的運動</h2>";
       if (!(profile.favoriteSports || []).length) {
@@ -39,17 +39,31 @@
       }
 
       html += "<h2>收藏的據點</h2>";
-      if (!favoriteVenues.length) {
-        html += '<p class="hint-text">尚未收藏任何據點，瀏覽「社區活動查詢」時可點選 ☆ 加入收藏。</p>';
+      const favoriteCards = favorites
+        .map((fav) => ({ fav, venue: allVenues.find((v) => v.id === fav.venueId) }))
+        .filter((x) => x.venue);
+
+      if (!favoriteCards.length) {
+        html += '<p class="hint-text">尚未收藏任何據點，瀏覽「社區活動查詢」或鄉鎮頁面時可點選 ☆ 加入收藏。</p>';
       } else {
-        html += '<div class="venue-list">' + favoriteVenues.map((v) => `
-          <div class="venue-card">
-            <h3>${escapeHtml(v.name)} <span class="venue-type">(${venueTypeName(v.type)})</span> <span class="fav-slot" data-venue="${encodeURIComponent(v.id)}"></span></h3>
-            <p>鄉鎮：${townshipName(v.township)}</p>
-            <p>地址：${escapeHtml(v.address)}</p>
-            <p>電話：${escapeHtml(v.phone)}</p>
-          </div>
-        `).join("") + "</div>";
+        html += '<div class="venue-list">' + favoriteCards.map(({ fav, venue }) => {
+          // 有指定運動的收藏（在某個運動的篩選畫面收藏），只顯示那項運動跟它的課程時間；
+          // 沒有指定運動的收藏（收藏整個據點），維持列出所有提供的運動項目
+          const sportLine = fav.sportType ? sportName(fav.sportType) : (venue.sportTypes || []).map(sportName).join("、");
+          const relatedCourses = fav.sportType
+            ? allCourses.filter((c) => c.venueId === venue.id && c.sportType === fav.sportType)
+            : [];
+          return `
+            <div class="venue-card">
+              <h3>${escapeHtml(venue.name)} <span class="venue-type">(${venueTypeName(venue.type)})</span> <span class="fav-slot" data-venue="${encodeURIComponent(venue.id)}" ${fav.sportType ? `data-sport="${fav.sportType}"` : ""}></span></h3>
+              <p>鄉鎮：${townshipName(venue.township)}</p>
+              <p>地址：${escapeHtml(venue.address)}</p>
+              <p>電話：${escapeHtml(venue.phone)}</p>
+              <p>運動項目：${sportLine}</p>
+              ${relatedCourses.map((c) => `<p class="course-line">課程時間：${escapeHtml(c.schedule)}｜${escapeHtml(c.description)}</p>`).join("")}
+            </div>
+          `;
+        }).join("") + "</div>";
       }
 
       document.getElementById("content").innerHTML = html;
