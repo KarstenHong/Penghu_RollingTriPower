@@ -1,7 +1,7 @@
 {
   "mainAssemblyName": "PenghuSportsFinder",
   "resources": {
-    "hash": "sha256-amlF9IpAwEOvmlpb1PgRhx/KSRyf5QSO7HhG89RetqQ=",
+    "hash": "sha256-AZ+YGDMoYEFDsrnYIiZBpQF9nj2RdR0EBWy6F6qO91E=",
     "jsModuleNative": {
       "dotnet.native.js": "sha256-JTswf4CBcNmmrTGm6DppxYNII8GVEmbA3iXD3bU1fcA="
     },
@@ -61,7 +61,7 @@
       "System.Threading.wasm": "sha256-umeu0Sm9RMnVh+6GP0K2C2DZn7Zi8iU4AgHMc/tejKk=",
       "System.wasm": "sha256-j0ZGZpl3U3v6Y5aQxnvY7OqOdRv9E3uPI4tGitwhjXI=",
       "System.Private.CoreLib.wasm": "sha256-i5ngAcPbA213WaghGlROb7XfucA1OINctWROGRXvt2U=",
-      "PenghuSportsFinder.wasm": "sha256-rtq7+DJoFGNcrI/efdm3mzM4apPmkwKy5Oi0K5fp7S0="
+      "PenghuSportsFinder.wasm": "sha256-0ezfMmCA0EU7ylPIn1obUlgd5oXd4mAMpUJhrzWgpPE="
     }
   },
   "cacheBootResources": true,
