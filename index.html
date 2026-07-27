@@ -13,10 +13,14 @@
   <script src="js/auth.js"></script>
   <script src="js/common.js"></script>
   <script src="js/map-data.js"></script>
+  <script src="js/highlights.js"></script>
 </head>
 <body>
   <div id="nav"></div>
   <main>
+    <div class="hero-banner" id="hero-banner"></div>
+    <p class="hero-tagline">台灣海峽最美麗的明珠・澎湖縣</p>
+
     <h1>澎湖縣社區運動資源查詢</h1>
     <p class="hint-text">請點選地圖上您想查詢的鄉鎮</p>
 
@@ -28,10 +32,22 @@
     </div>
 
     <div class="map-wrap" id="map"></div>
+    <p class="photo-credit" id="photo-credits"></p>
   </main>
 
   <script>
     renderPenghuMap("map");
+
+    const heroTownships = ["qimei", "baisha", "magong"];
+    document.getElementById("hero-banner").innerHTML = heroTownships
+      .map((id) => `<img src="${TOWNSHIP_HIGHLIGHTS[id].image}" alt="${escapeHtml(TOWNSHIP_HIGHLIGHTS[id].landmarkName)}" loading="lazy" />`)
+      .join("");
+
+    document.getElementById("photo-credits").innerHTML =
+      "首頁圖片來源：" + heroTownships.map((id) => {
+        const h = TOWNSHIP_HIGHLIGHTS[id];
+        return `<a href="${escapeHtml(h.sourceUrl)}" target="_blank" rel="noopener">${escapeHtml(h.credit)}</a>`;
+      }).join("；");
   </script>
 </body>
 </html>

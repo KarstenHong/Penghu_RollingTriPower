@@ -61,7 +61,7 @@
 
     function render() {
       let html = `
-        <table class="admin-table">
+        <div class="table-scroll"><table class="admin-table">
           <thead><tr><th>問題</th><th></th></tr></thead>
           <tbody>
             ${faqs.map((f) => `
@@ -74,7 +74,7 @@
               </tr>
             `).join("")}
           </tbody>
-        </table>
+        </table></div>
         <button class="primary-button" onclick="newFaq()">+ 新增問題</button>
       `;
 

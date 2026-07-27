@@ -1,0 +1,51 @@
+// 各鄉鎮代表景點與美食（照片來自 Wikimedia Commons，皆為 CC BY-SA 授權，附上攝影者標示與出處連結）
+const TOWNSHIP_HIGHLIGHTS = {
+  magong: {
+    image: "images/scenery/magong.jpg",
+    landmarkName: "澎湖天后宮",
+    landmarkDesc: "全臺歷史最悠久的媽祖廟，已有四百多年歷史，是馬公市最具代表性的地標。",
+    food: "花枝丸、黑糖糕是馬公中央老街常見的道地小吃。",
+    credit: "Bryan / Wikimedia Commons, CC BY-SA 2.0",
+    sourceUrl: "https://commons.wikimedia.org/wiki/File:Penghu_Tianhou_Temple_%E6%BE%8E%E6%B9%96%E5%A4%A9%E5%90%8E%E5%AE%AE.jpg",
+  },
+  huxi: {
+    image: "images/scenery/huxi.jpg",
+    landmarkName: "奎壁山摩西分海",
+    landmarkDesc: "退潮時會浮現一條 S 型石板道，連接奎壁山與赤嶼，宛如摩西分海的奇景。",
+    food: "小管麵線是湖西沿海漁村常見的家常美食。",
+    credit: "舟集 Boattoad / Wikimedia Commons, CC BY-SA 4.0",
+    sourceUrl: "https://commons.wikimedia.org/wiki/File:%E5%A5%8E%E5%A3%81%E5%B1%B1%E8%B8%8F%E6%B5%AA_02.jpg",
+  },
+  baisha: {
+    image: "images/scenery/baisha.jpg",
+    landmarkName: "通樑古榕",
+    landmarkDesc: "樹齡超過三百年的老榕樹，氣根盤根錯節覆蓋整個廟埕，是全臺知名的老樹景觀。",
+    food: "風茹茶是澎湖消暑退火的在地飲品，白沙一帶盛產風茹草。",
+    credit: "Prattflora / Wikimedia Commons, CC BY-SA 3.0",
+    sourceUrl: "https://commons.wikimedia.org/wiki/File:Taiwan-Penghu-Tongliang-Great-Banyan.JPG",
+  },
+  xiyu: {
+    image: "images/scenery/xiyu.jpg",
+    landmarkName: "西嶼燈塔（漁翁島燈塔）",
+    landmarkDesc: "臺灣最古老的燈塔之一，矗立在西嶼西南方海岬上，見證澎湖百年航運歷史。",
+    food: "小卷、丁香魚等海鮮是西嶼漁港常見的漁獲美食。",
+    credit: "Ying-lung Lu / Wikimedia Commons, CC BY-SA 3.0",
+    sourceUrl: "https://commons.wikimedia.org/wiki/File:West_Islet_Lighthouse.JPG",
+  },
+  wangan: {
+    image: "images/scenery/wangan.jpg",
+    landmarkName: "花宅聚落",
+    landmarkDesc: "保存完整的閩南傳統聚落，古厝群已列為文化景觀，是望安最具人文特色的角落。",
+    food: "望安是保育類綠蠵龜的重要產卵地，夏季可參加生態導覽活動。",
+    credit: "Jgfhhgf942zo / Wikimedia Commons, CC BY-SA 4.0",
+    sourceUrl: "https://commons.wikimedia.org/wiki/File:Wangan_Huazhai_Ancient_Residences.jpg",
+  },
+  qimei: {
+    image: "images/scenery/qimei.jpg",
+    landmarkName: "雙心石滬",
+    landmarkDesc: "由玄武岩堆砌而成的心形石滬，是澎湖最具代表性的地標之一，浪漫景致聞名全臺。",
+    food: "七美地瓜、風茹茶也是當地特色。",
+    credit: "Zeze0729 / Wikimedia Commons, CC BY-SA 3.0",
+    sourceUrl: "https://commons.wikimedia.org/wiki/File:Double-Heart_of_Stacked_Stones_20150721.jpg",
+  },
+};

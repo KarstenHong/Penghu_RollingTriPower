@@ -36,6 +36,57 @@ main {
 
 .hint-text { font-size: 1.05em; color: #444; }
 
+/* 鄉鎮景點/美食介紹卡 */
+
+.highlight-card {
+  display: flex;
+  gap: 1.2rem;
+  margin: 1rem 0 1.5rem;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 6px 20px rgba(10, 92, 120, 0.15);
+  background: #fff;
+}
+
+  .highlight-card img {
+    width: 42%;
+    min-width: 220px;
+    object-fit: cover;
+  }
+
+  .highlight-text {
+    padding: 1rem 1.2rem 1rem 0;
+    flex: 1;
+  }
+
+  .highlight-text h3 { margin: 0.3rem 0; color: #0a5c78; font-size: 1.15em; }
+  .highlight-text p { margin: 0.2rem 0 0.6rem; }
+
+.photo-credit { font-size: 0.8em; color: #888; }
+  .photo-credit a { color: inherit; }
+
+/* 首頁景點宣傳橫幅 */
+
+.hero-banner {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.5rem;
+  border-radius: 16px;
+  overflow: hidden;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 6px 20px rgba(10, 92, 120, 0.15);
+}
+
+  .hero-banner img { width: 100%; height: 140px; object-fit: cover; display: block; }
+
+.hero-tagline {
+  text-align: center;
+  color: #0a5c78;
+  font-weight: bold;
+  font-size: 1.2em;
+  margin: -0.5rem 0 1.5rem;
+}
+
 /* 導覽列 */
 
 .nav-bar {
@@ -405,3 +456,38 @@ svg text {
   .admin-table tr:last-child td { border-bottom: none; }
   .admin-table tr:nth-child(even) td { background: #f7fbfc; }
   .admin-table button { min-height: 36px; margin-right: 0.4rem; }
+
+/* 表格在手機上容易被內容撐爆，讓它可以左右滑動而不會把整頁版面擠壞 */
+.table-scroll {
+  overflow-x: auto;
+  border-radius: 12px;
+  margin-bottom: 1.2rem;
+}
+
+  .table-scroll .admin-table { margin-bottom: 0; min-width: 480px; }
+
+/* 手機版微調 */
+
+@media (max-width: 640px) {
+  main {
+    margin: 0.75rem auto 2rem;
+    padding: 1.1rem 1.1rem 1.8rem;
+    border-radius: 14px;
+  }
+
+  .nav-bar { padding: 0.75rem 1rem; }
+  .nav-brand { font-size: 1.05rem; }
+  .nav-links { gap: 0.5rem; }
+  .nav-links a { font-size: 0.9rem; padding: 0.25rem 0.45rem; }
+
+  h1 { font-size: 1.5em; }
+
+  .highlight-card { flex-direction: column; }
+  .highlight-card img { width: 100%; min-width: 0; height: 180px; }
+  .highlight-text { padding: 0 1rem 1rem; }
+
+  .hero-banner { grid-template-columns: repeat(2, 1fr); }
+  .hero-banner img { height: 100px; }
+
+  .icon-grid { grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); }
+}
