@@ -30,20 +30,31 @@
       <button onclick="setFontSize('text-xlarge')">特大</button>
     </div>
 
-    <div class="map-wrap" id="map"></div>
+    <div class="map-container">
+      <div class="map-wrap" id="map"></div>
+      <div class="map-insets">
+        <div class="map-inset" id="inset-wangan"></div>
+        <div class="map-inset" id="inset-qimei"></div>
+      </div>
+    </div>
+    <p class="hint-text inset-note">望安、七美離本島較遠，用縮圖顯示在左上角方便點選，位置非實際方位</p>
 
     <div class="township-buttons" id="township-buttons"></div>
   </main>
 
   <script>
-    renderPenghuMap("map");
+    // 望安、七美跟本島距離很遠，共用一張地圖會讓它們變得非常小；
+    // 本島（馬公/湖西/白沙/西嶼）畫大地圖，望安、七美改成左上角的放大鏡縮圖
+    renderPenghuMap("map", ["magong", "huxi", "baisha", "xiyu"]);
+    renderMapInset("inset-wangan", "wangan");
+    renderMapInset("inset-qimei", "qimei");
 
     document.getElementById("photo-strip").innerHTML =
       GENERAL_PHOTOS.map((p) => `<img src="${p.image}" alt="" loading="lazy" />`).join("") +
       `<span class="bg-credit">來源：${GENERAL_PHOTOS.map((p) => `<a href="${escapeHtml(p.sourceUrl)}" target="_blank" rel="noopener">${escapeHtml(p.credit)}</a>`).join("、")}</span>`;
 
     document.getElementById("township-buttons").innerHTML = TOWNSHIPS.map((t) => `
-      <a class="township-button" href="township.html?id=${t.id}">${t.name}</a>
+      <a class="township-button" href="township.html?id=${t.id}" style="--tb-color: ${TOWNSHIP_COLORS[t.id]}">${t.name}</a>
     `).join("");
   </script>
 </body>

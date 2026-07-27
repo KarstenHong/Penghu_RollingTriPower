@@ -101,24 +101,39 @@ function projectLatLng(lat, lng) {
   return [(x - p.minX) * p.scale + 20, (y - p.minY) * p.scale + 20];
 }
 
-function renderPenghuMap(containerId) {
+// ids 省略時畫全部六個鄉鎮（用固定的整體 viewBox）；
+// 有給 ids 時只畫這幾個鄉鎮，並把視角縮放到它們的範圍（首頁「本島」地圖用這個，望安、七美隔太遠會被排除）
+function renderPenghuMap(containerId, ids) {
   const el = document.getElementById(containerId);
   if (!el) return;
 
-  let svg = `<svg viewBox="0 0 ${PENGHU_MAP.width} ${PENGHU_MAP.height}" role="img" aria-label="澎湖縣地圖">`;
-  for (const id in PENGHU_MAP.townships) {
+  const townshipIds = ids || Object.keys(PENGHU_MAP.townships);
+  let vx = 0, vy = 0, vw = PENGHU_MAP.width, vh = PENGHU_MAP.height;
+
+  if (ids) {
+    let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+    ids.forEach((id) => {
+      const [a, b, c, d] = PENGHU_MAP.townships[id].bbox;
+      x0 = Math.min(x0, a); y0 = Math.min(y0, b); x1 = Math.max(x1, c); y1 = Math.max(y1, d);
+    });
+    const pad = 20;
+    vx = x0 - pad; vy = y0 - pad; vw = (x1 - x0) + pad * 2; vh = (y1 - y0) + pad * 2;
+  }
+
+  let svg = `<svg viewBox="${vx} ${vy} ${vw} ${vh}" role="img" aria-label="澎湖縣地圖">`;
+  townshipIds.forEach((id) => {
     const t = PENGHU_MAP.townships[id];
     svg += `<path class="township-shape" tabindex="0" data-township="${id}" d="${t.d}" fill="${TOWNSHIP_COLORS[id]}" fill-rule="evenodd" />`;
-  }
+  });
   // 望安、七美這些小島在地圖上的實際形狀很小，手機上很難點準；疊一個透明的大圓當作保底的點擊熱區
-  for (const id in PENGHU_MAP.townships) {
+  townshipIds.forEach((id) => {
     const t = PENGHU_MAP.townships[id];
     svg += `<circle class="township-shape township-hit-area" tabindex="-1" data-township="${id}" cx="${t.labelX}" cy="${t.labelY}" r="32" fill="transparent" />`;
-  }
-  for (const id in PENGHU_MAP.townships) {
+  });
+  townshipIds.forEach((id) => {
     const t = PENGHU_MAP.townships[id];
     svg += `<text x="${t.labelX}" y="${t.labelY}" text-anchor="middle">${t.name}</text>`;
-  }
+  });
   svg += "</svg>";
   el.innerHTML = svg;
 
@@ -128,6 +143,31 @@ function renderPenghuMap(containerId) {
     shape.addEventListener("keydown", (e) => {
       if (e.key === "Enter" || e.key === " ") go();
     });
+  });
+}
+
+// 離島小地圖（望安、七美）：像放大鏡一樣單獨顯示，不必照實際地理位置擺放
+function renderMapInset(containerId, townshipId) {
+  const el = document.getElementById(containerId);
+  const t = PENGHU_MAP.townships[townshipId];
+  if (!el || !t) return;
+
+  const [bx0, by0, bx1, by1] = t.bbox;
+  const pad = Math.max(8, (bx1 - bx0) * 0.2);
+  const vx = bx0 - pad, vy = by0 - pad, vw = (bx1 - bx0) + pad * 2, vh = (by1 - by0) + pad * 2;
+
+  el.innerHTML = `
+    <svg viewBox="${vx} ${vy} ${vw} ${vh}" role="img" aria-label="${t.name}">
+      <path d="${t.d}" fill="${TOWNSHIP_COLORS[townshipId]}" fill-rule="evenodd" />
+    </svg>
+    <span class="map-inset-label">${t.name}</span>
+  `;
+  el.setAttribute("role", "button");
+  el.setAttribute("tabindex", "0");
+  const go = () => { location.href = "township.html?id=" + townshipId; };
+  el.addEventListener("click", go);
+  el.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" || e.key === " ") go();
   });
 }
 
