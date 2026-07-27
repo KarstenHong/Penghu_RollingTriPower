@@ -39,20 +39,22 @@
       document.getElementById("content").innerHTML = `
         <form class="member-form" id="profile-form">
           <label>姓名 <input type="text" id="name" value="${escapeHtml(profile.name)}" required /></label>
-          <label>出生年月日 <input type="date" id="birthDate" value="${escapeHtml(profile.birthDate)}" /></label>
-          <label>聯絡電話 <input type="text" id="phone" value="${escapeHtml(profile.phone)}" /></label>
+          <label>出生年月日 <input type="date" id="birthDate" value="${escapeHtml(profile.birthDate)}" required /></label>
+          <label>身分證字號 <input type="text" id="nationalId" value="${escapeHtml(profile.nationalId)}" maxlength="10" required /></label>
+          <label>聯絡電話 <input type="text" id="phone" value="${escapeHtml(profile.phone)}" required /></label>
           <label>所在鄉鎮
-            <select id="township">
+            <select id="township" required>
               <option value="">請選擇</option>
               ${townshipOptions}
             </select>
           </label>
           <fieldset>
-            <legend>喜愛的運動</legend>
+            <legend>喜愛的運動（至少選一項）</legend>
             ${sportCheckboxes}
           </fieldset>
           <button type="submit" class="primary-button">儲存</button>
         </form>
+        <p class="error-text" id="profile-error" style="display: none;"></p>
         <p class="success-text" id="saved" style="display: none;">已儲存！</p>
         <button type="button" class="secondary-button" id="logout-button">登出</button>
       `;
@@ -66,11 +68,30 @@
 
     async function handleSave(e) {
       e.preventDefault();
+      const errorEl = document.getElementById("profile-error");
+      errorEl.style.display = "none";
+      document.getElementById("saved").style.display = "none";
+
+      const nationalId = document.getElementById("nationalId").value.toUpperCase();
+      if (!isValidTaiwanId(nationalId)) {
+        errorEl.textContent = "身分證字號格式不正確，請確認後再輸入一次。";
+        errorEl.style.display = "block";
+        return;
+      }
+
+      const favoriteSports = Array.from(document.querySelectorAll(".sport-checkbox:checked")).map((c) => c.value);
+      if (!favoriteSports.length) {
+        errorEl.textContent = "請至少選擇一項喜愛的運動。";
+        errorEl.style.display = "block";
+        return;
+      }
+
       profile.name = document.getElementById("name").value;
       profile.birthDate = document.getElementById("birthDate").value;
+      profile.nationalId = nationalId;
       profile.phone = document.getElementById("phone").value;
       profile.township = document.getElementById("township").value;
-      profile.favoriteSports = Array.from(document.querySelectorAll(".sport-checkbox:checked")).map((c) => c.value);
+      profile.favoriteSports = favoriteSports;
 
       await setItem("users", uid, profile);
       document.getElementById("saved").style.display = "block";
@@ -79,7 +100,7 @@
     requireLogin(async (user) => {
       uid = user.uid;
       profile = (await getById("users", uid)) || {
-        name: "", birthDate: "", phone: "", township: "", favoriteSports: [], favoriteVenueIds: [], role: "user",
+        name: "", birthDate: "", nationalId: "", phone: "", township: "", favoriteSports: [], favoriteVenueIds: [], role: "user",
       };
       render();
     });
