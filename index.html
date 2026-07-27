@@ -18,6 +18,9 @@
 <body>
   <div id="nav"></div>
   <main>
+    <div class="photo-strip" id="photo-strip"></div>
+    <p class="photo-credit-line" id="photo-credit-line"></p>
+
     <h1>澎湖縣社區運動資源查詢</h1>
     <p class="hint-text">請點選地圖上您想查詢的鄉鎮</p>
 
@@ -33,7 +36,12 @@
 
   <script>
     renderPenghuMap("map");
-    setBackgroundPhoto("qimei");
+
+    document.getElementById("photo-strip").innerHTML =
+      GENERAL_PHOTOS.map((p) => `<img src="${p.image}" alt="" loading="lazy" />`).join("");
+
+    document.getElementById("photo-credit-line").innerHTML =
+      "圖片來源：" + GENERAL_PHOTOS.map((p) => `<a href="${escapeHtml(p.sourceUrl)}" target="_blank" rel="noopener">${escapeHtml(p.credit)}</a>`).join("、");
   </script>
 </body>
 </html>

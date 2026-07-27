@@ -12,8 +12,8 @@ body {
   background-attachment: fixed;
 }
 
-body.text-large { font-size: 1.4rem; }
-body.text-xlarge { font-size: 1.75rem; }
+html.text-large { font-size: 125%; }
+html.text-xlarge { font-size: 150%; }
 
 h1 {
   font-size: 1.8em;
@@ -36,27 +36,40 @@ main {
 
 .hint-text { font-size: 1.05em; color: #444; }
 
-/* 澎湖景觀照當背景：內容卡片維持不透明白底（可讀性不受影響），
-   照片只會露出在卡片兩側與頁面周圍，用淡淡的疊色蓋一層讓畫面不會太搶眼 */
+/* 澎湖景觀照：貼在內容卡片頂端當作橫幅裝飾，不管螢幕多寬都看得到，
+   不加說明文字，只在角落留一個很小的出處標示 */
 
-body.photo-bg-page {
-  background-image:
-    linear-gradient(rgba(227, 244, 251, 0.86), rgba(253, 246, 234, 0.8)),
-    var(--bg-photo);
-  background-size: cover;
-  background-position: center;
-  background-attachment: fixed;
+.page-banner {
+  position: relative;
+  margin: -1.5rem -2rem 1.5rem;
+  height: 200px;
+  overflow: hidden;
 }
 
+  .page-banner img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+.photo-strip {
+  position: relative;
+  margin: -1.5rem -2rem 0.3rem;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2px;
+  height: 160px;
+  overflow: hidden;
+}
+
+  .photo-strip img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+.photo-credit-line { font-size: 0.75em; color: #999; margin: 0 0 1.2rem; }
+  .photo-credit-line a { color: inherit; }
+
 .bg-credit {
-  position: fixed;
-  right: 0.6rem;
+  position: absolute;
+  right: 0.5rem;
   bottom: 0.4rem;
   font-size: 0.68rem;
-  color: rgba(0, 0, 0, 0.35);
-  background: rgba(255, 255, 255, 0.5);
-  padding: 0.1rem 0.4rem;
-  border-radius: 4px;
+  color: rgba(255, 255, 255, 0.9);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
   z-index: 5;
 }
 
@@ -459,11 +472,10 @@ svg text {
 
   .icon-grid { grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); }
 
-  /* 手機螢幕太窄，卡片兩側看不到背景照片，固定背景在部分手機瀏覽器也容易頓，直接關掉比較省效能 */
-  body.photo-bg-page {
-    background-image: linear-gradient(160deg, #e3f4fb 0%, #fdf6ea 55%, #fbe9dd 100%);
-    background-attachment: scroll;
-  }
+  .page-banner { margin: -1.1rem -1.1rem 1.1rem; height: 140px; }
+  .photo-strip { margin: -1.1rem -1.1rem 0.3rem; height: 110px; }
 
-  .bg-credit { display: none; }
+  /* 手機地圖太小很難點準，把地圖區塊的內距縮小，讓地圖本身盡量畫大一點 */
+  .map-wrap { padding: 0.5rem; }
+  main:has(.map-wrap) { padding-left: 0.6rem; padding-right: 0.6rem; }
 }

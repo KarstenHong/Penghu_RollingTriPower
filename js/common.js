@@ -101,28 +101,15 @@ function renderNav() {
 
 function applyFontSize() {
   const size = localStorage.getItem("fontSize") || "";
-  // 用 classList 增減，不要整個覆寫 className，避免把 photo-bg-page 這類其他 class 洗掉
-  document.body.classList.remove("text-large", "text-xlarge");
-  if (size) document.body.classList.add(size);
+  // 放在 <html> 而不是 <body>：CSS 裡大部分元件用 rem，rem 是相對於根元素（html）的字體大小，
+  // 放在 body 上只會放大內文，導覽列、按鈕等 rem 單位的元件都不會跟著變大。
+  document.documentElement.classList.remove("text-large", "text-xlarge");
+  if (size) document.documentElement.classList.add(size);
 }
 
 function setFontSize(size) {
   localStorage.setItem("fontSize", size);
   applyFontSize();
-}
-
-// 把某個鄉鎮的代表景觀照設成頁面背景（露在內容卡片周圍），並附上不明顯的小小出處標示
-function setBackgroundPhoto(townshipId) {
-  const h = TOWNSHIP_HIGHLIGHTS[townshipId];
-  if (!h) return;
-
-  document.body.classList.add("photo-bg-page");
-  document.body.style.setProperty("--bg-photo", `url('${h.image}')`);
-
-  const credit = document.createElement("div");
-  credit.className = "bg-credit";
-  credit.innerHTML = `照片來源：<a href="${escapeHtml(h.sourceUrl)}" target="_blank" rel="noopener">${escapeHtml(h.credit)}</a>`;
-  document.body.appendChild(credit);
 }
 
 document.addEventListener("DOMContentLoaded", () => {
