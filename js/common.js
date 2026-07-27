@@ -111,10 +111,46 @@ function authLinksHtml(role) {
 function wireLogoutButton() {
   document.getElementById("nav-logout")?.addEventListener("click", async (e) => {
     e.preventDefault();
-    if (!confirm("確定要登出嗎？")) return;
+    const confirmed = await showConfirmDialog("確定要登出嗎？", { confirmLabel: "登出", danger: true });
+    if (!confirmed) return;
     await logoutUser();
     setCachedAuth(null);
     location.href = "index.html";
+  });
+}
+
+// 自訂確認視窗，樣式跟網站風格一致（取代原生 confirm()，長輩看的字級/按鈕大小也比較一致）
+function showConfirmDialog(message, { confirmLabel = "確定", cancelLabel = "取消", danger = false } = {}) {
+  return new Promise((resolve) => {
+    const overlay = document.createElement("div");
+    overlay.className = "confirm-overlay";
+    overlay.innerHTML = `
+      <div class="confirm-dialog" role="alertdialog" aria-modal="true">
+        <p>${escapeHtml(message)}</p>
+        <div class="confirm-buttons">
+          <button type="button" class="secondary-button" data-action="cancel">${escapeHtml(cancelLabel)}</button>
+          <button type="button" class="${danger ? "danger-button" : "primary-button"}" data-action="confirm">${escapeHtml(confirmLabel)}</button>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(overlay);
+
+    function close(result) {
+      overlay.remove();
+      document.removeEventListener("keydown", onKeydown);
+      resolve(result);
+    }
+
+    function onKeydown(e) {
+      if (e.key === "Escape") close(false);
+    }
+
+    overlay.addEventListener("click", (e) => {
+      if (e.target === overlay) close(false);
+    });
+    overlay.querySelector('[data-action="cancel"]').addEventListener("click", () => close(false));
+    overlay.querySelector('[data-action="confirm"]').addEventListener("click", () => close(true));
+    document.addEventListener("keydown", onKeydown);
   });
 }
 
