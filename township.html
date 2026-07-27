@@ -36,10 +36,8 @@
 
     const highlight = TOWNSHIP_HIGHLIGHTS[townshipId];
     if (highlight) {
-      document.getElementById("page-banner").innerHTML = `
-        <img src="${highlight.image}" alt="" loading="lazy" />
-        <span class="bg-credit">圖片來源：<a href="${escapeHtml(highlight.sourceUrl)}" target="_blank" rel="noopener">${escapeHtml(highlight.credit)}</a></span>
-      `;
+      document.getElementById("page-banner").innerHTML =
+        `<img src="${highlight.image}" alt="" title="圖片來源：${escapeHtml(highlight.credit)}" loading="lazy" />`;
     }
 
     let venues = [];

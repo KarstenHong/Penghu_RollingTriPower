@@ -50,8 +50,7 @@
     renderMapInset("inset-qimei", "qimei");
 
     document.getElementById("photo-strip").innerHTML =
-      GENERAL_PHOTOS.map((p) => `<img src="${p.image}" alt="" loading="lazy" />`).join("") +
-      `<span class="bg-credit">來源：${GENERAL_PHOTOS.map((p) => `<a href="${escapeHtml(p.sourceUrl)}" target="_blank" rel="noopener">${escapeHtml(p.credit)}</a>`).join("、")}</span>`;
+      GENERAL_PHOTOS.map((p) => `<img src="${p.image}" alt="" title="圖片來源：${escapeHtml(p.credit)}" loading="lazy" />`).join("");
 
     document.getElementById("township-buttons").innerHTML = TOWNSHIPS.map((t) => `
       <a class="township-button" href="township.html?id=${t.id}" style="--tb-color: ${TOWNSHIP_COLORS[t.id]}">${t.name}</a>
