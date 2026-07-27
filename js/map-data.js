@@ -208,14 +208,20 @@ function renderMapInset(containerId, townshipId) {
   });
 }
 
-// 畫單一鄉鎮的放大地圖。大部分鄉鎮顯示完整轄區（含離島）；
-// 望安鄉的離島散得太開，照實際比例縮放會讓本島小到看不清楚，這裡改成只放大顯示本島，犧牲地理比例換取清晰度
+// 大部分鄉鎮的詳細頁地圖顯示完整轄區（含離島）；
+// 望安鄉的離島散得太開，照實際比例縮放會讓本島小到看不清楚，改成只放大顯示本島，犧牲地理比例換取清晰度。
+// township.html 畫運動圖示圖釘時也要用同一個 bbox，不然圖釘大小會跟地圖縮放比例對不起來。
+function getTownshipDetailBbox(townshipId) {
+  const t = PENGHU_MAP.townships[townshipId];
+  return townshipId === "wangan" ? t.mainBbox : t.bbox;
+}
+
 function renderTownshipMap(containerId, townshipId) {
   const el = document.getElementById(containerId);
   const t = PENGHU_MAP.townships[townshipId];
   if (!el || !t) return;
 
-  const [bx0, by0, bx1, by1] = townshipId === "wangan" ? t.mainBbox : t.bbox;
+  const [bx0, by0, bx1, by1] = getTownshipDetailBbox(townshipId);
   const pad = Math.max(10, (bx1 - bx0) * 0.08);
   const vx = bx0 - pad, vy = by0 - pad, vw = (bx1 - bx0) + pad * 2, vh = (by1 - by0) + pad * 2;
 
