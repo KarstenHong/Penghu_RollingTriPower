@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>我的最愛 - 澎湖縣社區運動資源查詢</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+  <script src="js/firebase-config.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/common.js"></script>
+</head>
+<body>
+  <div id="nav"></div>
+  <main>
+    <h1>我的最愛</h1>
+    <div id="content"><p>載入中...</p></div>
+  </main>
+
+  <script>
+    requireLogin(async (user) => {
+      const profile = (await getById("users", user.uid)) || { favoriteSports: [], favoriteVenueIds: [] };
+      const allVenues = await getAll("venues");
+      const favoriteVenues = allVenues.filter((v) => (profile.favoriteVenueIds || []).includes(v.id));
+
+      let html = "<h2>喜愛的運動</h2>";
+      if (!(profile.favoriteSports || []).length) {
+        html += '<p class="hint-text">尚未選擇喜愛的運動，可到「會員資料」頁面設定。</p>';
+      } else {
+        html += '<div class="icon-grid">' + profile.favoriteSports.map((id) => `
+          <div class="icon-button">
+            <img src="images/icons/${sportIcon(id)}" alt="${sportName(id)}" />
+            <span>${sportName(id)}</span>
+          </div>
+        `).join("") + "</div>";
+      }
+
+      html += "<h2>收藏的據點</h2>";
+      if (!favoriteVenues.length) {
+        html += '<p class="hint-text">尚未收藏任何據點，瀏覽「社區活動查詢」時可點選 ☆ 加入收藏。</p>';
+      } else {
+        html += '<div class="venue-list">' + favoriteVenues.map((v) => `
+          <div class="venue-card">
+            <h3>${escapeHtml(v.name)} <span class="venue-type">(${venueTypeName(v.type)})</span> <span class="fav-slot" data-venue="${encodeURIComponent(v.id)}"></span></h3>
+            <p>鄉鎮：${townshipName(v.township)}</p>
+            <p>地址：${escapeHtml(v.address)}</p>
+            <p>電話：${escapeHtml(v.phone)}</p>
+          </div>
+        `).join("") + "</div>";
+      }
+
+      document.getElementById("content").innerHTML = html;
+      renderFavoriteToggles();
+    });
+  </script>
+  <script src="js/favorites-widget.js"></script>
+</body>
+</html>

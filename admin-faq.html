@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>常見問題管理 - 澎湖縣社區運動資源查詢</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+  <script src="js/firebase-config.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/common.js"></script>
+</head>
+<body>
+  <div id="nav"></div>
+  <main>
+    <a href="admin.html" class="back-button">&larr; 返回後台首頁</a>
+    <h1>常見問題管理</h1>
+    <div id="content"><p>載入中...</p></div>
+  </main>
+
+  <script>
+    let faqs = [];
+    let editing = null;
+
+    async function reload() {
+      faqs = await getAll("faq");
+      render();
+    }
+
+    function newFaq() {
+      editing = { question: "", answer: "" };
+      render();
+    }
+
+    function editFaq(id) {
+      editing = JSON.parse(JSON.stringify(faqs.find((f) => f.id === id)));
+      render();
+    }
+
+    async function deleteFaq(id) {
+      await deleteItem("faq", id);
+      await reload();
+    }
+
+    async function saveFaq(e) {
+      e.preventDefault();
+      editing.question = document.getElementById("f-question").value;
+      editing.answer = document.getElementById("f-answer").value;
+
+      if (editing.id) {
+        await setItem("faq", editing.id, editing);
+      } else {
+        await addItem("faq", editing);
+      }
+      editing = null;
+      await reload();
+    }
+
+    function render() {
+      let html = `
+        <table class="admin-table">
+          <thead><tr><th>問題</th><th></th></tr></thead>
+          <tbody>
+            ${faqs.map((f) => `
+              <tr>
+                <td>${escapeHtml(f.question)}</td>
+                <td>
+                  <button onclick="editFaq('${f.id}')">編輯</button>
+                  <button onclick="deleteFaq('${f.id}')">刪除</button>
+                </td>
+              </tr>
+            `).join("")}
+          </tbody>
+        </table>
+        <button class="primary-button" onclick="newFaq()">+ 新增問題</button>
+      `;
+
+      if (editing) {
+        html += `
+          <form class="member-form" id="faq-form">
+            <label>問題 <input type="text" id="f-question" value="${escapeHtml(editing.question)}" required /></label>
+            <label>答案 <textarea id="f-answer">${escapeHtml(editing.answer)}</textarea></label>
+            <button type="submit" class="primary-button">儲存</button>
+            <button type="button" class="secondary-button" onclick="editing = null; render();">取消</button>
+          </form>
+        `;
+      }
+
+      document.getElementById("content").innerHTML = html;
+      if (editing) {
+        document.getElementById("faq-form").addEventListener("submit", saveFaq);
+      }
+    }
+
+    requireAdmin(() => reload());
+  </script>
+</body>
+</html>
