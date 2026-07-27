@@ -21,8 +21,6 @@
     <a href="index.html" class="back-button">&larr; 返回地圖</a>
     <h1 id="township-title"></h1>
 
-    <div id="highlight-card"></div>
-
     <p class="hint-text">點選下方運動圖示，只看該運動在地圖上的據點；再點一次可恢復顯示全部</p>
 
     <div class="map-wrap" id="township-map"></div>
@@ -33,22 +31,7 @@
   <script>
     const townshipId = new URLSearchParams(location.search).get("id") || "";
     document.getElementById("township-title").textContent = townshipName(townshipId);
-
-    const highlight = TOWNSHIP_HIGHLIGHTS[townshipId];
-    if (highlight) {
-      document.getElementById("highlight-card").innerHTML = `
-        <div class="highlight-card">
-          <img src="${highlight.image}" alt="${escapeHtml(highlight.landmarkName)}" loading="lazy" />
-          <div class="highlight-text">
-            <h3>📍 ${escapeHtml(highlight.landmarkName)}</h3>
-            <p>${escapeHtml(highlight.landmarkDesc)}</p>
-            <h3>🍽️ 在地美食</h3>
-            <p>${escapeHtml(highlight.food)}</p>
-            <p class="photo-credit">圖片來源：<a href="${escapeHtml(highlight.sourceUrl)}" target="_blank" rel="noopener">${escapeHtml(highlight.credit)}</a></p>
-          </div>
-        </div>
-      `;
-    }
+    setBackgroundPhoto(townshipId);
 
     let venues = [];
     let courses = [];
