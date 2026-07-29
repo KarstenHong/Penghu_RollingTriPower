@@ -133,6 +133,7 @@
         const venueCourses = courses.filter((c) => c.venueId === v.id && (!selectedSport || c.sportType === selectedSport));
         html += `
           <div class="venue-card">
+            ${v.photoUrl ? `<img class="venue-photo" src="${escapeHtml(v.photoUrl)}" alt="" loading="lazy" />` : ""}
             <h3>${escapeHtml(v.name)} <span class="venue-type">(${venueTypeName(v.type)})</span> <span class="fav-slot" data-venue="${encodeURIComponent(v.id)}" ${selectedSport ? `data-sport="${selectedSport}"` : ""}></span></h3>
             <p>地址：${escapeHtml(v.address)}</p>
             <p>電話：${escapeHtml(v.phone)}</p>

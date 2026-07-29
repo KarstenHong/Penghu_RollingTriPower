@@ -31,7 +31,7 @@
     }
 
     function newVenue() {
-      editing = { name: "", township: "", type: "", address: "", phone: "", sportTypes: [], lat: "", lng: "" };
+      editing = { name: "", township: "", type: "", address: "", phone: "", sportTypes: [], lat: "", lng: "", photoUrl: "" };
       render();
     }
 
@@ -56,6 +56,7 @@
       editing.lat = parseFloat(document.getElementById("f-lat").value) || null;
       editing.lng = parseFloat(document.getElementById("f-lng").value) || null;
       editing.sportTypes = Array.from(document.querySelectorAll(".f-sport:checked")).map((c) => c.value);
+      editing.photoUrl = document.getElementById("f-photo").value;
 
       if (editing.id) {
         await setItem("venues", editing.id, editing);
@@ -69,10 +70,11 @@
     function render() {
       let html = `
         <div class="table-scroll"><table class="admin-table">
-          <thead><tr><th>名稱</th><th>鄉鎮</th><th>類型</th><th></th></tr></thead>
+          <thead><tr><th>照片</th><th>名稱</th><th>鄉鎮</th><th>類型</th><th></th></tr></thead>
           <tbody>
             ${venues.map((v) => `
               <tr>
+                <td>${v.photoUrl ? `<img src="${escapeHtml(v.photoUrl)}" alt="" style="width:60px;height:60px;object-fit:cover;border-radius:8px;" />` : ""}</td>
                 <td>${escapeHtml(v.name)}</td>
                 <td>${townshipName(v.township)}</td>
                 <td>${venueTypeName(v.type)}</td>
@@ -105,6 +107,7 @@
             </label>
             <label>地址 <input type="text" id="f-address" value="${escapeHtml(editing.address)}" /></label>
             <label>電話 <input type="text" id="f-phone" value="${escapeHtml(editing.phone)}" /></label>
+            <label>照片網址（選填） <input type="text" id="f-photo" value="${escapeHtml(editing.photoUrl)}" /></label>
             <label>緯度 Latitude（用於在鄉鎮地圖上標示位置，可到 Google 地圖上按右鍵複製座標）
               <input type="number" step="any" id="f-lat" value="${editing.lat ?? ""}" placeholder="例如 23.5654" />
             </label>

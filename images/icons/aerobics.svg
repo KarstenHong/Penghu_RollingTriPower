@@ -5,4 +5,12 @@
   <path d="M32 22 L50 10" stroke="#f4a261" stroke-width="5" stroke-linecap="round"/>
   <path d="M32 35 L14 50" stroke="#f4a261" stroke-width="5" stroke-linecap="round"/>
   <path d="M32 35 L50 50" stroke="#f4a261" stroke-width="5" stroke-linecap="round"/>
+  <g fill="#f4a261">
+    <rect x="8" y="6" width="10" height="4" rx="2"/>
+    <circle cx="8" cy="8" r="3.4"/>
+    <circle cx="18" cy="8" r="3.4"/>
+    <rect x="46" y="6" width="10" height="4" rx="2"/>
+    <circle cx="46" cy="8" r="3.4"/>
+    <circle cx="56" cy="8" r="3.4"/>
+  </g>
 </svg>
