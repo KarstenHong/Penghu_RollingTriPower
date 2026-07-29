@@ -100,7 +100,7 @@
             <label>運動類型
               <select id="f-sport">
                 <option value="">請選擇</option>
-                ${SPORT_TYPES.map((s) => `<option value="${s.id}" ${editing.sportType === s.id ? "selected" : ""}>${s.name}</option>`).join("")}
+                ${activeSportTypes([editing.sportType]).map((s) => `<option value="${s.id}" ${editing.sportType === s.id ? "selected" : ""}>${s.name}</option>`).join("")}
               </select>
             </label>
             <label>上課時間 <input type="text" id="f-schedule" value="${escapeHtml(editing.schedule)}" placeholder="例如：每週二、四 09:00-10:00" /></label>
@@ -118,6 +118,7 @@
     }
 
     requireAdmin(async () => {
+      await loadSportTypes();
       venues = await getAll("venues");
       await reload();
     });

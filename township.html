@@ -46,6 +46,7 @@
 
     async function init() {
       renderTownshipMap("township-map", townshipId);
+      await loadSportTypes();
       [venues, courses] = await Promise.all([
         getWhere("venues", "township", townshipId),
         getAll("courses"),
@@ -58,7 +59,7 @@
     function availableSports() {
       const ids = new Set();
       venues.forEach((v) => (v.sportTypes || []).forEach((s) => ids.add(s)));
-      return SPORT_TYPES.filter((s) => ids.has(s.id));
+      return activeSportTypes().filter((s) => ids.has(s.id));
     }
 
     function selectSport(sportId) {
@@ -76,7 +77,7 @@
       }
       el.innerHTML = '<div class="icon-grid">' + availableSports().map((s) => `
         <button class="icon-button ${selectedSport === s.id ? "selected" : ""}" onclick="selectSport('${s.id}')">
-          <img src="images/icons/${s.icon}" alt="${s.name}" />
+          <img src="${s.icon}" alt="${s.name}" />
           <span>${s.name}</span>
         </button>
       `).join("") + "</div>";
@@ -110,7 +111,7 @@
           // 白色底盤墊在圖示後面：運動圖示的顏色偶爾會跟該鄉鎮的地圖底色一樣，疊在一起會看不清楚，
           // 白底不管地圖是什麼顏色都有足夠對比
           svg += `<circle cx="${cx}" cy="${py}" r="${markerSize * 0.62}" fill="white" stroke="rgba(0,0,0,0.2)" stroke-width="1" class="map-marker-badge" />
-          <image href="images/icons/${sportIcon(sport)}" x="${x}" y="${y}" width="${markerSize}" height="${markerSize}" class="map-marker">
+          <image href="${sportIcon(sport)}" x="${x}" y="${y}" width="${markerSize}" height="${markerSize}" class="map-marker">
             <title>${escapeHtml(venue.name)} - ${sportName(sport)}</title>
           </image>`;
         });

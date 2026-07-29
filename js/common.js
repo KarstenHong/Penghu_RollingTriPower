@@ -9,16 +9,34 @@ const TOWNSHIPS = [
   { id: "qimei", name: "七美鄉" },
 ];
 
-const SPORT_TYPES = [
-  { id: "taichi", name: "太極拳", icon: "taichi.svg" },
-  { id: "folkdance", name: "土風舞", icon: "folkdance.svg" },
-  { id: "croquet", name: "槌球", icon: "croquet.svg" },
-  { id: "tabletennis", name: "桌球", icon: "tabletennis.svg" },
-  { id: "badminton", name: "羽球", icon: "badminton.svg" },
-  { id: "aerobics", name: "有氧運動", icon: "aerobics.svg" },
-  { id: "yoga", name: "瑜珈", icon: "yoga.svg" },
-  { id: "walking", name: "健走", icon: "walking.svg" },
+// 運動項目原本是寫死在這裡的常數，現在改成後台可管理，實際資料存在 Firestore 的 sportTypes 集合。
+// 這份只留著當「第一次初始化」用的預設值（admin-sporttypes.html 在集合是空的時候會用這份資料建檔），
+// id 沿用原本的值，是因為既有的據點／課程資料裡已經存了這些 id 字串（例如 sportType: "taichi"），
+// 沿用才能讓舊資料繼續對得上，不用另外寫資料搬遷程式。
+const DEFAULT_SPORT_TYPES = [
+  { id: "taichi", name: "太極拳", icon: "images/icons/taichi.svg", active: true },
+  { id: "folkdance", name: "土風舞", icon: "images/icons/folkdance.svg", active: true },
+  { id: "croquet", name: "槌球", icon: "images/icons/croquet.svg", active: true },
+  { id: "tabletennis", name: "桌球", icon: "images/icons/tabletennis.svg", active: true },
+  { id: "badminton", name: "羽球", icon: "images/icons/badminton.svg", active: true },
+  { id: "aerobics", name: "有氧運動", icon: "images/icons/aerobics.svg", active: true },
+  { id: "yoga", name: "瑜珈", icon: "images/icons/yoga.svg", active: true },
+  { id: "walking", name: "健走", icon: "images/icons/walking.svg", active: true },
 ];
+
+// 目前已載入的運動項目（含已下架的，下架只是不再讓人「新選」，舊資料的名稱/圖示仍要能查到）。
+// 每個頁面要用 SPORT_TYPES、sportName()、sportIcon() 之前，記得先 await loadSportTypes() 一次。
+let SPORT_TYPES = [];
+
+async function loadSportTypes() {
+  SPORT_TYPES = await getAll("sportTypes");
+}
+
+// 給「新增/勾選」用的清單：只列上架中的項目；如果某個項目已下架但目前這筆資料本來就有選，
+// 照樣要出現在清單裡（傳 keepIds 進來），不然使用者原本的選擇會在下次儲存時被悄悄清掉
+function activeSportTypes(keepIds = []) {
+  return SPORT_TYPES.filter((s) => s.active !== false || keepIds.includes(s.id));
+}
 
 const VENUE_TYPES = [
   { id: "community_center", name: "社區活動中心" },

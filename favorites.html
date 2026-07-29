@@ -22,6 +22,7 @@
 
   <script>
     requireLogin(async (user) => {
+      await loadSportTypes();
       const profile = (await getById("users", user.uid)) || { favoriteSports: [], favorites: [] };
       const favorites = profile.favorites || [];
       const [allVenues, allCourses] = await Promise.all([getAll("venues"), getAll("courses")]);
@@ -32,7 +33,7 @@
       } else {
         html += '<div class="icon-grid">' + profile.favoriteSports.map((id) => `
           <div class="icon-button">
-            <img src="images/icons/${sportIcon(id)}" alt="${sportName(id)}" />
+            <img src="${sportIcon(id)}" alt="${sportName(id)}" />
             <span>${sportName(id)}</span>
           </div>
         `).join("") + "</div>";
