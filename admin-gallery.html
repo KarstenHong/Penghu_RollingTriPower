@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>成果集管理 - 澎湖縣社區運動資源查詢</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+  <script src="js/firebase-config.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/common.js"></script>
+</head>
+<body>
+  <div id="nav"></div>
+  <main>
+    <a href="admin.html" class="back-button">&larr; 返回後台首頁</a>
+    <h1>成果集管理</h1>
+    <div id="content"><p>載入中...</p></div>
+  </main>
+
+  <script>
+    let photos = [];
+    let editing = null;
+
+    async function reload() {
+      photos = await getAll("gallery");
+      photos.sort((a, b) => (b.date || "").localeCompare(a.date || ""));
+      render();
+    }
+
+    function newPhoto() {
+      editing = { caption: "", date: new Date().toISOString().slice(0, 10), imageUrl: "" };
+      render();
+    }
+
+    function editPhoto(id) {
+      editing = JSON.parse(JSON.stringify(photos.find((p) => p.id === id)));
+      render();
+    }
+
+    async function deletePhoto(id) {
+      await deleteItem("gallery", id);
+      await reload();
+    }
+
+    async function savePhoto(e) {
+      e.preventDefault();
+      editing.imageUrl = document.getElementById("f-image").value;
+      editing.caption = document.getElementById("f-caption").value;
+      editing.date = document.getElementById("f-date").value;
+
+      if (editing.id) {
+        await setItem("gallery", editing.id, editing);
+      } else {
+        await addItem("gallery", editing);
+      }
+      editing = null;
+      await reload();
+    }
+
+    function render() {
+      let html = `
+        <div class="table-scroll"><table class="admin-table">
+          <thead><tr><th>照片</th><th>說明</th><th>日期</th><th></th></tr></thead>
+          <tbody>
+            ${photos.map((p) => `
+              <tr>
+                <td>${p.imageUrl ? `<img src="${escapeHtml(p.imageUrl)}" alt="" style="width:60px;height:60px;object-fit:cover;border-radius:8px;" />` : ""}</td>
+                <td>${escapeHtml(p.caption)}</td>
+                <td>${escapeHtml(p.date)}</td>
+                <td>
+                  <button onclick="editPhoto('${p.id}')">編輯</button>
+                  <button onclick="deletePhoto('${p.id}')">刪除</button>
+                </td>
+              </tr>
+            `).join("")}
+          </tbody>
+        </table></div>
+        <button class="primary-button" onclick="newPhoto()">+ 新增照片</button>
+      `;
+
+      if (editing) {
+        html += `
+          <form class="member-form" id="photo-form">
+            <label>照片網址 <input type="text" id="f-image" value="${escapeHtml(editing.imageUrl)}" required /></label>
+            <label>說明（選填） <input type="text" id="f-caption" value="${escapeHtml(editing.caption)}" /></label>
+            <label>日期 <input type="date" id="f-date" value="${escapeHtml(editing.date)}" /></label>
+            <button type="submit" class="primary-button">儲存</button>
+            <button type="button" class="secondary-button" onclick="editing = null; render();">取消</button>
+          </form>
+        `;
+      }
+
+      document.getElementById("content").innerHTML = html;
+      if (editing) {
+        document.getElementById("photo-form").addEventListener("submit", savePhoto);
+      }
+    }
+
+    requireAdmin(() => reload());
+  </script>
+</body>
+</html>

@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>活動成果集 - 澎湖縣社區運動資源查詢</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+  <script src="js/firebase-config.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/common.js"></script>
+</head>
+<body>
+  <div id="nav"></div>
+  <main>
+    <h1>活動成果集</h1>
+    <p class="hint-text">長輩們參加社區運動的精彩紀錄</p>
+    <div id="content"><p>載入中...</p></div>
+  </main>
+
+  <script>
+    let photos = [];
+
+    async function init() {
+      photos = await getAll("gallery");
+      photos.sort((a, b) => (b.date || "").localeCompare(a.date || ""));
+
+      const el = document.getElementById("content");
+      if (!photos.length) {
+        el.innerHTML = '<p class="hint-text">目前還沒有成果照片，敬請期待。</p>';
+        return;
+      }
+
+      el.innerHTML = '<div class="gallery-grid">' + photos.map((p, i) => `
+        <button type="button" class="gallery-thumb" onclick="openPhoto(${i})">
+          <img src="${escapeHtml(p.imageUrl)}" alt="" loading="lazy" />
+          ${p.caption ? `<span class="gallery-caption">${escapeHtml(p.caption)}</span>` : ""}
+        </button>
+      `).join("") + "</div>";
+    }
+
+    function openPhoto(i) {
+      const p = photos[i];
+      const overlay = document.createElement("div");
+      overlay.className = "confirm-overlay";
+      overlay.innerHTML = `
+        <div class="lightbox-dialog">
+          <img src="${escapeHtml(p.imageUrl)}" alt="" />
+          ${p.caption ? `<p>${escapeHtml(p.caption)}</p>` : ""}
+          ${p.date ? `<p class="post-date">${escapeHtml(p.date)}</p>` : ""}
+          <button type="button" class="secondary-button" data-close>關閉</button>
+        </div>
+      `;
+      document.body.appendChild(overlay);
+
+      function close() { overlay.remove(); document.removeEventListener("keydown", onKeydown); }
+      function onKeydown(e) { if (e.key === "Escape") close(); }
+
+      overlay.addEventListener("click", (e) => {
+        if (e.target === overlay || e.target.closest("[data-close]")) close();
+      });
+      document.addEventListener("keydown", onKeydown);
+    }
+
+    init();
+  </script>
+</body>
+</html>

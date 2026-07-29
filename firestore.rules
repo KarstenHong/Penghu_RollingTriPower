@@ -37,6 +37,11 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
+    match /gallery/{id} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
     // 會員資料：本人可讀寫自己的文件；admin 可讀所有人（後台管理會員時可擴充）
     // role 欄位只能由已經是 admin 的人變更，避免使用者自行把自己升級成 admin
     match /users/{uid} {

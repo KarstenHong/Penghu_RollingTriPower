@@ -74,6 +74,7 @@ const NAV_LINKS = [
   { href: "posts.html?category=news", label: "最新消息" },
   { href: "posts.html?category=event", label: "活動資訊" },
   { href: "search.html", label: "社區活動查詢" },
+  { href: "gallery.html", label: "活動成果集" },
   { href: "faq.html", label: "常見問題" },
   { href: "contact.html", label: "聯絡我們" },
 ];
