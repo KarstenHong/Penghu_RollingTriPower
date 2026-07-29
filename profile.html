@@ -29,7 +29,7 @@
         (t) => `<option value="${t.id}" ${profile.township === t.id ? "selected" : ""}>${t.name}</option>`
       ).join("");
 
-      const sportCheckboxes = SPORT_TYPES.map((s) => `
+      const sportCheckboxes = activeSportTypes(profile.favoriteSports || []).map((s) => `
         <label class="checkbox-line">
           <input type="checkbox" value="${s.id}" ${(profile.favoriteSports || []).includes(s.id) ? "checked" : ""} class="sport-checkbox" />
           ${s.name}
@@ -98,6 +98,7 @@
     }
 
     requireLogin(async (user) => {
+      await loadSportTypes();
       uid = user.uid;
       profile = (await getById("users", uid)) || {
         name: "", birthDate: "", nationalId: "", phone: "", township: "", favoriteSports: [], favoriteVenueIds: [], role: "user",

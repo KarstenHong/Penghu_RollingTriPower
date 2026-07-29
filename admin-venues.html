@@ -116,7 +116,7 @@
             </label>
             <fieldset>
               <legend>提供的運動項目</legend>
-              ${SPORT_TYPES.map((s) => `
+              ${activeSportTypes(editing.sportTypes || []).map((s) => `
                 <label class="checkbox-line">
                   <input type="checkbox" class="f-sport" value="${s.id}" ${(editing.sportTypes || []).includes(s.id) ? "checked" : ""} />
                   ${s.name}
@@ -135,7 +135,10 @@
       }
     }
 
-    requireAdmin(() => reload());
+    requireAdmin(async () => {
+      await loadSportTypes();
+      await reload();
+    });
   </script>
 </body>
 </html>

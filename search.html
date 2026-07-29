@@ -44,7 +44,7 @@
       const t = document.getElementById("township-filter");
       TOWNSHIPS.forEach((x) => t.insertAdjacentHTML("beforeend", `<option value="${x.id}">${x.name}</option>`));
       const s = document.getElementById("sport-filter");
-      SPORT_TYPES.forEach((x) => s.insertAdjacentHTML("beforeend", `<option value="${x.id}">${x.name}</option>`));
+      activeSportTypes().forEach((x) => s.insertAdjacentHTML("beforeend", `<option value="${x.id}">${x.name}</option>`));
     }
 
     function render() {
@@ -79,6 +79,7 @@
     }
 
     async function init() {
+      await loadSportTypes();
       fillOptions();
       venues = await getAll("venues");
       render();
