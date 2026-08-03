@@ -308,7 +308,7 @@ function renderNav() {
   );
   el.innerHTML = `
     <div class="nav-bar">
-      <a class="nav-brand" href="index.html">澎湖縣社區運動資源查詢</a>
+      <a class="nav-brand" href="index.html">澎湖縣三力運動地圖</a>
       <div class="nav-links">${links}<span id="nav-auth-links"></span></div>
     </div>
   `;

@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>據點詳細介紹 - 澎湖縣社區運動資源查詢</title>
+  <title>據點詳細介紹 - 澎湖縣三力運動地圖</title>
   <link rel="stylesheet" href="css/style.css" />
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
@@ -38,7 +38,7 @@
         return;
       }
 
-      document.title = venue.name + " - 澎湖縣社區運動資源查詢";
+      document.title = venue.name + " - 澎湖縣三力運動地圖";
       const relatedCourses = allCourses.filter((c) => c.venueId === venueId && (!sport || c.sportType === sport));
 
       el.innerHTML = `
