@@ -374,7 +374,23 @@ function setFontSize(size) {
   applyFontSize();
 }
 
+// 回到頂端按鈕：全站共用，捲動超過一小段才浮現，避免一開頁面就擋住內容
+function renderBackToTop() {
+  const btn = document.createElement("button");
+  btn.type = "button";
+  btn.className = "back-to-top";
+  btn.setAttribute("aria-label", "回到頁面頂端");
+  btn.innerHTML = "&uarr;";
+  btn.addEventListener("click", () => window.scrollTo({ top: 0, behavior: "smooth" }));
+  document.body.appendChild(btn);
+
+  window.addEventListener("scroll", () => {
+    btn.classList.toggle("visible", window.scrollY > 300);
+  });
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   applyFontSize();
   renderNav();
+  renderBackToTop();
 });

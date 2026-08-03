@@ -61,6 +61,7 @@
 
     function render() {
       document.getElementById("content").innerHTML = `
+        <button class="primary-button" onclick="newFaq()" style="display: block; margin: 0.8rem 0 1.2rem;">+ 新增問題</button>
         <div class="table-scroll"><table class="admin-table">
           <thead><tr><th>問題</th><th></th></tr></thead>
           <tbody>
@@ -75,7 +76,6 @@
             `).join("")}
           </tbody>
         </table></div>
-        <button class="primary-button" onclick="newFaq()">+ 新增問題</button>
       `;
 
       if (!editing) { renderEditModal(null); return; }

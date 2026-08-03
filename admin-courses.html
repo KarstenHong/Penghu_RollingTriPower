@@ -83,6 +83,7 @@
 
     function render() {
       document.getElementById("content").innerHTML = `
+        <button class="primary-button" onclick="newCourse()" style="display: block; margin: 0.8rem 0 1.2rem;">+ 新增課程</button>
         <div class="table-scroll"><table class="admin-table">
           <thead><tr><th>場域</th><th>運動類型</th><th>時間</th><th>招生狀態</th><th></th></tr></thead>
           <tbody>
@@ -100,7 +101,6 @@
             `).join("")}
           </tbody>
         </table></div>
-        <button class="primary-button" onclick="newCourse()">+ 新增課程</button>
       `;
 
       if (!editing) { renderEditModal(null); return; }

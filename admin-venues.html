@@ -69,6 +69,7 @@
 
     function render() {
       document.getElementById("content").innerHTML = `
+        <button class="primary-button" onclick="newVenue()" style="display: block; margin: 0.8rem 0 1.2rem;">+ 新增場域</button>
         <div class="table-scroll"><table class="admin-table">
           <thead><tr><th>照片</th><th>名稱</th><th>鄉鎮</th><th>類型</th><th></th></tr></thead>
           <tbody>
@@ -86,7 +87,6 @@
             `).join("")}
           </tbody>
         </table></div>
-        <button class="primary-button" onclick="newVenue()">+ 新增場域</button>
       `;
 
       if (!editing) { renderEditModal(null); return; }
