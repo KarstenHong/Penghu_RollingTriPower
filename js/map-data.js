@@ -182,6 +182,17 @@ function renderPenghuMap(containerId, ids) {
   });
 }
 
+// 滑鼠移到下方的鄉鎮按鈕時，讓地圖上對應的鄉鎮跟著亮起來（呼應），方便使用者對照按鈕跟地圖上的位置
+function wireTownshipButtonHover() {
+  document.querySelectorAll(".township-buttons .township-button").forEach((btn) => {
+    const id = btn.dataset.township;
+    const shape = document.querySelector(`.township-shape:not(.township-hit-area)[data-township="${id}"]`);
+    if (!shape) return;
+    btn.addEventListener("mouseenter", () => shape.classList.add("highlight"));
+    btn.addEventListener("mouseleave", () => shape.classList.remove("highlight"));
+  });
+}
+
 // 離島小地圖（望安、七美）：像放大鏡一樣單獨顯示，不必照實際地理位置擺放。
 // 用 mainBbox（只放大本島）而不是完整 bbox，縮圖才不會因為離島太分散而把本島縮到看不清楚
 function renderMapInset(containerId, townshipId) {

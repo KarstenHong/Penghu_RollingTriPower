@@ -140,8 +140,9 @@
       renderMapInset("inset-qimei", "qimei");
 
       document.getElementById("township-buttons").innerHTML = TOWNSHIPS.map((t) => `
-        <a class="township-button" href="township.html?id=${t.id}" style="--tb-color: ${TOWNSHIP_COLORS[t.id]}">${t.name}</a>
+        <a class="township-button" data-township="${t.id}" href="township.html?id=${t.id}" style="--tb-color: ${TOWNSHIP_COLORS[t.id]}">${t.name}</a>
       `).join("");
+      wireTownshipButtonHover();
 
       fillFilterOptions();
       [venues, courses] = await Promise.all([getAll("venues"), getAll("courses")]);

@@ -53,8 +53,9 @@
       GENERAL_PHOTOS.map((p) => `<img src="${p.image}" alt="" title="圖片來源：${escapeHtml(p.credit)}" loading="lazy" />`).join("");
 
     document.getElementById("township-buttons").innerHTML = TOWNSHIPS.map((t) => `
-      <a class="township-button" href="township.html?id=${t.id}" style="--tb-color: ${TOWNSHIP_COLORS[t.id]}">${t.name}</a>
+      <a class="township-button" data-township="${t.id}" href="township.html?id=${t.id}" style="--tb-color: ${TOWNSHIP_COLORS[t.id]}">${t.name}</a>
     `).join("");
+    wireTownshipButtonHover();
   </script>
 </body>
 </html>
