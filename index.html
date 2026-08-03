@@ -1,61 +1,70 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-Hant">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>澎湖縣社區運動資源查詢</title>
-  <link rel="stylesheet" href="css/style.css" />
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-  <script src="js/firebase-config.js"></script>
-  <script src="js/data.js"></script>
-  <script src="js/auth.js"></script>
-  <script src="js/common.js"></script>
-  <script src="js/map-data.js"></script>
-  <script src="js/highlights.js"></script>
-</head>
-<body>
-  <div id="nav"></div>
-  <main>
-    <div class="photo-strip" id="photo-strip"></div>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>澎湖縣三力運動地圖 - 「滾動三力學」正在澎湖不同社區持續滾動。透過地圖尋找鄰近的課程據點，查看上課時間、招生狀態與聯絡方式，一起加入動身體、想策略、交朋友的健康行列。</title>
+    <link rel="stylesheet" href="css/style.css" />
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+    <script src="js/firebase-config.js"></script>
+    <script src="js/data.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/common.js"></script>
+    <script src="js/map-data.js"></script>
+    <script src="js/highlights.js"></script>
+  </head>
+  <body>
+    <div id="nav"></div>
+    <main>
+      <div class="photo-strip" id="photo-strip"></div>
 
-    <h1>澎湖縣社區運動資源查詢</h1>
-    <p class="hint-text">請點選地圖上的鄉鎮，或直接點下面的鄉鎮名稱</p>
+      <h1>澎湖縣三力運動地圖</h1>
+      <p class="hint-text">
+        「滾動三力學」正在澎湖不同社區持續滾動。透過地圖尋找鄰近的課程據點，查看上課時間、招生狀態與聯絡方式，一起加入動身體、想策略、交朋友的健康行列。
+      </p>
+      <p class="hint-text">請點選地圖上的鄉鎮，或直接點下面的鄉鎮名稱</p>
 
-    <div class="font-size-controls">
-      <span>字體大小：</span>
-      <button onclick="setFontSize('')">標準</button>
-      <button onclick="setFontSize('text-large')">大</button>
-      <button onclick="setFontSize('text-xlarge')">特大</button>
-    </div>
-
-    <div class="map-container">
-      <div class="map-wrap" id="map"></div>
-      <div class="map-insets">
-        <div class="map-inset" id="inset-wangan"></div>
-        <div class="map-inset" id="inset-qimei"></div>
+      <div class="font-size-controls">
+        <span>字體大小：</span>
+        <button onclick="setFontSize('')">標準</button>
+        <button onclick="setFontSize('text-large')">大</button>
+        <button onclick="setFontSize('text-xlarge')">特大</button>
       </div>
-    </div>
-    <p class="hint-text inset-note">望安、七美離本島較遠，用縮圖顯示在左上角方便點選，位置非實際方位</p>
 
-    <div class="township-buttons" id="township-buttons"></div>
-  </main>
+      <div class="map-container">
+        <div class="map-wrap" id="map"></div>
+        <div class="map-insets">
+          <div class="map-inset" id="inset-wangan"></div>
+          <div class="map-inset" id="inset-qimei"></div>
+        </div>
+      </div>
+      <p class="hint-text inset-note">
+        望安、七美離本島較遠，用縮圖顯示在左上角方便點選，位置非實際方位
+      </p>
 
-  <script>
-    // 望安、七美跟本島距離很遠，共用一張地圖會讓它們變得非常小；
-    // 本島（馬公/湖西/白沙/西嶼）畫大地圖，望安、七美改成左上角的放大鏡縮圖
-    renderPenghuMap("map", ["magong", "huxi", "baisha", "xiyu"]);
-    renderMapInset("inset-wangan", "wangan");
-    renderMapInset("inset-qimei", "qimei");
+      <div class="township-buttons" id="township-buttons"></div>
+    </main>
 
-    document.getElementById("photo-strip").innerHTML =
-      GENERAL_PHOTOS.map((p) => `<img src="${p.image}" alt="" title="圖片來源：${escapeHtml(p.credit)}" loading="lazy" />`).join("");
+    <script>
+      // 望安、七美跟本島距離很遠，共用一張地圖會讓它們變得非常小；
+      // 本島（馬公/湖西/白沙/西嶼）畫大地圖，望安、七美改成左上角的放大鏡縮圖
+      renderPenghuMap("map", ["magong", "huxi", "baisha", "xiyu"]);
+      renderMapInset("inset-wangan", "wangan");
+      renderMapInset("inset-qimei", "qimei");
 
-    document.getElementById("township-buttons").innerHTML = TOWNSHIPS.map((t) => `
+      document.getElementById("photo-strip").innerHTML = GENERAL_PHOTOS.map(
+        (p) =>
+          `<img src="${p.image}" alt="" title="圖片來源：${escapeHtml(p.credit)}" loading="lazy" />`,
+      ).join("");
+
+      document.getElementById("township-buttons").innerHTML = TOWNSHIPS.map(
+        (t) => `
       <a class="township-button" data-township="${t.id}" href="township.html?id=${t.id}" style="--tb-color: ${TOWNSHIP_COLORS[t.id]}">${t.name}</a>
-    `).join("");
-    wireTownshipButtonHover();
-  </script>
-</body>
+    `,
+      ).join("");
+      wireTownshipButtonHover();
+    </script>
+  </body>
 </html>
