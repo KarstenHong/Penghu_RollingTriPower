@@ -61,7 +61,7 @@
               <p>地址：${escapeHtml(venue.address)}</p>
               <p>電話：${escapeHtml(venue.phone)}</p>
               <p>運動項目：${sportLine}</p>
-              ${relatedCourses.map((c) => `<p class="course-line">課程時間：${escapeHtml(c.schedule)}｜${escapeHtml(c.description)}</p>`).join("")}
+              ${relatedCourses.map(renderCourseCard).join("")}
             </div>
           `;
         }).join("") + "</div>";

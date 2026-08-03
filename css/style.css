@@ -362,6 +362,25 @@ svg text {
 
 .venue-type { font-size: 0.85em; color: #666; }
 
+.course-card { border-top: 1px dashed #ddd; margin-top: 0.6rem; padding-top: 0.6rem; }
+.course-line { margin: 0 0 0.3rem; }
+.course-detail-line { font-size: 0.9em; color: #555; margin: 0.15rem 0; }
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.15rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.85em;
+  font-weight: bold;
+  background: color-mix(in srgb, var(--status-color) 15%, white);
+  color: var(--status-color);
+  border: 1.5px solid var(--status-color);
+  margin-right: 0.5rem;
+  vertical-align: middle;
+}
+
 .favorite-toggle {
   background: none;
   border: none;

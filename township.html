@@ -139,7 +139,7 @@
             <p>地址：${escapeHtml(v.address)}</p>
             <p>電話：${escapeHtml(v.phone)}</p>
             <p>運動項目：${(v.sportTypes || []).map(sportName).join("、")}</p>
-            ${venueCourses.map((c) => `<p class="course-line">課程時間：${escapeHtml(c.schedule)}｜${escapeHtml(c.description)}</p>`).join("")}
+            ${venueCourses.map(renderCourseCard).join("")}
           </div>`;
       });
       html += "</div>";
