@@ -26,7 +26,7 @@ h1 {
 h2 { font-size: 1.4em; color: #0a5c78; }
 
 main {
-  max-width: 900px;
+  max-width: 1200px;
   margin: 1.5rem auto 3rem;
   padding: 1.5rem 2rem 2.5rem;
   background: white;
@@ -172,7 +172,7 @@ main {
 
 .map-container {
   position: relative;
-  max-width: 620px;
+  max-width: 900px;
   margin: 0 auto;
 }
 
@@ -271,7 +271,8 @@ main {
 }
 
   .township-shape:hover,
-  .township-shape:focus {
+  .township-shape:focus,
+  .township-shape.highlight {
     opacity: 0.8;
     filter: brightness(1.15);
     outline: none;
@@ -284,6 +285,34 @@ main {
 .map-marker-badge {
   filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.35));
 }
+
+.map-marker-hit {
+  cursor: pointer;
+  transition: opacity 0.15s ease;
+}
+
+  .map-marker-hit:hover,
+  .map-marker-hit:focus {
+    opacity: 0.75;
+    outline: none;
+  }
+
+.marker-tooltip {
+  position: fixed;
+  z-index: 50;
+  background: white;
+  border: 2px solid #14919b;
+  border-radius: 10px;
+  padding: 0.6rem 0.9rem;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  box-shadow: 0 8px 22px rgba(10, 92, 120, 0.3);
+  pointer-events: none;
+  max-width: 240px;
+}
+
+  .marker-tooltip[hidden] { display: none; }
+  .marker-tooltip strong { color: #0a5c78; }
 
 svg text {
   font-size: 20px;
