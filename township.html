@@ -23,7 +23,7 @@
     <a href="index.html" class="back-button">&larr; 返回地圖</a>
     <h1 id="township-title"></h1>
 
-    <p class="hint-text">滑鼠移到地圖上的圖示可以看簡要資訊，點擊圖示可以看完整介紹</p>
+    <p class="hint-text" id="marker-hint"></p>
 
     <div class="map-wrap" id="township-map"></div>
     <p class="hint-text" id="empty-hint" style="display: none;">目前這個鄉鎮還沒有資料。</p>
@@ -43,6 +43,15 @@
 
     let venues = [];
     let courses = [];
+
+    // 觸控裝置沒有滑鼠懸停，改成「點第一下看簡要資訊、點第二下（同一個圖示）才進入完整介紹」，
+    // 避免一點就直接跳頁、還沒看到簡要資訊
+    const canHover = window.matchMedia("(hover: hover)").matches;
+    let activeTouchMarker = null;
+
+    document.getElementById("marker-hint").textContent = canHover
+      ? "滑鼠移到地圖上的圖示可以看簡要資訊，點擊圖示可以看完整介紹"
+      : "點一下圖示可以看簡要資訊，再點一次同一個圖示可以看完整介紹";
 
     async function init() {
       renderTownshipMap("township-map", townshipId);
@@ -96,12 +105,31 @@
         const sport = marker.dataset.sport;
         const go = () => { location.href = `venue-detail.html?venue=${encodeURIComponent(venueId)}&sport=${encodeURIComponent(sport)}`; };
 
-        marker.addEventListener("mouseenter", (e) => showMarkerTooltip(e, venueId, sport));
-        marker.addEventListener("mousemove", moveMarkerTooltip);
-        marker.addEventListener("mouseleave", hideMarkerTooltip);
-        marker.addEventListener("click", go);
+        if (canHover) {
+          marker.addEventListener("mouseenter", (e) => showMarkerTooltip(e, venueId, sport));
+          marker.addEventListener("mousemove", moveMarkerTooltip);
+          marker.addEventListener("mouseleave", hideMarkerTooltip);
+          marker.addEventListener("click", go);
+        } else {
+          marker.addEventListener("click", (e) => {
+            if (activeTouchMarker === marker) { go(); return; }
+            e.preventDefault();
+            activeTouchMarker = marker;
+            showMarkerTooltip(e, venueId, sport);
+          });
+        }
+
         marker.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") go(); });
       });
+
+      if (!canHover) {
+        document.addEventListener("click", (e) => {
+          if (activeTouchMarker && !e.target.closest(".map-marker-hit")) {
+            activeTouchMarker = null;
+            hideMarkerTooltip();
+          }
+        });
+      }
     }
 
     function showMarkerTooltip(e, venueId, sport) {
@@ -126,6 +154,11 @@
       const pad = 16;
       tooltip.style.left = e.clientX + pad + "px";
       tooltip.style.top = e.clientY + pad + "px";
+
+      // 手機螢幕窄，圖釘靠邊時 tooltip 往右/往下開會被切掉，改往左/往上開
+      const rect = tooltip.getBoundingClientRect();
+      if (rect.right > window.innerWidth) tooltip.style.left = e.clientX - rect.width - pad + "px";
+      if (rect.bottom > window.innerHeight) tooltip.style.top = e.clientY - rect.height - pad + "px";
     }
 
     function hideMarkerTooltip() {
