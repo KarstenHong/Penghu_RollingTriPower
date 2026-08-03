@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>成果與資源／聯絡我們 - 澎湖縣社區運動資源查詢</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+  <script src="js/firebase-config.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/common.js"></script>
+</head>
+<body>
+  <div id="nav"></div>
+  <main>
+    <h1>成果與資源</h1>
+    <p class="hint-text">長輩們參加社區運動的精彩紀錄</p>
+    <div id="gallery-content"><p>載入中...</p></div>
+
+    <h1 style="margin-top: 2.5rem;">聯絡我們</h1>
+    <div id="contact-content"><p>載入中...</p></div>
+  </main>
+
+  <script>
+    let photos = [];
+
+    async function initGallery() {
+      photos = await getAll("gallery");
+      photos.sort((a, b) => (b.date || "").localeCompare(a.date || ""));
+
+      const el = document.getElementById("gallery-content");
+      if (!photos.length) {
+        el.innerHTML = '<p class="hint-text">目前還沒有成果照片，敬請期待。</p>';
+        return;
+      }
+
+      el.innerHTML = '<div class="gallery-grid">' + photos.map((p, i) => `
+        <button type="button" class="gallery-thumb" onclick="openPhoto(${i})">
+          <img src="${escapeHtml(p.imageUrl)}" alt="" loading="lazy" />
+          ${p.caption ? `<span class="gallery-caption">${escapeHtml(p.caption)}</span>` : ""}
+        </button>
+      `).join("") + "</div>";
+    }
+
+    function openPhoto(i) {
+      const p = photos[i];
+      const overlay = document.createElement("div");
+      overlay.className = "confirm-overlay";
+      overlay.innerHTML = `
+        <div class="lightbox-dialog">
+          <img src="${escapeHtml(p.imageUrl)}" alt="" />
+          ${p.caption ? `<p>${escapeHtml(p.caption)}</p>` : ""}
+          ${p.date ? `<p class="post-date">${escapeHtml(p.date)}</p>` : ""}
+          <button type="button" class="secondary-button" data-close>關閉</button>
+        </div>
+      `;
+      document.body.appendChild(overlay);
+
+      function close() { overlay.remove(); document.removeEventListener("keydown", onKeydown); }
+      function onKeydown(e) { if (e.key === "Escape") close(); }
+
+      overlay.addEventListener("click", (e) => {
+        if (e.target === overlay || e.target.closest("[data-close]")) close();
+      });
+      document.addEventListener("keydown", onKeydown);
+    }
+
+    async function initContact() {
+      const associations = await getAll("associations");
+      const el = document.getElementById("contact-content");
+
+      if (!associations.length) {
+        el.innerHTML = '<p class="hint-text">目前沒有聯絡資料。</p>';
+        return;
+      }
+
+      const groups = {};
+      associations.forEach((a) => {
+        (groups[a.township] = groups[a.township] || []).push(a);
+      });
+
+      let html = "";
+      Object.keys(groups).forEach((townshipId) => {
+        html += `<h2>${townshipName(townshipId)}</h2><div class="venue-list">`;
+        groups[townshipId].forEach((a) => {
+          html += `
+            <div class="venue-card">
+              <h3>${escapeHtml(a.name)}</h3>
+              <p>電話：${escapeHtml(a.phone)}</p>
+              <p>地址：${escapeHtml(a.address)}</p>
+            </div>`;
+        });
+        html += "</div>";
+      });
+      el.innerHTML = html;
+    }
+
+    initGallery();
+    initContact();
+  </script>
+</body>
+</html>

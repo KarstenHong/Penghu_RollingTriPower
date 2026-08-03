@@ -81,20 +81,62 @@ function sportIcon(id) {
   return SPORT_TYPES.find((s) => s.id === id)?.icon || "";
 }
 
+// 課程招生狀態，固定 6 種（客戶「三力運動地圖」規格指定），不像運動項目那樣需要後台新增，所以直接寫死；
+// 規格要求不能只靠顏色辨識，所以每個狀態都同時有文字跟圖示（多數用圓點，體驗活動用星形跟其他狀態明顯不同）
+const COURSE_STATUS = {
+  enrolling: { label: "招生中", color: "#2a9d5f", icon: "●" },
+  upcoming: { label: "即將開課", color: "#457b9d", icon: "●" },
+  ongoing: { label: "課程進行中", color: "#f4a261", icon: "●" },
+  full: { label: "本期額滿", color: "#c0392b", icon: "●" },
+  paused: { label: "暫停招生", color: "#6c757d", icon: "●" },
+  trial: { label: "單次體驗", color: "#e9c46a", icon: "★" },
+};
+
+// 據點卡片裡的課程資訊卡：狀態徽章＋時間說明是基本欄位，其餘（課程期間、對象、指導團隊…）是選填欄位，
+// 只有後台實際填了才會顯示那一行，舊資料沒有這些欄位時畫面不會出現一堆空白列
+function renderCourseCard(c) {
+  const status = COURSE_STATUS[c.status];
+  const detailRows = [
+    ["課程期間", c.startDate && c.endDate ? `${c.startDate} 至 ${c.endDate}` : ""],
+    ["適合對象", c.targetAudience],
+    ["指導團隊", c.instructorTeam],
+    ["是否收費", c.fee],
+    ["報名方式", c.registrationMethod],
+    ["無障礙資訊", c.accessibilityInfo],
+    ["其他提醒", c.otherNotes],
+  ].filter(([, value]) => value);
+
+  return `
+    <div class="course-card">
+      <p class="course-line">
+        ${status ? `<span class="status-badge" style="--status-color: ${status.color}">${status.icon} ${escapeHtml(status.label)}</span>` : ""}
+        課程時間：${escapeHtml(c.schedule)}｜${escapeHtml(c.description)}
+      </p>
+      ${detailRows.map(([label, value]) => `<p class="course-detail-line">${label}：${escapeHtml(value)}</p>`).join("")}
+    </div>
+  `;
+}
+
 function venueTypeName(id) {
   return VENUE_TYPES.find((v) => v.id === id)?.name || id;
 }
 
 // ---- 導覽列 ----
 
+// 頁籤文字＋順序照客戶「網頁建置.xlsx」的「上方標題」工作表。
+// H、I 兩欄客戶確認是「兩個標題合成一個頁籤」：成果與資源／聯絡我們共用一頁，關於我們／方案評估平台共用一頁，
+// 頁籤文字把兩個標題都放出來，實際頁面裡也是兩個段落都顯示（見 results-contact.html、about-evaluation.html）。
+// 常見問題／社區活動查詢／活動資訊這幾頁客戶的新規劃裡沒有列在頁籤上，頁面本身還在，只是先不放進導覽列。
 const NAV_LINKS = [
   { href: "index.html", label: "首頁" },
+  { href: "about-program.html", label: "認識三力學" },
+  { href: "course-benefits.html", label: "課程效益" },
+  { href: "sports-map.html", label: "三力運動地圖" },
+  { href: "join-course.html", label: "參與課程" },
+  { href: "join-team.html", label: "加入指導團隊" },
   { href: "posts.html?category=news", label: "最新消息" },
-  { href: "posts.html?category=event", label: "活動資訊" },
-  { href: "search.html", label: "社區活動查詢" },
-  { href: "gallery.html", label: "活動成果集" },
-  { href: "faq.html", label: "常見問題" },
-  { href: "contact.html", label: "聯絡我們" },
+  { href: "results-contact.html", label: "成果與資源／聯絡我們" },
+  { href: "about-evaluation.html", label: "關於我們／方案評估平台" },
 ];
 
 // 每個網頁都是獨立的頁面（沒有用單頁式框架），每次點連結都會整頁重新載入，

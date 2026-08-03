@@ -36,7 +36,11 @@
     }
 
     function newCourse() {
-      editing = { venueId: "", sportType: "", schedule: "", description: "" };
+      editing = {
+        venueId: "", sportType: "", schedule: "", description: "",
+        status: "enrolling", startDate: "", endDate: "", targetAudience: "",
+        instructorTeam: "", fee: "", registrationMethod: "", accessibilityInfo: "", otherNotes: "",
+      };
       render();
     }
 
@@ -56,6 +60,15 @@
       editing.sportType = document.getElementById("f-sport").value;
       editing.schedule = document.getElementById("f-schedule").value;
       editing.description = document.getElementById("f-description").value;
+      editing.status = document.getElementById("f-status").value;
+      editing.startDate = document.getElementById("f-start-date").value;
+      editing.endDate = document.getElementById("f-end-date").value;
+      editing.targetAudience = document.getElementById("f-audience").value;
+      editing.instructorTeam = document.getElementById("f-instructors").value;
+      editing.fee = document.getElementById("f-fee").value;
+      editing.registrationMethod = document.getElementById("f-registration").value;
+      editing.accessibilityInfo = document.getElementById("f-accessibility").value;
+      editing.otherNotes = document.getElementById("f-notes").value;
       editing.iconKey = editing.sportType;
 
       if (editing.id) {
@@ -70,13 +83,14 @@
     function render() {
       let html = `
         <div class="table-scroll"><table class="admin-table">
-          <thead><tr><th>場域</th><th>運動類型</th><th>時間</th><th></th></tr></thead>
+          <thead><tr><th>場域</th><th>運動類型</th><th>時間</th><th>招生狀態</th><th></th></tr></thead>
           <tbody>
             ${courses.map((c) => `
               <tr>
                 <td>${escapeHtml(venueName(c.venueId))}</td>
                 <td>${sportName(c.sportType)}</td>
                 <td>${escapeHtml(c.schedule)}</td>
+                <td>${COURSE_STATUS[c.status] ? escapeHtml(COURSE_STATUS[c.status].label) : ""}</td>
                 <td>
                   <button onclick="editCourse('${c.id}')">編輯</button>
                   <button onclick="deleteCourse('${c.id}')">刪除</button>
@@ -105,6 +119,19 @@
             </label>
             <label>上課時間 <input type="text" id="f-schedule" value="${escapeHtml(editing.schedule)}" placeholder="例如：每週二、四 09:00-10:00" /></label>
             <label>說明 <textarea id="f-description">${escapeHtml(editing.description)}</textarea></label>
+            <label>招生狀態
+              <select id="f-status">
+                ${Object.entries(COURSE_STATUS).map(([key, s]) => `<option value="${key}" ${editing.status === key ? "selected" : ""}>${s.icon} ${s.label}</option>`).join("")}
+              </select>
+            </label>
+            <label>課程期間開始 <input type="date" id="f-start-date" value="${escapeHtml(editing.startDate || "")}" /></label>
+            <label>課程期間結束 <input type="date" id="f-end-date" value="${escapeHtml(editing.endDate || "")}" /></label>
+            <label>適合對象（選填） <input type="text" id="f-audience" value="${escapeHtml(editing.targetAudience || "")}" placeholder="例如：65歲以上社區長者" /></label>
+            <label>指導團隊（選填） <input type="text" id="f-instructors" value="${escapeHtml(editing.instructorTeam || "")}" placeholder="例如：王老師、李協助員" /></label>
+            <label>是否收費（選填） <input type="text" id="f-fee" value="${escapeHtml(editing.fee || "")}" placeholder="例如：免費" /></label>
+            <label>報名方式（選填） <input type="text" id="f-registration" value="${escapeHtml(editing.registrationMethod || "")}" placeholder="例如：電話報名／線上報名" /></label>
+            <label>無障礙資訊（選填） <input type="text" id="f-accessibility" value="${escapeHtml(editing.accessibilityInfo || "")}" placeholder="例如：輪椅可進入／設有無障礙廁所" /></label>
+            <label>其他提醒（選填） <textarea id="f-notes">${escapeHtml(editing.otherNotes || "")}</textarea></label>
             <button type="submit" class="primary-button">儲存</button>
             <button type="button" class="secondary-button" onclick="editing = null; render();">取消</button>
           </form>
