@@ -64,6 +64,7 @@
 
     function render() {
       document.getElementById("content").innerHTML = `
+        <button class="primary-button" onclick="newPost()" style="display: block; margin: 0.8rem 0 1.2rem;">+ 新增公告</button>
         <div class="table-scroll"><table class="admin-table">
           <thead><tr><th>分類</th><th>標題</th><th>日期</th><th></th></tr></thead>
           <tbody>
@@ -80,7 +81,6 @@
             `).join("")}
           </tbody>
         </table></div>
-        <button class="primary-button" onclick="newPost()">+ 新增公告</button>
       `;
 
       if (!editing) { renderEditModal(null); return; }

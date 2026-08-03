@@ -63,6 +63,7 @@
 
     function render() {
       document.getElementById("content").innerHTML = `
+        <button class="primary-button" onclick="newPhoto()" style="display: block; margin: 0.8rem 0 1.2rem;">+ 新增照片</button>
         <div class="table-scroll"><table class="admin-table">
           <thead><tr><th>照片</th><th>說明</th><th>日期</th><th></th></tr></thead>
           <tbody>
@@ -79,7 +80,6 @@
             `).join("")}
           </tbody>
         </table></div>
-        <button class="primary-button" onclick="newPhoto()">+ 新增照片</button>
       `;
 
       if (!editing) { renderEditModal(null); return; }

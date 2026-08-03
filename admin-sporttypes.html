@@ -70,7 +70,7 @@
     }
 
     function render() {
-      let html = "";
+      let html = `<button class="primary-button" onclick="newSport()" style="display: block; margin: 0.8rem 0 1.2rem;">+ 新增運動項目</button>`;
 
       if (!sportTypes.length) {
         html += `
@@ -97,8 +97,6 @@
           </table></div>
         `;
       }
-
-      html += `<button class="primary-button" onclick="newSport()">+ 新增運動項目</button>`;
 
       document.getElementById("content").innerHTML = html;
 
