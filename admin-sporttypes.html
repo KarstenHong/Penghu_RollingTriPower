@@ -100,21 +100,20 @@
 
       html += `<button class="primary-button" onclick="newSport()">+ 新增運動項目</button>`;
 
-      if (editing) {
-        html += `
-          <form class="member-form" id="sport-form">
-            <label>名稱 <input type="text" id="f-name" value="${escapeHtml(editing.name)}" required /></label>
-            <label>圖示網址（選填，留空使用預設圖示） <input type="text" id="f-icon" value="${escapeHtml(editing.icon || "")}" /></label>
-            <button type="submit" class="primary-button">儲存</button>
-            <button type="button" class="secondary-button" onclick="editing = null; render();">取消</button>
-          </form>
-        `;
-      }
-
       document.getElementById("content").innerHTML = html;
-      if (editing) {
-        document.getElementById("sport-form").addEventListener("submit", saveSport);
-      }
+
+      if (!editing) { renderEditModal(null); return; }
+
+      renderEditModal(`
+        <form class="member-form" id="sport-form">
+          <label>名稱 <input type="text" id="f-name" value="${escapeHtml(editing.name)}" required /></label>
+          <label>圖示網址（選填，留空使用預設圖示） <input type="text" id="f-icon" value="${escapeHtml(editing.icon || "")}" /></label>
+          <button type="submit" class="primary-button">儲存</button>
+          <button type="button" class="secondary-button" onclick="editing = null; render();">取消</button>
+        </form>
+      `, () => { editing = null; render(); });
+
+      document.getElementById("sport-form").addEventListener("submit", saveSport);
     }
 
     requireAdmin(() => reload());
