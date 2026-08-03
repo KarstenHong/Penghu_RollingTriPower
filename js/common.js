@@ -233,7 +233,7 @@ function setCachedAuth(value) {
 }
 
 function authLinksHtml(role) {
-  let html = `<a href="profile.html">會員資料</a><a href="favorites.html">我的最愛</a>`;
+  let html = "";
   if (role === "admin") {
     html += `<a href="admin.html">後台維護</a>`;
   }
@@ -319,13 +319,13 @@ function renderNav() {
     authEl.innerHTML = authLinksHtml(cached.role);
     wireLogoutButton();
   } else {
-    authEl.innerHTML = `<a href="login.html" class="nav-cta">會員登入 / 註冊</a>`;
+    authEl.innerHTML = `<a href="login.html">管理者登入</a>`;
   }
 
   onAuthReady(async (user) => {
     if (!user) {
       setCachedAuth(null);
-      authEl.innerHTML = `<a href="login.html" class="nav-cta">會員登入 / 註冊</a>`;
+      authEl.innerHTML = `<a href="login.html">管理者登入</a>`;
       return;
     }
     const profile = await getById("users", user.uid);
