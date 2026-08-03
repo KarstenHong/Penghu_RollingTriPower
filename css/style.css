@@ -624,6 +624,26 @@ svg text {
     border-radius: 8px;
   }
 
+/* 三力運動地圖：找不到符合篩選條件的據點時，改顯示「還沒開課」呼籲區塊 */
+
+.map-cta {
+  margin-top: 1rem;
+  padding: 1.5rem;
+  background: linear-gradient(135deg, #e3f4fb 0%, #fdf6ea 100%);
+  border-radius: 16px;
+  text-align: center;
+}
+
+  .map-cta h3 { margin-top: 0; color: #0a5c78; }
+
+.map-cta-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+  justify-content: center;
+  margin-top: 1rem;
+}
+
 /* 後台管理 */
 
 .admin-nav { list-style: none; padding: 0; display: flex; flex-direction: column; gap: 0.75rem; }

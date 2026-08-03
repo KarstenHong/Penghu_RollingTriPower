@@ -14,14 +14,49 @@ const TOWNSHIPS = [
 // id 沿用原本的值，是因為既有的據點／課程資料裡已經存了這些 id 字串（例如 sportType: "taichi"），
 // 沿用才能讓舊資料繼續對得上，不用另外寫資料搬遷程式。
 const DEFAULT_SPORT_TYPES = [
-  { id: "taichi", name: "太極拳", icon: "images/icons/taichi.svg", active: true },
-  { id: "folkdance", name: "土風舞", icon: "images/icons/folkdance.svg", active: true },
-  { id: "croquet", name: "槌球", icon: "images/icons/croquet.svg", active: true },
-  { id: "tabletennis", name: "桌球", icon: "images/icons/tabletennis.svg", active: true },
-  { id: "badminton", name: "羽球", icon: "images/icons/badminton.svg", active: true },
-  { id: "aerobics", name: "有氧運動", icon: "images/icons/aerobics.svg", active: true },
+  {
+    id: "taichi",
+    name: "太極拳",
+    icon: "images/icons/taichi.svg",
+    active: true,
+  },
+  {
+    id: "folkdance",
+    name: "土風舞",
+    icon: "images/icons/folkdance.svg",
+    active: true,
+  },
+  {
+    id: "croquet",
+    name: "槌球",
+    icon: "images/icons/croquet.svg",
+    active: true,
+  },
+  {
+    id: "tabletennis",
+    name: "桌球",
+    icon: "images/icons/tabletennis.svg",
+    active: true,
+  },
+  {
+    id: "badminton",
+    name: "羽球",
+    icon: "images/icons/badminton.svg",
+    active: true,
+  },
+  {
+    id: "aerobics",
+    name: "有氧運動",
+    icon: "images/icons/aerobics.svg",
+    active: true,
+  },
   { id: "yoga", name: "瑜珈", icon: "images/icons/yoga.svg", active: true },
-  { id: "walking", name: "健走", icon: "images/icons/walking.svg", active: true },
+  {
+    id: "walking",
+    name: "健走",
+    icon: "images/icons/walking.svg",
+    active: true,
+  },
 ];
 
 // 目前已載入的運動項目（含已下架的，下架只是不再讓人「新選」，舊資料的名稱/圖示仍要能查到）。
@@ -35,13 +70,24 @@ async function loadSportTypes() {
 // 給「新增/勾選」用的清單：只列上架中的項目；如果某個項目已下架但目前這筆資料本來就有選，
 // 照樣要出現在清單裡（傳 keepIds 進來），不然使用者原本的選擇會在下次儲存時被悄悄清掉
 function activeSportTypes(keepIds = []) {
-  return SPORT_TYPES.filter((s) => s.active !== false || keepIds.includes(s.id));
+  return SPORT_TYPES.filter(
+    (s) => s.active !== false || keepIds.includes(s.id),
+  );
 }
 
 const VENUE_TYPES = [
   { id: "community_center", name: "社區活動中心" },
   { id: "association", name: "社區協會" },
   { id: "health_center", name: "衛生所" },
+];
+
+// 上課時段（三力運動地圖規格的搜尋篩選要用），課程的上課時間本身是自由填寫的文字（例如「每週三14:00-16:00」），
+// 沒辦法直接拿來篩選，所以另外加這個結構化欄位讓後台填課程時額外選一個時段
+const TIME_SLOTS = [
+  { id: "weekday-morning", name: "平日上午" },
+  { id: "weekday-afternoon", name: "平日下午" },
+  { id: "weekday-evening", name: "平日晚間" },
+  { id: "weekend", name: "假日" },
 ];
 
 // 把 Firestore 裡的文字（據點名稱、公告內容等）安全地插進 innerHTML 或 HTML 屬性，避免 XSS
@@ -58,9 +104,32 @@ function escapeHtml(text) {
 function isValidTaiwanId(id) {
   if (!/^[A-Z][12]\d{8}$/.test(id)) return false;
   const letterValues = {
-    A: 10, B: 11, C: 12, D: 13, E: 14, F: 15, G: 16, H: 17, I: 34, J: 18,
-    K: 19, L: 20, M: 21, N: 22, O: 35, P: 23, Q: 24, R: 25, S: 26, T: 27,
-    U: 28, V: 29, W: 32, X: 30, Y: 31, Z: 33,
+    A: 10,
+    B: 11,
+    C: 12,
+    D: 13,
+    E: 14,
+    F: 15,
+    G: 16,
+    H: 17,
+    I: 34,
+    J: 18,
+    K: 19,
+    L: 20,
+    M: 21,
+    N: 22,
+    O: 35,
+    P: 23,
+    Q: 24,
+    R: 25,
+    S: 26,
+    T: 27,
+    U: 28,
+    V: 29,
+    W: 32,
+    X: 30,
+    Y: 31,
+    Z: 33,
   };
   const n = String(letterValues[id[0]]);
   const digits = [n[0], n[1], ...id.slice(1).split("")].map(Number);
@@ -97,7 +166,10 @@ const COURSE_STATUS = {
 function renderCourseCard(c) {
   const status = COURSE_STATUS[c.status];
   const detailRows = [
-    ["課程期間", c.startDate && c.endDate ? `${c.startDate} 至 ${c.endDate}` : ""],
+    [
+      "課程期間",
+      c.startDate && c.endDate ? `${c.startDate} 至 ${c.endDate}` : "",
+    ],
     ["適合對象", c.targetAudience],
     ["指導團隊", c.instructorTeam],
     ["是否收費", c.fee],
@@ -129,12 +201,12 @@ function venueTypeName(id) {
 // 常見問題／社區活動查詢／活動資訊這幾頁客戶的新規劃裡沒有列在頁籤上，頁面本身還在，只是先不放進導覽列。
 const NAV_LINKS = [
   { href: "index.html", label: "首頁" },
+  { href: "posts.html?category=news", label: "最新消息" },
   { href: "about-program.html", label: "認識三力學" },
   { href: "course-benefits.html", label: "課程效益" },
   { href: "sports-map.html", label: "三力運動地圖" },
   { href: "join-course.html", label: "參與課程" },
   { href: "join-team.html", label: "加入指導團隊" },
-  { href: "posts.html?category=news", label: "最新消息" },
   { href: "results-contact.html", label: "成果與資源／聯絡我們" },
   { href: "about-evaluation.html", label: "關於我們／方案評估平台" },
 ];
@@ -170,18 +242,26 @@ function authLinksHtml(role) {
 }
 
 function wireLogoutButton() {
-  document.getElementById("nav-logout")?.addEventListener("click", async (e) => {
-    e.preventDefault();
-    const confirmed = await showConfirmDialog("確定要登出嗎？", { confirmLabel: "登出", danger: true });
-    if (!confirmed) return;
-    await logoutUser();
-    setCachedAuth(null);
-    location.href = "index.html";
-  });
+  document
+    .getElementById("nav-logout")
+    ?.addEventListener("click", async (e) => {
+      e.preventDefault();
+      const confirmed = await showConfirmDialog("確定要登出嗎？", {
+        confirmLabel: "登出",
+        danger: true,
+      });
+      if (!confirmed) return;
+      await logoutUser();
+      setCachedAuth(null);
+      location.href = "index.html";
+    });
 }
 
 // 自訂確認視窗，樣式跟網站風格一致（取代原生 confirm()，長輩看的字級/按鈕大小也比較一致）
-function showConfirmDialog(message, { confirmLabel = "確定", cancelLabel = "取消", danger = false } = {}) {
+function showConfirmDialog(
+  message,
+  { confirmLabel = "確定", cancelLabel = "取消", danger = false } = {},
+) {
   return new Promise((resolve) => {
     const overlay = document.createElement("div");
     overlay.className = "confirm-overlay";
@@ -209,8 +289,12 @@ function showConfirmDialog(message, { confirmLabel = "確定", cancelLabel = "�
     overlay.addEventListener("click", (e) => {
       if (e.target === overlay) close(false);
     });
-    overlay.querySelector('[data-action="cancel"]').addEventListener("click", () => close(false));
-    overlay.querySelector('[data-action="confirm"]').addEventListener("click", () => close(true));
+    overlay
+      .querySelector('[data-action="cancel"]')
+      .addEventListener("click", () => close(false));
+    overlay
+      .querySelector('[data-action="confirm"]')
+      .addEventListener("click", () => close(true));
     document.addEventListener("keydown", onKeydown);
   });
 }
@@ -219,7 +303,9 @@ function renderNav() {
   const el = document.getElementById("nav");
   if (!el) return;
 
-  const links = NAV_LINKS.map((l) => `<a href="${l.href}">${l.label}</a>`).join("");
+  const links = NAV_LINKS.map((l) => `<a href="${l.href}">${l.label}</a>`).join(
+    "",
+  );
   el.innerHTML = `
     <div class="nav-bar">
       <a class="nav-brand" href="index.html">澎湖縣社區運動資源查詢</a>
