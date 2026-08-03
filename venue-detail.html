@@ -43,7 +43,7 @@
 
       el.innerHTML = `
         ${venue.photoUrl ? `<img class="venue-photo" src="${escapeHtml(venue.photoUrl)}" alt="" loading="lazy" />` : ""}
-        <h1>${escapeHtml(venue.name)} <span class="venue-type">(${venueTypeName(venue.type)})</span> <span class="fav-slot" data-venue="${encodeURIComponent(venue.id)}" ${sport ? `data-sport="${sport}"` : ""}></span></h1>
+        <h1>${escapeHtml(venue.name)} <span class="venue-type">(${venueTypeName(venue.type)})</span></h1>
         <p>所在地區：${townshipName(venue.township)}</p>
         <p>上課地點／地址：${escapeHtml(venue.address)}</p>
         <p>聯絡電話：${escapeHtml(venue.phone)}</p>
@@ -51,12 +51,9 @@
         <h2>課程資訊</h2>
         ${relatedCourses.length ? relatedCourses.map(renderCourseCard).join("") : '<p class="hint-text">目前這個據點還沒有課程資料。</p>'}
       `;
-
-      renderFavoriteToggles();
     }
 
     init();
   </script>
-  <script src="js/favorites-widget.js"></script>
 </body>
 </html>

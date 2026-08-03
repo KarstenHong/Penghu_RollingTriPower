@@ -410,15 +410,6 @@ svg text {
   vertical-align: middle;
 }
 
-.favorite-toggle {
-  background: none;
-  border: none;
-  font-size: 1.4rem;
-  color: #f4a261;
-  cursor: pointer;
-  vertical-align: middle;
-}
-
 /* 公告 / 常見問題 */
 
 .post-list { display: flex; flex-direction: column; gap: 1rem; }
@@ -767,7 +758,6 @@ svg text {
 @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
 @keyframes pop-in { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
 @keyframes gentle-zoom { from { transform: scale(1); } to { transform: scale(1.06); } }
-@keyframes heart-pop { 0% { transform: scale(1); } 40% { transform: scale(1.4); } 100% { transform: scale(1); } }
 
 .nav-bar { animation: fade-slide-down 0.5s ease-out; }
 main { animation: fade-slide-up 0.5s ease-out; }
@@ -795,7 +785,6 @@ main { animation: fade-slide-up 0.5s ease-out; }
   transform: scale(0.96);
 }
 
-.favorite-toggle:active { animation: heart-pop 0.3s ease; }
 .icon-button.selected { animation: pop-in 0.25s ease-out; }
 
 .confirm-overlay { animation: fade-in 0.2s ease-out; }

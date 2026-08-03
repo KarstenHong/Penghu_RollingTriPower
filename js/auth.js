@@ -1,19 +1,5 @@
-// Firebase Authentication 包裝（Email/Password）
-
-async function registerUser(email, password, name, birthDate, nationalId) {
-  const cred = await auth.createUserWithEmailAndPassword(email, password);
-  await setItem("users", cred.user.uid, {
-    name,
-    birthDate,
-    nationalId,
-    role: "user",
-    phone: "",
-    township: "",
-    favoriteSports: [],
-    favoriteVenueIds: [],
-  });
-  return cred.user;
-}
+// Firebase Authentication 包裝（Email/Password）。只有管理者需要登入，公開註冊功能已移除，
+// 新的管理者帳號要用 Firebase 主控台建立，再把 Firestore users/{uid} 的 role 設成 "admin"
 
 async function loginUser(email, password) {
   const cred = await auth.signInWithEmailAndPassword(email, password);
@@ -32,17 +18,6 @@ async function sendPasswordReset(email) {
 function onAuthReady(callback) {
   const unsubscribe = auth.onAuthStateChanged((user) => {
     unsubscribe();
-    callback(user);
-  });
-}
-
-// 需要登入才能看的頁面（會員資料、我的最愛）：沒登入就導回登入頁
-function requireLogin(callback) {
-  onAuthReady((user) => {
-    if (!user) {
-      location.href = "login.html";
-      return;
-    }
     callback(user);
   });
 }

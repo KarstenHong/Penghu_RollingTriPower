@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>會員登入 - 澎湖縣社區運動資源查詢</title>
+  <title>管理者登入 - 澎湖縣社區運動資源查詢</title>
   <link rel="stylesheet" href="css/style.css" />
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
@@ -16,7 +16,7 @@
 <body>
   <div id="nav"></div>
   <main>
-    <h1>會員登入</h1>
+    <h1>管理者登入</h1>
 
     <form class="member-form" id="login-form">
       <label>電子郵件 <input type="email" id="email" required /></label>
@@ -25,7 +25,6 @@
     </form>
 
     <p class="error-text" id="error" style="display: none;">登入失敗，請確認帳號密碼是否正確。</p>
-    <p>還沒有帳號嗎？<a href="register.html">立即註冊</a></p>
     <p>忘記密碼了嗎？<a href="forgot-password.html">點此重設密碼</a></p>
   </main>
 
@@ -35,7 +34,7 @@
       document.getElementById("error").style.display = "none";
       try {
         await loginUser(document.getElementById("email").value, document.getElementById("password").value);
-        location.href = "profile.html";
+        location.href = "admin.html";
       } catch (err) {
         document.getElementById("error").style.display = "block";
       }
