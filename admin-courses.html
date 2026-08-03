@@ -37,7 +37,7 @@
 
     function newCourse() {
       editing = {
-        venueId: "", sportType: "", schedule: "", description: "",
+        venueId: "", sportType: "", schedule: "", description: "", timeSlot: "",
         status: "enrolling", startDate: "", endDate: "", targetAudience: "",
         instructorTeam: "", fee: "", registrationMethod: "", accessibilityInfo: "", otherNotes: "",
       };
@@ -60,6 +60,7 @@
       editing.sportType = document.getElementById("f-sport").value;
       editing.schedule = document.getElementById("f-schedule").value;
       editing.description = document.getElementById("f-description").value;
+      editing.timeSlot = document.getElementById("f-timeslot").value;
       editing.status = document.getElementById("f-status").value;
       editing.startDate = document.getElementById("f-start-date").value;
       editing.endDate = document.getElementById("f-end-date").value;
@@ -118,6 +119,12 @@
               </select>
             </label>
             <label>上課時間 <input type="text" id="f-schedule" value="${escapeHtml(editing.schedule)}" placeholder="例如：每週二、四 09:00-10:00" /></label>
+            <label>上課時段（給地圖搜尋篩選用）
+              <select id="f-timeslot">
+                <option value="">未分類</option>
+                ${TIME_SLOTS.map((t) => `<option value="${t.id}" ${editing.timeSlot === t.id ? "selected" : ""}>${t.name}</option>`).join("")}
+              </select>
+            </label>
             <label>說明 <textarea id="f-description">${escapeHtml(editing.description)}</textarea></label>
             <label>招生狀態
               <select id="f-status">

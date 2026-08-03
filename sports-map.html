@@ -31,16 +31,124 @@
     <p class="hint-text">點選地圖上的鄉鎮，即可查看該地區的課程據點、上課時間與招生狀態</p>
 
     <div class="township-buttons" id="township-buttons"></div>
+
+    <h2 style="margin-top: 2rem;">搜尋課程據點</h2>
+    <div class="search-filters">
+      <label>地區
+        <select id="filter-township" onchange="renderResults()">
+          <option value="">全部地區</option>
+        </select>
+      </label>
+      <label>課程狀態
+        <select id="filter-status" onchange="renderResults()">
+          <option value="">全部狀態</option>
+        </select>
+      </label>
+      <label>上課時間
+        <select id="filter-timeslot" onchange="renderResults()">
+          <option value="">全部時段</option>
+        </select>
+      </label>
+      <label>關鍵字
+        <input id="filter-keyword" placeholder="社區名稱、據點名稱、鄉市、地址" oninput="renderResults()" />
+      </label>
+    </div>
+
+    <div id="results-content"><p>載入中...</p></div>
   </main>
 
   <script>
-    renderPenghuMap("map", ["magong", "huxi", "baisha", "xiyu"]);
-    renderMapInset("inset-wangan", "wangan");
-    renderMapInset("inset-qimei", "qimei");
+    // 只給這 4 個狀態當篩選條件——「本期額滿」「暫停招生」不是使用者會主動想篩出來查看的狀態
+    const SEARCHABLE_STATUSES = ["enrolling", "upcoming", "ongoing", "trial"];
 
-    document.getElementById("township-buttons").innerHTML = TOWNSHIPS.map((t) => `
-      <a class="township-button" href="township.html?id=${t.id}" style="--tb-color: ${TOWNSHIP_COLORS[t.id]}">${t.name}</a>
-    `).join("");
+    let venues = [];
+    let courses = [];
+
+    function fillFilterOptions() {
+      const t = document.getElementById("filter-township");
+      TOWNSHIPS.forEach((x) => t.insertAdjacentHTML("beforeend", `<option value="${x.id}">${x.name}</option>`));
+
+      const s = document.getElementById("filter-status");
+      SEARCHABLE_STATUSES.forEach((key) => s.insertAdjacentHTML("beforeend", `<option value="${key}">${COURSE_STATUS[key].icon} ${COURSE_STATUS[key].label}</option>`));
+
+      const ts = document.getElementById("filter-timeslot");
+      TIME_SLOTS.forEach((x) => ts.insertAdjacentHTML("beforeend", `<option value="${x.id}">${x.name}</option>`));
+    }
+
+    // 把課程跟所屬據點合併成清單要用的一列資料，找不到據點（理論上不會發生）的課程直接跳過
+    function courseRows() {
+      return courses
+        .map((c) => ({ course: c, venue: venues.find((v) => v.id === c.venueId) }))
+        .filter((r) => r.venue);
+    }
+
+    function renderResults() {
+      const township = document.getElementById("filter-township").value;
+      const status = document.getElementById("filter-status").value;
+      const timeSlot = document.getElementById("filter-timeslot").value;
+      const keyword = document.getElementById("filter-keyword").value.trim().toLowerCase();
+
+      const matching = courseRows().filter(({ course, venue }) =>
+        (!township || venue.township === township) &&
+        (!status || course.status === status) &&
+        (!timeSlot || course.timeSlot === timeSlot) &&
+        (!keyword ||
+          venue.name.toLowerCase().includes(keyword) ||
+          (venue.address || "").toLowerCase().includes(keyword) ||
+          townshipName(venue.township).toLowerCase().includes(keyword))
+      );
+
+      const el = document.getElementById("results-content");
+
+      if (!matching.length) {
+        el.innerHTML = `
+          <p class="hint-text">找不到符合條件的課程據點。</p>
+          <div class="map-cta">
+            <h3>您的社區還沒有滾動三力學嗎？</h3>
+            <p>如果您是社區據點、長照單位、銀髮健身俱樂部或高齡服務機構，歡迎與我們聯繫，進一步了解課程導入、師資安排及合作方式。</p>
+            <div class="map-cta-buttons">
+              <a class="primary-button" href="results-contact.html">申請開設課程</a>
+              <a class="secondary-button" href="results-contact.html">洽詢合作方式</a>
+              <a class="secondary-button" href="results-contact.html">接收開課通知</a>
+            </div>
+          </div>
+        `;
+        return;
+      }
+
+      el.innerHTML = `
+        <div class="table-scroll"><table class="admin-table">
+          <thead><tr><th>鄉市</th><th>據點名稱</th><th>上課時間</th><th>課程狀態</th><th></th></tr></thead>
+          <tbody>
+            ${matching.map(({ course, venue }) => `
+              <tr>
+                <td>${townshipName(venue.township)}</td>
+                <td>${escapeHtml(venue.name)}</td>
+                <td>${escapeHtml(course.schedule)}</td>
+                <td>${COURSE_STATUS[course.status] ? `<span class="status-badge" style="--status-color: ${COURSE_STATUS[course.status].color}">${COURSE_STATUS[course.status].icon} ${escapeHtml(COURSE_STATUS[course.status].label)}</span>` : ""}</td>
+                <td><a href="township.html?id=${venue.township}">查看據點</a></td>
+              </tr>
+            `).join("")}
+          </tbody>
+        </table></div>
+      `;
+    }
+
+    async function init() {
+      renderPenghuMap("map", ["magong", "huxi", "baisha", "xiyu"]);
+      renderMapInset("inset-wangan", "wangan");
+      renderMapInset("inset-qimei", "qimei");
+
+      document.getElementById("township-buttons").innerHTML = TOWNSHIPS.map((t) => `
+        <a class="township-button" href="township.html?id=${t.id}" style="--tb-color: ${TOWNSHIP_COLORS[t.id]}">${t.name}</a>
+      `).join("");
+
+      fillFilterOptions();
+      [venues, courses] = await Promise.all([getAll("venues"), getAll("courses")]);
+      renderResults();
+    }
+
+    init();
   </script>
 </body>
 </html>
