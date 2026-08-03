@@ -189,6 +189,29 @@ function renderCourseCard(c) {
   `;
 }
 
+// 後台的新增／編輯表單改成彈出視窗呈現，不用捲到清單下方才看得到表單，表單本身很長時視窗內自己捲動就好。
+// formHtml 是 null（沒有正在編輯）時只是把視窗關掉；每次呼叫都會先關掉舊的再開新的，不會疊出好幾層視窗。
+function renderEditModal(formHtml, onClose) {
+  document.getElementById("edit-modal-overlay")?.remove();
+  if (!formHtml) return;
+
+  const overlay = document.createElement("div");
+  overlay.className = "confirm-overlay";
+  overlay.id = "edit-modal-overlay";
+  overlay.innerHTML = `<div class="edit-modal-dialog" role="dialog" aria-modal="true">${formHtml}</div>`;
+  document.body.appendChild(overlay);
+
+  overlay.addEventListener("click", (e) => {
+    if (e.target === overlay) onClose();
+  });
+  document.addEventListener("keydown", function onKeydown(e) {
+    if (e.key === "Escape") {
+      document.removeEventListener("keydown", onKeydown);
+      onClose();
+    }
+  });
+}
+
 function venueTypeName(id) {
   return VENUE_TYPES.find((v) => v.id === id)?.name || id;
 }

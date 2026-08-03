@@ -615,8 +615,22 @@ svg text {
 
   .confirm-buttons button { flex: 1; }
 
-.back-button { display: inline-block; margin-bottom: 1rem; color: #0a5c78; font-weight: bold; border: none; padding: 0; background: none; }
-  .back-button:hover { text-decoration: underline; }
+/* 後台新增／編輯表單的彈出視窗，跟 .confirm-dialog 共用同一層半透明背景（.confirm-overlay），
+   只是內容改成表單，所以要寬一點、允許內部捲動（表單欄位一多，視窗本身不會撐爆畫面） */
+.edit-modal-dialog {
+  background: white;
+  border-radius: 18px;
+  padding: 1.8rem;
+  max-width: 560px;
+  width: 100%;
+  max-height: 85vh;
+  overflow-y: auto;
+  box-shadow: 0 15px 45px rgba(0, 0, 0, 0.3);
+  animation: pop-in 0.25s ease-out;
+}
+
+.back-button { display: block; margin-bottom: 1rem; color: #0a5c78; font-weight: bold; border: none; padding: 0; background: none; transition: color 0.15s ease; }
+  .back-button:hover { color: #14919b; text-decoration: underline; }
 
 .error-text { color: #c0392b; font-weight: bold; }
 .success-text { color: #2a9d5f; font-weight: bold; }

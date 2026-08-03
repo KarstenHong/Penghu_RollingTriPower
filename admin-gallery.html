@@ -62,7 +62,7 @@
     }
 
     function render() {
-      let html = `
+      document.getElementById("content").innerHTML = `
         <div class="table-scroll"><table class="admin-table">
           <thead><tr><th>照片</th><th>說明</th><th>日期</th><th></th></tr></thead>
           <tbody>
@@ -82,22 +82,19 @@
         <button class="primary-button" onclick="newPhoto()">+ 新增照片</button>
       `;
 
-      if (editing) {
-        html += `
-          <form class="member-form" id="photo-form">
-            <label>照片網址 <input type="text" id="f-image" value="${escapeHtml(editing.imageUrl)}" required /></label>
-            <label>說明（選填） <input type="text" id="f-caption" value="${escapeHtml(editing.caption)}" /></label>
-            <label>日期 <input type="date" id="f-date" value="${escapeHtml(editing.date)}" /></label>
-            <button type="submit" class="primary-button">儲存</button>
-            <button type="button" class="secondary-button" onclick="editing = null; render();">取消</button>
-          </form>
-        `;
-      }
+      if (!editing) { renderEditModal(null); return; }
 
-      document.getElementById("content").innerHTML = html;
-      if (editing) {
-        document.getElementById("photo-form").addEventListener("submit", savePhoto);
-      }
+      renderEditModal(`
+        <form class="member-form" id="photo-form">
+          <label>照片網址 <input type="text" id="f-image" value="${escapeHtml(editing.imageUrl)}" required /></label>
+          <label>說明（選填） <input type="text" id="f-caption" value="${escapeHtml(editing.caption)}" /></label>
+          <label>日期 <input type="date" id="f-date" value="${escapeHtml(editing.date)}" /></label>
+          <button type="submit" class="primary-button">儲存</button>
+          <button type="button" class="secondary-button" onclick="editing = null; render();">取消</button>
+        </form>
+      `, () => { editing = null; render(); });
+
+      document.getElementById("photo-form").addEventListener("submit", savePhoto);
     }
 
     requireAdmin(() => reload());

@@ -62,7 +62,7 @@
     }
 
     function render() {
-      let html = `
+      document.getElementById("content").innerHTML = `
         <div class="table-scroll"><table class="admin-table">
           <thead><tr><th>名稱</th><th>鄉鎮</th><th></th></tr></thead>
           <tbody>
@@ -81,28 +81,25 @@
         <button class="primary-button" onclick="newAssociation()">+ 新增協會</button>
       `;
 
-      if (editing) {
-        html += `
-          <form class="member-form" id="association-form">
-            <label>名稱 <input type="text" id="f-name" value="${escapeHtml(editing.name)}" required /></label>
-            <label>鄉鎮
-              <select id="f-township">
-                <option value="">請選擇</option>
-                ${TOWNSHIPS.map((t) => `<option value="${t.id}" ${editing.township === t.id ? "selected" : ""}>${t.name}</option>`).join("")}
-              </select>
-            </label>
-            <label>電話 <input type="text" id="f-phone" value="${escapeHtml(editing.phone)}" /></label>
-            <label>地址 <input type="text" id="f-address" value="${escapeHtml(editing.address)}" /></label>
-            <button type="submit" class="primary-button">儲存</button>
-            <button type="button" class="secondary-button" onclick="editing = null; render();">取消</button>
-          </form>
-        `;
-      }
+      if (!editing) { renderEditModal(null); return; }
 
-      document.getElementById("content").innerHTML = html;
-      if (editing) {
-        document.getElementById("association-form").addEventListener("submit", saveAssociation);
-      }
+      renderEditModal(`
+        <form class="member-form" id="association-form">
+          <label>名稱 <input type="text" id="f-name" value="${escapeHtml(editing.name)}" required /></label>
+          <label>鄉鎮
+            <select id="f-township">
+              <option value="">請選擇</option>
+              ${TOWNSHIPS.map((t) => `<option value="${t.id}" ${editing.township === t.id ? "selected" : ""}>${t.name}</option>`).join("")}
+            </select>
+          </label>
+          <label>電話 <input type="text" id="f-phone" value="${escapeHtml(editing.phone)}" /></label>
+          <label>地址 <input type="text" id="f-address" value="${escapeHtml(editing.address)}" /></label>
+          <button type="submit" class="primary-button">儲存</button>
+          <button type="button" class="secondary-button" onclick="editing = null; render();">取消</button>
+        </form>
+      `, () => { editing = null; render(); });
+
+      document.getElementById("association-form").addEventListener("submit", saveAssociation);
     }
 
     requireAdmin(() => reload());

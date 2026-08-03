@@ -63,7 +63,7 @@
     }
 
     function render() {
-      let html = `
+      document.getElementById("content").innerHTML = `
         <div class="table-scroll"><table class="admin-table">
           <thead><tr><th>分類</th><th>標題</th><th>日期</th><th></th></tr></thead>
           <tbody>
@@ -83,29 +83,26 @@
         <button class="primary-button" onclick="newPost()">+ 新增公告</button>
       `;
 
-      if (editing) {
-        html += `
-          <form class="member-form" id="post-form">
-            <label>分類
-              <select id="f-category">
-                <option value="news" ${editing.category === "news" ? "selected" : ""}>最新消息</option>
-                <option value="event" ${editing.category === "event" ? "selected" : ""}>活動資訊</option>
-              </select>
-            </label>
-            <label>標題 <input type="text" id="f-title" value="${escapeHtml(editing.title)}" required /></label>
-            <label>日期 <input type="date" id="f-date" value="${escapeHtml(editing.date)}" /></label>
-            <label>內容 <textarea id="f-content">${escapeHtml(editing.content)}</textarea></label>
-            <label>圖片網址（選填） <input type="text" id="f-image" value="${escapeHtml(editing.imageUrl)}" /></label>
-            <button type="submit" class="primary-button">儲存</button>
-            <button type="button" class="secondary-button" onclick="editing = null; render();">取消</button>
-          </form>
-        `;
-      }
+      if (!editing) { renderEditModal(null); return; }
 
-      document.getElementById("content").innerHTML = html;
-      if (editing) {
-        document.getElementById("post-form").addEventListener("submit", savePost);
-      }
+      renderEditModal(`
+        <form class="member-form" id="post-form">
+          <label>分類
+            <select id="f-category">
+              <option value="news" ${editing.category === "news" ? "selected" : ""}>最新消息</option>
+              <option value="event" ${editing.category === "event" ? "selected" : ""}>活動資訊</option>
+            </select>
+          </label>
+          <label>標題 <input type="text" id="f-title" value="${escapeHtml(editing.title)}" required /></label>
+          <label>日期 <input type="date" id="f-date" value="${escapeHtml(editing.date)}" /></label>
+          <label>內容 <textarea id="f-content">${escapeHtml(editing.content)}</textarea></label>
+          <label>圖片網址（選填） <input type="text" id="f-image" value="${escapeHtml(editing.imageUrl)}" /></label>
+          <button type="submit" class="primary-button">儲存</button>
+          <button type="button" class="secondary-button" onclick="editing = null; render();">取消</button>
+        </form>
+      `, () => { editing = null; render(); });
+
+      document.getElementById("post-form").addEventListener("submit", savePost);
     }
 
     requireAdmin(() => reload());

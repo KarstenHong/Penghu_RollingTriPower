@@ -68,7 +68,7 @@
     }
 
     function render() {
-      let html = `
+      document.getElementById("content").innerHTML = `
         <div class="table-scroll"><table class="admin-table">
           <thead><tr><th>照片</th><th>名稱</th><th>鄉鎮</th><th>類型</th><th></th></tr></thead>
           <tbody>
@@ -89,50 +89,47 @@
         <button class="primary-button" onclick="newVenue()">+ 新增場域</button>
       `;
 
-      if (editing) {
-        html += `
-          <form class="member-form" id="venue-form">
-            <label>名稱 <input type="text" id="f-name" value="${escapeHtml(editing.name)}" required /></label>
-            <label>鄉鎮
-              <select id="f-township">
-                <option value="">請選擇</option>
-                ${TOWNSHIPS.map((t) => `<option value="${t.id}" ${editing.township === t.id ? "selected" : ""}>${t.name}</option>`).join("")}
-              </select>
-            </label>
-            <label>類型
-              <select id="f-type">
-                <option value="">請選擇</option>
-                ${VENUE_TYPES.map((t) => `<option value="${t.id}" ${editing.type === t.id ? "selected" : ""}>${t.name}</option>`).join("")}
-              </select>
-            </label>
-            <label>地址 <input type="text" id="f-address" value="${escapeHtml(editing.address)}" /></label>
-            <label>電話 <input type="text" id="f-phone" value="${escapeHtml(editing.phone)}" /></label>
-            <label>照片網址（選填） <input type="text" id="f-photo" value="${escapeHtml(editing.photoUrl)}" /></label>
-            <label>緯度 Latitude（用於在鄉鎮地圖上標示位置，可到 Google 地圖上按右鍵複製座標）
-              <input type="number" step="any" id="f-lat" value="${editing.lat ?? ""}" placeholder="例如 23.5654" />
-            </label>
-            <label>經度 Longitude
-              <input type="number" step="any" id="f-lng" value="${editing.lng ?? ""}" placeholder="例如 119.5654" />
-            </label>
-            <fieldset>
-              <legend>提供的運動項目</legend>
-              ${activeSportTypes(editing.sportTypes || []).map((s) => `
-                <label class="checkbox-line">
-                  <input type="checkbox" class="f-sport" value="${s.id}" ${(editing.sportTypes || []).includes(s.id) ? "checked" : ""} />
-                  ${s.name}
-                </label>
-              `).join("")}
-            </fieldset>
-            <button type="submit" class="primary-button">儲存</button>
-            <button type="button" class="secondary-button" onclick="editing = null; render();">取消</button>
-          </form>
-        `;
-      }
+      if (!editing) { renderEditModal(null); return; }
 
-      document.getElementById("content").innerHTML = html;
-      if (editing) {
-        document.getElementById("venue-form").addEventListener("submit", saveVenue);
-      }
+      renderEditModal(`
+        <form class="member-form" id="venue-form">
+          <label>名稱 <input type="text" id="f-name" value="${escapeHtml(editing.name)}" required /></label>
+          <label>鄉鎮
+            <select id="f-township">
+              <option value="">請選擇</option>
+              ${TOWNSHIPS.map((t) => `<option value="${t.id}" ${editing.township === t.id ? "selected" : ""}>${t.name}</option>`).join("")}
+            </select>
+          </label>
+          <label>類型
+            <select id="f-type">
+              <option value="">請選擇</option>
+              ${VENUE_TYPES.map((t) => `<option value="${t.id}" ${editing.type === t.id ? "selected" : ""}>${t.name}</option>`).join("")}
+            </select>
+          </label>
+          <label>地址 <input type="text" id="f-address" value="${escapeHtml(editing.address)}" /></label>
+          <label>電話 <input type="text" id="f-phone" value="${escapeHtml(editing.phone)}" /></label>
+          <label>照片網址（選填） <input type="text" id="f-photo" value="${escapeHtml(editing.photoUrl)}" /></label>
+          <label>緯度 Latitude（用於在鄉鎮地圖上標示位置，可到 Google 地圖上按右鍵複製座標）
+            <input type="number" step="any" id="f-lat" value="${editing.lat ?? ""}" placeholder="例如 23.5654" />
+          </label>
+          <label>經度 Longitude
+            <input type="number" step="any" id="f-lng" value="${editing.lng ?? ""}" placeholder="例如 119.5654" />
+          </label>
+          <fieldset>
+            <legend>提供的運動項目</legend>
+            ${activeSportTypes(editing.sportTypes || []).map((s) => `
+              <label class="checkbox-line">
+                <input type="checkbox" class="f-sport" value="${s.id}" ${(editing.sportTypes || []).includes(s.id) ? "checked" : ""} />
+                ${s.name}
+              </label>
+            `).join("")}
+          </fieldset>
+          <button type="submit" class="primary-button">儲存</button>
+          <button type="button" class="secondary-button" onclick="editing = null; render();">取消</button>
+        </form>
+      `, () => { editing = null; render(); });
+
+      document.getElementById("venue-form").addEventListener("submit", saveVenue);
     }
 
     requireAdmin(async () => {
