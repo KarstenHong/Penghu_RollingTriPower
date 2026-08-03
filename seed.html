@@ -181,14 +181,43 @@
         "tabletennis",
         "badminton"
       ]
+    },
+    {
+      "name": "中社社區活動中心",
+      "township": "wangan",
+      "type": "community_center",
+      "address": "澎湖縣望安鄉中社村",
+      "phone": "06-9990088",
+      "lat": 23.35912,
+      "lng": 119.50871,
+      "sportTypes": [
+        "taichi"
+      ]
     }
   ],
   "courses": [
     {
+      "venueRef": 12,
+      "sportType": "taichi",
+      "schedule": "每週三 14:00–16:00",
+      "description": "由在地指導員帶領，動作和緩適合長者",
+      "status": "ongoing",
+      "timeSlot": "weekday-afternoon",
+      "startDate": "2026-09-02",
+      "endDate": "2026-11-18",
+      "targetAudience": "65歲以上社區長者",
+      "instructorTeam": "陳老師、林協助員",
+      "fee": "免費",
+      "registrationMethod": "電話報名／線上報名／洽詢據點",
+      "accessibilityInfo": "輪椅可進入／設有無障礙廁所",
+      "otherNotes": "請穿著方便活動的服裝並攜帶飲用水"
+    },
+    {
       "venueRef": 0,
       "sportType": "taichi",
-      "schedule": "每週一、三 09:00-10:00",
-      "description": "由在地師資帶領，歡迎長者踴躍參加"
+      "schedule": "每週一 09:30–11:30",
+      "description": "由在地師資帶領，歡迎長者踴躍參加",
+      "status": "enrolling"
     },
     {
       "venueRef": 0,
@@ -217,8 +246,9 @@
     {
       "venueRef": 2,
       "sportType": "tabletennis",
-      "schedule": "每週二、四 15:00-16:00",
-      "description": "由在地師資帶領，歡迎長者踴躍參加"
+      "schedule": "每週五 14:00–16:00",
+      "description": "由在地師資帶領，歡迎長者踴躍參加",
+      "status": "upcoming"
     },
     {
       "venueRef": 3,
@@ -236,7 +266,8 @@
       "venueRef": 4,
       "sportType": "badminton",
       "schedule": "每週一、三 09:00-10:00",
-      "description": "由在地師資帶領，歡迎長者踴躍參加"
+      "description": "由在地師資帶領，歡迎長者踴躍參加",
+      "status": "full"
     },
     {
       "venueRef": 4,
@@ -278,7 +309,8 @@
       "venueRef": 7,
       "sportType": "taichi",
       "schedule": "每週二、四 15:00-16:00",
-      "description": "由在地師資帶領，歡迎長者踴躍參加"
+      "description": "師資調整中，暫停招生",
+      "status": "paused"
     },
     {
       "venueRef": 8,
@@ -313,8 +345,9 @@
     {
       "venueRef": 10,
       "sportType": "tabletennis",
-      "schedule": "每週二、四 15:00-16:00",
-      "description": "由在地師資帶領，歡迎長者踴躍參加"
+      "schedule": "8/20（六）10:00–12:00",
+      "description": "單次體驗活動，歡迎新朋友參加",
+      "status": "trial"
     },
     {
       "venueRef": 11,
@@ -426,6 +459,14 @@
   ]
 };
 
+    // 課程時間是自由填寫文字，猜不到就抓常見的上下午時段當預設值，範例資料的搜尋篩選才有東西可以篩
+    function inferTimeSlot(schedule) {
+      if (/09:00|09:30|10:00|11:00|11:30/.test(schedule)) return "weekday-morning";
+      if (/14:00|15:00|16:00/.test(schedule)) return "weekday-afternoon";
+      if (/18:00|19:00|20:00/.test(schedule)) return "weekday-evening";
+      return "";
+    }
+
     async function seed() {
       const btn = document.getElementById("seed-button");
       const statusEl = document.getElementById("status");
@@ -446,6 +487,16 @@
           schedule: c.schedule,
           description: c.description,
           iconKey: c.sportType,
+          status: c.status || "enrolling",
+          timeSlot: c.timeSlot || inferTimeSlot(c.schedule),
+          startDate: c.startDate || "",
+          endDate: c.endDate || "",
+          targetAudience: c.targetAudience || "",
+          instructorTeam: c.instructorTeam || "",
+          fee: c.fee || "",
+          registrationMethod: c.registrationMethod || "",
+          accessibilityInfo: c.accessibilityInfo || "",
+          otherNotes: c.otherNotes || "",
         });
       }
 
