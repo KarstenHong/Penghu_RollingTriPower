@@ -32,7 +32,7 @@ function requireAdmin(callback) {
     const profile = await getById("users", user.uid);
     if (!profile || profile.role !== "admin") {
       alert("您沒有後台管理權限");
-      location.href = "index.html";
+      location.href = "home-map.html";
       return;
     }
     callback(user, profile);
