@@ -195,8 +195,8 @@ main {
 }
 
 .map-inset {
-  width: 76px;
-  height: 76px;
+  width: 110px;
+  height: 110px;
   background: white;
   border: 2px solid white;
   border-radius: 50%;
@@ -219,11 +219,11 @@ main {
 
   .map-inset-label {
     position: absolute;
-    bottom: 2px;
+    bottom: 4px;
     left: 0;
     right: 0;
     text-align: center;
-    font-size: 0.62rem;
+    font-size: 0.9rem;
     font-weight: bold;
     color: white;
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
@@ -785,8 +785,8 @@ svg text {
 
   .township-buttons { grid-template-columns: repeat(2, 1fr); }
 
-  .map-inset { width: 62px; height: 62px; }
-  .map-inset-label { font-size: 0.55rem; }
+  .map-inset { width: 74px; height: 74px; }
+  .map-inset-label { font-size: 0.68rem; }
 }
 
 /* 動畫效果：只在進場、互動當下播放一次，不做持續循環的晃動，
