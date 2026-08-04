@@ -189,12 +189,52 @@ main {
   text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.25);
 }
 
-.nav-links {
-  display: flex;
-  flex-wrap: wrap;
+.nav-toggle {
+  display: inline-flex;
   align-items: center;
-  gap: 0.9rem;
+  gap: 0.4rem;
+  min-height: 44px;
+  padding: 0.5rem 1.1rem;
+  border: none;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.15);
+  color: white;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.15s ease;
 }
+
+  .nav-toggle:hover { background: rgba(255, 255, 255, 0.28); }
+
+/* 頁籤收合成選單：預設收起來，桌面滑鼠移到按鈕或選單上自動展開（見下方 hover 媒體查詢），
+   觸控裝置沒有 hover，改由 js/common.js 的 wireNavToggle() 點按鈕切換 .open */
+.nav-links {
+  display: none;
+  position: absolute;
+  top: 100%;
+  right: 1.5rem;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.3rem;
+  background: linear-gradient(135deg, #0a5c78 0%, #14919b 100%);
+  padding: 0.8rem 1.2rem 1rem;
+  border-radius: 0 0 14px 14px;
+  box-shadow: 0 10px 24px rgba(10, 92, 120, 0.4);
+  min-width: 240px;
+  max-height: 80vh;
+  overflow-y: auto;
+  z-index: 15;
+}
+
+  .nav-links.open { display: flex; }
+
+  @media (hover: hover) {
+    .nav-toggle:hover + .nav-links,
+    .nav-links:hover {
+      display: flex;
+    }
+  }
 
   /* #nav-auth-links 這個 span 裡面塞了好幾個連結（會員資料/我的最愛/登出），
      它本身雖然是 .nav-links 的 flex item，但沒有設 display:flex 的話，
@@ -916,7 +956,7 @@ svg text {
 
   .nav-bar { padding: 0.75rem 1rem; }
   .nav-brand { font-size: 1.05rem; }
-  .nav-links { gap: 0.5rem; }
+  .nav-links { gap: 0.5rem; right: 1rem; min-width: 200px; }
   .nav-links a { font-size: 0.9rem; padding: 0.25rem 0.45rem; }
 
   h1 { font-size: 1.5em; }

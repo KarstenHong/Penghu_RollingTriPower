@@ -322,6 +322,27 @@ function showConfirmDialog(
   });
 }
 
+// 頁籤收合成一個按鈕：有滑鼠的裝置用 CSS :hover 自動展開/收合（見 style.css），
+// 觸控裝置沒有 hover，改成點按鈕切換開關、點選單以外的地方自動收合
+function wireNavToggle() {
+  const btn = document.getElementById("nav-toggle");
+  const links = document.getElementById("nav-links");
+  if (!btn || !links) return;
+  if (window.matchMedia("(hover: hover)").matches) return;
+
+  btn.addEventListener("click", () => {
+    const open = links.classList.toggle("open");
+    btn.setAttribute("aria-expanded", open ? "true" : "false");
+  });
+
+  document.addEventListener("click", (e) => {
+    if (links.classList.contains("open") && !e.target.closest(".nav-bar")) {
+      links.classList.remove("open");
+      btn.setAttribute("aria-expanded", "false");
+    }
+  });
+}
+
 function renderNav() {
   const el = document.getElementById("nav");
   if (!el) return;
@@ -332,9 +353,11 @@ function renderNav() {
   el.innerHTML = `
     <div class="nav-bar">
       <a class="nav-brand" href="index.html">澎湖縣三力運動地圖</a>
-      <div class="nav-links">${links}<span id="nav-auth-links"></span></div>
+      <button type="button" class="nav-toggle" id="nav-toggle" aria-label="開啟選單" aria-expanded="false">☰ 選單</button>
+      <div class="nav-links" id="nav-links">${links}<span id="nav-auth-links"></span></div>
     </div>
   `;
+  wireNavToggle();
 
   const authEl = document.getElementById("nav-auth-links");
   const cached = getCachedAuth();
