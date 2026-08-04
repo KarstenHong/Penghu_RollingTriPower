@@ -223,7 +223,7 @@ function venueTypeName(id) {
 // 頁籤文字把兩個標題都放出來，實際頁面裡也是兩個段落都顯示（見 results-contact.html、about-evaluation.html）。
 // 常見問題／社區活動查詢／活動資訊這幾頁客戶的新規劃裡沒有列在頁籤上，頁面本身還在，只是先不放進導覽列。
 const NAV_LINKS = [
-  { href: "index.html", label: "首頁" },
+  { href: "home-map.html", label: "首頁" },
   { href: "posts.html?category=news", label: "最新消息" },
   { href: "about-program.html", label: "認識三力學" },
   { href: "course-benefits.html", label: "課程效益" },
@@ -276,7 +276,7 @@ function wireLogoutButton() {
       if (!confirmed) return;
       await logoutUser();
       setCachedAuth(null);
-      location.href = "index.html";
+      location.href = "home-map.html";
     });
 }
 
