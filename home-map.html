@@ -12,11 +12,15 @@
   <script src="js/data.js"></script>
   <script src="js/auth.js"></script>
   <script src="js/common.js"></script>
-  <script src="js/map-data.js"></script>
 </head>
 <body>
   <div id="nav"></div>
   <main>
+    <div class="page-header-row">
+      <h1>首頁</h1>
+      <a href="index.html" class="secondary-button">回到入口網站</a>
+    </div>
+
     <div class="font-size-controls">
       <span>字體大小：</span>
       <button onclick="setFontSize('')">標準</button>
@@ -24,31 +28,57 @@
       <button onclick="setFontSize('text-xlarge')">特大</button>
     </div>
 
-    <p class="hint-text">請點選地圖上的鄉鎮，或直接點下面的鄉鎮名稱</p>
+    <p class="hint-text">歡迎來到「澎湖縣三力運動地圖」，點選下面的項目看更多內容。</p>
 
-    <div class="map-container">
-      <div class="map-wrap" id="map"></div>
-      <div class="map-insets">
-        <div class="map-inset" id="inset-wangan"></div>
-        <div class="map-inset" id="inset-qimei"></div>
-      </div>
-    </div>
-    <p class="hint-text inset-note">望安、七美離本島較遠，用縮圖顯示在左上角方便點選，位置非實際方位</p>
-
-    <div class="township-buttons" id="township-buttons"></div>
+    <div class="directory-grid" id="directory-grid"></div>
   </main>
 
   <script>
-    // 望安、七美跟本島距離很遠，共用一張地圖會讓它們變得非常小；
-    // 本島（馬公/湖西/白沙/西嶼）畫大地圖，望安、七美改成左上角的放大鏡縮圖
-    renderPenghuMap("map", ["magong", "huxi", "baisha", "xiyu"]);
-    renderMapInset("inset-wangan", "wangan");
-    renderMapInset("inset-qimei", "qimei");
+    // 每個項目對應一個頁籤頁面；最新消息、成果與資源這兩個有實際資料庫內容，
+    // 抓最新的幾筆當預覽，其餘還沒有內容的頁面先放固定的簡短說明
+    const DIRECTORY_ITEMS = [
+      { icon: "📖", title: "認識三力學", href: "about-program.html", teaser: "了解「動身體、想策略、交朋友」三力運動的理念與方法。" },
+      { icon: "📈", title: "課程效益", href: "course-benefits.html", teaser: "認識參加三力運動課程為長者健康帶來的效益。" },
+      { icon: "🗺️", title: "三力運動地圖", href: "sports-map.html", teaser: "透過互動地圖尋找鄰近的課程據點，查看上課時間與招生狀態。" },
+      { icon: "📝", title: "參與課程", href: "join-course.html", teaser: "搜尋課程據點，查看上課時間、招生狀態與聯絡方式。" },
+      { icon: "🤝", title: "加入指導團隊", href: "join-team.html", teaser: "歡迎有興趣的夥伴加入指導團隊，一起帶領社區長者動起來。" },
+      { icon: "📰", title: "最新消息", href: "posts.html?category=news", teaser: "掌握最新消息與活動資訊。" },
+      { icon: "🏆", title: "成果與資源／聯絡我們", href: "results-contact.html", teaser: "瀏覽長輩參與課程的精彩紀錄，或查詢各社區協會聯絡方式。" },
+      { icon: "ℹ️", title: "關於我們／方案評估平台", href: "about-evaluation.html", teaser: "認識我們的團隊與方案評估平台。" },
+    ];
 
-    document.getElementById("township-buttons").innerHTML = TOWNSHIPS.map((t) => `
-      <a class="township-button" data-township="${t.id}" href="township.html?id=${t.id}" style="--tb-color: ${TOWNSHIP_COLORS[t.id]}">${t.name}</a>
-    `).join("");
-    wireTownshipButtonHover();
+    function directoryCardHtml(item, extraHtml) {
+      return `
+        <a class="directory-card" href="${item.href}">
+          <span class="directory-icon">${item.icon}</span>
+          <h3>${escapeHtml(item.title)}</h3>
+          <p>${escapeHtml(item.teaser)}</p>
+          ${extraHtml || ""}
+          <span class="directory-more">更多內容 →</span>
+        </a>
+      `;
+    }
+
+    async function init() {
+      const [posts, photos] = await Promise.all([getAll("posts"), getAll("gallery")]);
+      posts.sort((a, b) => (b.date || "").localeCompare(a.date || ""));
+      photos.sort((a, b) => (b.date || "").localeCompare(a.date || ""));
+
+      const grid = document.getElementById("directory-grid");
+      grid.innerHTML = DIRECTORY_ITEMS.map((item) => {
+        if (item.title === "最新消息" && posts.length) {
+          const list = posts.slice(0, 2).map((p) => `<p class="directory-preview-line">・${escapeHtml(p.title)}</p>`).join("");
+          return directoryCardHtml(item, list);
+        }
+        if (item.title === "成果與資源／聯絡我們" && photos.length) {
+          const thumbs = `<div class="directory-thumbs">${photos.slice(0, 3).map((p) => `<img src="${escapeHtml(p.imageUrl)}" alt="" loading="lazy" />`).join("")}</div>`;
+          return directoryCardHtml(item, thumbs);
+        }
+        return directoryCardHtml(item);
+      }).join("");
+    }
+
+    init();
   </script>
 </body>
 </html>

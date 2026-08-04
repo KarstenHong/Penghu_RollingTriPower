@@ -539,6 +539,49 @@ svg text {
   vertical-align: middle;
 }
 
+/* 首頁目錄 */
+
+.page-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.directory-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 1.2rem;
+  margin: 1.5rem 0;
+}
+
+.directory-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 1.4rem;
+  background: white;
+  border: 1px solid #eee;
+  border-left: 5px solid #14919b;
+  border-radius: 14px;
+  box-shadow: 0 3px 12px rgba(10, 92, 120, 0.08);
+  text-decoration: none;
+  color: inherit;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+  .directory-card:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(10, 92, 120, 0.18); }
+  .directory-card h3 { margin: 0; color: #0a5c78; }
+  .directory-card p { margin: 0; color: #444; font-size: 0.95rem; }
+  .directory-icon { font-size: 2rem; line-height: 1; }
+  .directory-more { margin-top: auto; padding-top: 0.4rem; font-weight: bold; color: #14919b; }
+
+  .directory-preview-line { color: #666 !important; font-size: 0.85em !important; }
+
+  .directory-thumbs { display: flex; gap: 0.4rem; }
+    .directory-thumbs img { width: 100%; height: 60px; object-fit: cover; border-radius: 8px; }
+
 /* 公告 / 常見問題 */
 
 .post-list { display: flex; flex-direction: column; gap: 1rem; }
@@ -908,19 +951,19 @@ main { animation: fade-slide-up 0.5s ease-out; }
 .page-banner img, .photo-strip img { animation: gentle-zoom 12s ease-out forwards; }
 
 /* 卡片／清單項目進場淡入，依序錯開，最多做前 8 個以免項目一多要等很久 */
-:where(.venue-list, .post-list, .icon-grid, .township-buttons, .faq-list, .gallery-grid) > *,
+:where(.venue-list, .post-list, .icon-grid, .township-buttons, .faq-list, .gallery-grid, .directory-grid) > *,
 .admin-nav > li {
   animation: fade-slide-up 0.45s ease-out both;
 }
 
-:where(.venue-list, .post-list, .icon-grid, .township-buttons, .faq-list, .gallery-grid) > *:nth-child(1), .admin-nav > li:nth-child(1) { animation-delay: 0.02s; }
-:where(.venue-list, .post-list, .icon-grid, .township-buttons, .faq-list, .gallery-grid) > *:nth-child(2), .admin-nav > li:nth-child(2) { animation-delay: 0.06s; }
-:where(.venue-list, .post-list, .icon-grid, .township-buttons, .faq-list, .gallery-grid) > *:nth-child(3), .admin-nav > li:nth-child(3) { animation-delay: 0.10s; }
-:where(.venue-list, .post-list, .icon-grid, .township-buttons, .faq-list, .gallery-grid) > *:nth-child(4), .admin-nav > li:nth-child(4) { animation-delay: 0.14s; }
-:where(.venue-list, .post-list, .icon-grid, .township-buttons, .faq-list, .gallery-grid) > *:nth-child(5), .admin-nav > li:nth-child(5) { animation-delay: 0.18s; }
-:where(.venue-list, .post-list, .icon-grid, .township-buttons, .faq-list, .gallery-grid) > *:nth-child(6), .admin-nav > li:nth-child(6) { animation-delay: 0.22s; }
-:where(.venue-list, .post-list, .icon-grid, .township-buttons, .faq-list, .gallery-grid) > *:nth-child(7), .admin-nav > li:nth-child(7) { animation-delay: 0.26s; }
-:where(.venue-list, .post-list, .icon-grid, .township-buttons, .faq-list, .gallery-grid) > *:nth-child(n+8), .admin-nav > li:nth-child(n+8) { animation-delay: 0.30s; }
+:where(.venue-list, .post-list, .icon-grid, .township-buttons, .faq-list, .gallery-grid, .directory-grid) > *:nth-child(1), .admin-nav > li:nth-child(1) { animation-delay: 0.02s; }
+:where(.venue-list, .post-list, .icon-grid, .township-buttons, .faq-list, .gallery-grid, .directory-grid) > *:nth-child(2), .admin-nav > li:nth-child(2) { animation-delay: 0.06s; }
+:where(.venue-list, .post-list, .icon-grid, .township-buttons, .faq-list, .gallery-grid, .directory-grid) > *:nth-child(3), .admin-nav > li:nth-child(3) { animation-delay: 0.10s; }
+:where(.venue-list, .post-list, .icon-grid, .township-buttons, .faq-list, .gallery-grid, .directory-grid) > *:nth-child(4), .admin-nav > li:nth-child(4) { animation-delay: 0.14s; }
+:where(.venue-list, .post-list, .icon-grid, .township-buttons, .faq-list, .gallery-grid, .directory-grid) > *:nth-child(5), .admin-nav > li:nth-child(5) { animation-delay: 0.18s; }
+:where(.venue-list, .post-list, .icon-grid, .township-buttons, .faq-list, .gallery-grid, .directory-grid) > *:nth-child(6), .admin-nav > li:nth-child(6) { animation-delay: 0.22s; }
+:where(.venue-list, .post-list, .icon-grid, .township-buttons, .faq-list, .gallery-grid, .directory-grid) > *:nth-child(7), .admin-nav > li:nth-child(7) { animation-delay: 0.26s; }
+:where(.venue-list, .post-list, .icon-grid, .township-buttons, .faq-list, .gallery-grid, .directory-grid) > *:nth-child(n+8), .admin-nav > li:nth-child(n+8) { animation-delay: 0.30s; }
 
 /* 按鈕按下的觸覺回饋 */
 .primary-button:active, .secondary-button:active, .danger-button:active,
