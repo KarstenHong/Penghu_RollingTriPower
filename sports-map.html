@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>三力運動地圖 - 澎湖縣三力運動地圖</title>
+  <title>三力運動地圖 - 澎湖縣三力運動地圖資訊平台</title>
   <link rel="stylesheet" href="css/style.css" />
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
@@ -14,11 +14,13 @@
   <script src="js/common.js"></script>
   <script src="js/map-data.js"></script>
 </head>
-<body>
+<body class="sports-map-page">
   <div id="nav"></div>
   <main>
     <h1>三力運動地圖</h1>
-    <p class="hint-text">「滾動三力學」正在澎湖不同社區持續滾動。透過地圖尋找鄰近的課程據點，查看上課時間、招生狀態與聯絡方式，一起加入動身體、想策略、交朋友的健康行列。</p>
+    <p class="hint-text">點選下面的鄉鎮名稱，或直接點地圖上的鄉鎮，即可查看該地區的課程據點、上課時間與招生狀態</p>
+
+    <div class="township-buttons" id="township-buttons"></div>
 
     <div class="map-container">
       <div class="map-wrap" id="map"></div>
@@ -28,9 +30,6 @@
       </div>
     </div>
     <p class="hint-text inset-note">望安、七美離本島較遠，用縮圖顯示在左上角方便點選，位置非實際方位</p>
-    <p class="hint-text">點選地圖上的鄉鎮，即可查看該地區的課程據點、上課時間與招生狀態</p>
-
-    <div class="township-buttons" id="township-buttons"></div>
   </main>
 
   <script>

@@ -352,9 +352,11 @@ function renderNav() {
   );
   el.innerHTML = `
     <div class="nav-bar">
-      <a class="nav-brand" href="index.html">澎湖縣三力運動地圖</a>
-      <button type="button" class="nav-toggle" id="nav-toggle" aria-label="開啟選單" aria-expanded="false">☰ 選單</button>
-      <div class="nav-links" id="nav-links">${links}<span id="nav-auth-links"></span></div>
+      <a class="nav-brand" href="index.html">澎湖縣三力運動地圖資訊平台</a>
+      <div class="nav-menu">
+        <button type="button" class="nav-toggle" id="nav-toggle" aria-label="開啟選單" aria-expanded="false">☰ 選單</button>
+        <div class="nav-links" id="nav-links">${links}<span id="nav-auth-links"></span></div>
+      </div>
     </div>
   `;
   wireNavToggle();

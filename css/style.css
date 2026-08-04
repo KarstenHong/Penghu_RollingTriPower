@@ -36,6 +36,22 @@ main {
 
 .hint-text { font-size: 1.05em; color: #444; }
 
+/* 鄉鎮頁：該鄉鎮的景觀照當作滿版背景（不做霧化模糊，照片清晰呈現），內容卡片維持一般頁面的實心白底，
+   確保文字可讀性不受背景照片影響 */
+.township-bg {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  background: linear-gradient(160deg, #e3f4fb 0%, #fdf6ea 55%, #fbe9dd 100%);
+}
+
+  .township-bg img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
 /* 首頁入口歡迎畫面：整頁滿版風景照輪播＋置中文字，沒有導覽列（進站之後才出現），
    不用一般頁面的白色卡片版型，所以這裡沒有用 <main> */
 
@@ -140,30 +156,6 @@ main {
     .hero-cta { padding: 0.9rem 2.5rem; font-size: 1.2rem; }
   }
 
-/* 澎湖景觀照：貼在內容卡片頂端當作橫幅裝飾，不管螢幕多寬都看得到，
-   不加說明文字，只在角落留一個很小的出處標示 */
-
-.page-banner {
-  position: relative;
-  margin: -1.5rem -2rem 1.5rem;
-  height: 200px;
-  overflow: hidden;
-}
-
-  .page-banner img { width: 100%; height: 100%; object-fit: cover; display: block; }
-
-.photo-strip {
-  position: relative;
-  margin: -1.5rem -2rem 1.5rem;
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 2px;
-  height: 220px;
-  overflow: hidden;
-}
-
-  .photo-strip img { width: 100%; height: 100%; object-fit: cover; display: block; }
-
 /* 導覽列 */
 
 .nav-bar {
@@ -207,19 +199,23 @@ main {
 
   .nav-toggle:hover { background: rgba(255, 255, 255, 0.28); }
 
-/* 頁籤收合成選單：預設收起來，桌面滑鼠移到按鈕或選單上自動展開（見下方 hover 媒體查詢），
-   觸控裝置沒有 hover，改由 js/common.js 的 wireNavToggle() 點按鈕切換 .open */
+/* 選單按鈕跟下拉選單包在同一個 .nav-menu 裡，hover 判斷用父層而不是「按鈕:hover 才顯示」，
+   這樣滑鼠從按鈕往下移到選單清單的路徑上，不會有一段「兩邊都沒 hover 到」的空隙讓選單提早收合。
+   下拉選單本身用 top:100%（跟按鈕下緣完全貼齊、沒有 margin 空隙），視覺上的留白改用 padding-top，
+   因為 padding 還算在可以 hover 的範圍內，margin 不算。 */
+.nav-menu { position: relative; }
+
 .nav-links {
   display: none;
   position: absolute;
   top: 100%;
-  right: 1.5rem;
+  right: 0;
   flex-direction: column;
   align-items: flex-start;
   gap: 0.3rem;
   background: linear-gradient(135deg, #0a5c78 0%, #14919b 100%);
-  padding: 0.8rem 1.2rem 1rem;
-  border-radius: 0 0 14px 14px;
+  padding: 1.3rem 1.2rem 1rem;
+  border-radius: 14px;
   box-shadow: 0 10px 24px rgba(10, 92, 120, 0.4);
   min-width: 240px;
   max-height: 80vh;
@@ -230,8 +226,7 @@ main {
   .nav-links.open { display: flex; }
 
   @media (hover: hover) {
-    .nav-toggle:hover + .nav-links,
-    .nav-links:hover {
+    .nav-menu:hover .nav-links {
       display: flex;
     }
   }
@@ -320,6 +315,18 @@ main {
   margin: 0 auto;
 }
 
+/* 地圖本島（馬公/湖西/白沙/西嶼）縮放後的 viewBox 是直式的（高比寬多），如果讓它填滿 900px
+   容器寬度，換算出來的高度會超過 1000px、地名字也會被放大到不成比例；改用 max-height 夾住，
+   讓瀏覽器照長寬比整張縮小到合理大小（跟 <img> 的 object-fit: contain 同一種原理） */
+body.sports-map-page #map svg {
+  display: block;
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  max-height: 640px;
+  margin: 0 auto;
+}
+
 .map-wrap {
   padding: 1rem;
   background: linear-gradient(180deg, #cdeefb 0%, #e3f4fb 100%);
@@ -334,13 +341,13 @@ main {
   left: 0.7rem;
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 0.6rem;
   z-index: 2;
 }
 
 .map-inset {
-  width: 110px;
-  height: 110px;
+  width: 170px;
+  height: 170px;
   background: white;
   border: 2px solid white;
   border-radius: 50%;
@@ -356,18 +363,18 @@ main {
 
   .map-inset svg { width: 100%; height: 100%; }
 
-  .map-inset:hover, .map-inset:focus {
-    transform: scale(1.08);
+  .map-inset:hover, .map-inset:focus, .map-inset.highlight {
+    transform: scale(1.06);
     outline: none;
   }
 
   .map-inset-label {
     position: absolute;
-    bottom: 4px;
+    bottom: 8px;
     left: 0;
     right: 0;
     text-align: center;
-    font-size: 0.9rem;
+    font-size: 1.2rem;
     font-weight: bold;
     color: white;
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
@@ -379,15 +386,16 @@ main {
 /* 地圖上的小島不好點準時，直接點鄉鎮名稱一樣能到達，兩種方式並存 */
 .township-buttons {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 0.8rem;
-  max-width: 620px;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 0.6rem;
+  max-width: 900px;
   margin: 1.2rem auto 0;
 }
 
 .township-button {
   --tb-color: #14919b;
   min-height: 56px;
+  min-width: 0;
   padding: 0.6rem;
   border-radius: 14px;
   background: linear-gradient(135deg, var(--tb-color), color-mix(in srgb, var(--tb-color) 70%, black));
@@ -404,7 +412,8 @@ main {
   transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 
-  .township-button:hover {
+  .township-button:hover,
+  .township-button.highlight {
     transform: translateY(-3px);
     box-shadow: 0 8px 18px rgba(10, 92, 120, 0.35);
   }
@@ -580,14 +589,6 @@ svg text {
 }
 
 /* 首頁目錄 */
-
-.page-header-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 1rem;
-}
 
 .directory-grid {
   display: grid;
@@ -963,8 +964,9 @@ svg text {
 
   .icon-grid { grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); }
 
-  .page-banner { margin: -1.1rem -1.1rem 1.1rem; height: 140px; }
-  .photo-strip { margin: -1.1rem -1.1rem 1.1rem; height: 110px; }
+  /* venue-list 最小欄寬 280px、directory-grid 260px，比很多手機的可用寬度還寬，
+     沒有這個覆寫的話欄位撐不下去會把整頁往右推出去，變成要橫向捲動才看得到內容 */
+  .venue-list, .directory-grid { grid-template-columns: 1fr; }
 
   /* 手機地圖太小很難點準，把地圖區塊的內距縮小，讓地圖本身盡量畫大一點 */
   .map-wrap { padding: 0.5rem; }
@@ -972,8 +974,8 @@ svg text {
 
   .township-buttons { grid-template-columns: repeat(2, 1fr); }
 
-  .map-inset { width: 74px; height: 74px; }
-  .map-inset-label { font-size: 0.68rem; }
+  .map-inset { width: 120px; height: 120px; }
+  .map-inset-label { font-size: 0.85rem; bottom: 5px; }
 }
 
 /* 動畫效果：只在進場、互動當下播放一次，不做持續循環的晃動，
@@ -983,12 +985,10 @@ svg text {
 @keyframes fade-slide-down { from { opacity: 0; transform: translateY(-14px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
 @keyframes pop-in { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
-@keyframes gentle-zoom { from { transform: scale(1); } to { transform: scale(1.06); } }
 
 .nav-bar { animation: fade-slide-down 0.5s ease-out; }
 main { animation: fade-slide-up 0.5s ease-out; }
 
-.page-banner img, .photo-strip img { animation: gentle-zoom 12s ease-out forwards; }
 
 /* 卡片／清單項目進場淡入，依序錯開，最多做前 8 個以免項目一多要等很久 */
 :where(.venue-list, .post-list, .icon-grid, .township-buttons, .faq-list, .gallery-grid, .directory-grid) > *,

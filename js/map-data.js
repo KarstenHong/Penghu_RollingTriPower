@@ -182,14 +182,18 @@ function renderPenghuMap(containerId, ids) {
   });
 }
 
-// 滑鼠移到下方的鄉鎮按鈕時，讓地圖上對應的鄉鎮跟著亮起來（呼應），方便使用者對照按鈕跟地圖上的位置
+// 滑鼠移到下方的鄉鎮按鈕，或移到地圖上對應的鄉鎮（本島用地圖形狀，望安、七美用左上角縮圖），
+// 兩邊都會讓對方跟著亮起來（呼應），方便使用者對照按鈕跟地圖上的位置
 function wireTownshipButtonHover() {
   document.querySelectorAll(".township-buttons .township-button").forEach((btn) => {
     const id = btn.dataset.township;
-    const shape = document.querySelector(`.township-shape:not(.township-hit-area)[data-township="${id}"]`);
-    if (!shape) return;
-    btn.addEventListener("mouseenter", () => shape.classList.add("highlight"));
-    btn.addEventListener("mouseleave", () => shape.classList.remove("highlight"));
+    const target = document.querySelector(`.township-shape:not(.township-hit-area)[data-township="${id}"]`)
+      || document.getElementById(`inset-${id}`);
+    if (!target) return;
+    btn.addEventListener("mouseenter", () => target.classList.add("highlight"));
+    btn.addEventListener("mouseleave", () => target.classList.remove("highlight"));
+    target.addEventListener("mouseenter", () => btn.classList.add("highlight"));
+    target.addEventListener("mouseleave", () => btn.classList.remove("highlight"));
   });
 }
 
