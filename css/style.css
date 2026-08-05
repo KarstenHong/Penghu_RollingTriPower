@@ -974,8 +974,19 @@ svg text {
 
   .township-buttons { grid-template-columns: repeat(2, 1fr); }
 
-  .map-inset { width: 120px; height: 120px; }
-  .map-inset-label { font-size: 0.85rem; bottom: 5px; }
+  /* 手機螢幕窄，本島地圖填滿整個容器寬度後，左上角剛好對齊望安/七美縮圖原本疊放的位置，
+     縮圖會蓋住西嶼鄉/白沙鄉的圖形；改成不疊加、平移到地圖上方的一排，就不會再互相遮到 */
+  .map-container { display: flex; flex-direction: column; }
+  .map-insets {
+    position: static;
+    order: -1;
+    flex-direction: row;
+    justify-content: center;
+    gap: 0.8rem;
+    margin-bottom: 0.6rem;
+  }
+  .map-inset { width: 100px; height: 100px; }
+  .map-inset-label { font-size: 0.8rem; bottom: 4px; }
 }
 
 /* 動畫效果：只在進場、互動當下播放一次，不做持續循環的晃動，
