@@ -79,6 +79,12 @@ const PENGHU_MAP = {
         526,
         247,
         580
+      ],
+      "detailBbox": [
+        184,
+        526,
+        291,
+        588
       ]
     },
     "baisha": {
@@ -223,12 +229,33 @@ function renderMapInset(containerId, townshipId) {
   });
 }
 
-// 大部分鄉鎮的詳細頁地圖顯示完整轄區（含離島）；
-// 望安鄉的離島散得太開，照實際比例縮放會讓本島小到看不清楚，改成只放大顯示本島，犧牲地理比例換取清晰度。
+// 詳細頁地圖預設只放大顯示「本島」（mainBbox），每個鄉鎮縮放比例才會一致，不會有些鄉鎮（例如白沙、
+// 望安）因為離島散得很開，照完整轄區縮放讓本島變得很小、圖示比例跟地圖對不起來。
+// 望安鄉是唯一例外：緊鄰本島的將軍嶼也可能有課程據點，所以額外用 detailBbox 把將軍嶼一起框進來；
+// 其餘鄉鎮更遠的離島（虎井、桶盤、吉貝等）目前沒有另外框，如果之後那些離島也有課程據點要顯示，
+// 可以比照望安鄉的作法，個別加上 detailBbox。
 // township.html 畫運動圖示圖釘時也要用同一個 bbox，不然圖釘大小會跟地圖縮放比例對不起來。
 function getTownshipDetailBbox(townshipId) {
   const t = PENGHU_MAP.townships[townshipId];
-  return townshipId === "wangan" ? t.mainBbox : t.bbox;
+  return t.detailBbox || t.mainBbox;
+}
+
+// 詳細頁地圖實際顯示範圍（viewBox），renderTownshipMap 畫地圖跟 township.html 算圖示大小
+// 要用同一份計算，不然地圖縮放跟圖示比例會對不起來。
+function getTownshipViewBox(townshipId) {
+  const [bx0, by0, bx1, by1] = getTownshipDetailBbox(townshipId);
+  const pad = Math.max(5, (bx1 - bx0) * 0.05);
+  return { vx: bx0 - pad, vy: by0 - pad, vw: (bx1 - bx0) + pad * 2, vh: (by1 - by0) + pad * 2 };
+}
+
+// 圖示的「絕對大小」統一以望安鄉目前的呈現為準：望安鄉的圖示是本島寬度（mainBbox）的 13%，
+// 換算成「佔整張地圖畫面的比例」之後，套用同一個比例到其他鄉鎮，這樣不管各鄉鎮地圖範圍大小，
+// 圖示在畫面上的絕對大小都會跟望安鄉一致（而不是分別佔各自地圖的固定比例）。
+function getMarkerSizeRatio() {
+  const wangan = PENGHU_MAP.townships.wangan;
+  const [mbx0, , mbx1] = wangan.mainBbox;
+  const { vw } = getTownshipViewBox("wangan");
+  return ((mbx1 - mbx0) * 0.13) / vw;
 }
 
 function renderTownshipMap(containerId, townshipId) {
@@ -236,9 +263,7 @@ function renderTownshipMap(containerId, townshipId) {
   const t = PENGHU_MAP.townships[townshipId];
   if (!el || !t) return;
 
-  const [bx0, by0, bx1, by1] = getTownshipDetailBbox(townshipId);
-  const pad = Math.max(10, (bx1 - bx0) * 0.08);
-  const vx = bx0 - pad, vy = by0 - pad, vw = (bx1 - bx0) + pad * 2, vh = (by1 - by0) + pad * 2;
+  const { vx, vy, vw, vh } = getTownshipViewBox(townshipId);
 
   el.innerHTML = `
     <svg viewBox="${vx} ${vy} ${vw} ${vh}" role="img" aria-label="${t.name}地圖">
