@@ -181,7 +181,8 @@ main {
   text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.25);
 }
 
-.nav-toggle {
+.nav-toggle,
+.nav-home {
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
@@ -197,7 +198,10 @@ main {
   transition: background 0.15s ease;
 }
 
-  .nav-toggle:hover { background: rgba(255, 255, 255, 0.28); }
+  .nav-toggle:hover,
+  .nav-home:hover { background: rgba(255, 255, 255, 0.28); }
+
+  .nav-home { text-decoration: none; white-space: nowrap; }
 
 /* 選單按鈕跟下拉選單包在同一個 .nav-menu 裡，hover 判斷用父層而不是「按鈕:hover 才顯示」，
    這樣滑鼠從按鈕往下移到選單清單的路徑上，不會有一段「兩邊都沒 hover 到」的空隙讓選單提早收合。
