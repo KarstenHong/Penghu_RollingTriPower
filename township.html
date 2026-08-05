@@ -43,6 +43,9 @@
     let venues = [];
     let courses = [];
 
+    // 圖示在畫面上的最小像素大小（手機螢幕地圖縮得小，圖示比例縮放後容易小到看不清楚／點不準）
+    const MOBILE_MIN_MARKER_PX = 34;
+
     // 觸控裝置沒有滑鼠懸停，改成「點第一下看簡要資訊、點第二下（同一個圖示）才進入完整介紹」，
     // 避免一點就直接跳頁、還沒看到簡要資訊
     const canHover = window.matchMedia("(hover: hover)").matches;
@@ -61,6 +64,13 @@
       ]);
       document.getElementById("empty-hint").style.display = venues.length ? "none" : "block";
       renderMarkers();
+
+      // 轉螢幕方向或縮放視窗時地圖寬度會變，圖示的最小像素下限要跟著重算
+      let resizeTimer;
+      window.addEventListener("resize", () => {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(renderMarkers, 150);
+      });
     }
 
     // 把每個「據點＋運動」畫成地圖上的一個圖示圖釘，同一據點有多項運動時左右錯開避免疊在一起。
@@ -78,8 +88,13 @@
         });
       });
 
+      // 圖示比例是照地圖等比縮放，手機螢幕地圖本身就縮得比較小，圖示會跟著縮到很難看清楚／點準，
+      // 這裡量出地圖實際畫面寬度，換算出一個「螢幕最小像素」下限，手機上圖示不會比這個下限更小
       const { vw } = getTownshipViewBox(townshipId);
-      const markerSize = vw * getMarkerSizeRatio();
+      const svgEl = document.querySelector("#township-map svg");
+      const renderedWidth = svgEl ? svgEl.getBoundingClientRect().width : vw;
+      const minSizeRatio = renderedWidth > 0 ? MOBILE_MIN_MARKER_PX / renderedWidth : 0;
+      const markerSize = vw * Math.max(getMarkerSizeRatio(), minSizeRatio);
       let svg = "";
       Object.values(byVenue).forEach(({ venue, sports }) => {
         const [px, py] = projectLatLng(venue.lat, venue.lng);
