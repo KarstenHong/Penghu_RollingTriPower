@@ -55,6 +55,16 @@
       ? "滑鼠移到地圖上的圖示可以看簡要資訊，點擊圖示可以看完整介紹"
       : "點一下圖示可以看簡要資訊，再點一次同一個圖示可以看完整介紹";
 
+    // 點地圖上圖釘以外的地方，取消目前選取的圖釘；只要註冊一次即可，不需要每次重畫圖釘都重新加一份
+    if (!canHover) {
+      document.addEventListener("click", (e) => {
+        if (activeTouchMarker && !e.target.closest(".map-marker-hit")) {
+          activeTouchMarker = null;
+          hideMarkerTooltip();
+        }
+      });
+    }
+
     async function init() {
       renderTownshipMap("township-map", townshipId);
       await loadSportTypes();
@@ -79,6 +89,13 @@
       const group = document.getElementById("township-map-markers");
       const t = PENGHU_MAP.townships[townshipId];
       if (!group || !t) return;
+
+      // 重畫圖釘（例如 resize 觸發）會把舊的圖釘節點整個換掉，先前選取的圖釘節點就沒了，
+      // 沒有清掉的話「點兩下才進入介紹頁」的判斷會一直卡在已經不存在的舊節點上
+      if (!canHover) {
+        activeTouchMarker = null;
+        hideMarkerTooltip();
+      }
 
       const byVenue = {};
       venues.forEach((v) => {
@@ -135,15 +152,6 @@
 
         marker.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") go(); });
       });
-
-      if (!canHover) {
-        document.addEventListener("click", (e) => {
-          if (activeTouchMarker && !e.target.closest(".map-marker-hit")) {
-            activeTouchMarker = null;
-            hideMarkerTooltip();
-          }
-        });
-      }
     }
 
     function showMarkerTooltip(e, venueId, sport) {
