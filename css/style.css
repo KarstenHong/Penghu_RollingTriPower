@@ -101,6 +101,12 @@ main {
   padding: 2rem 1.5rem;
 }
 
+.hero-logo {
+  width: 200px;
+  height: 200px;
+  filter: drop-shadow(0 4px 16px rgba(0, 0, 0, 0.4));
+}
+
   .hero-content h1 {
     font-size: 2.6em;
     color: white;
@@ -154,6 +160,7 @@ main {
     .hero-content h1 { font-size: 1.9em; }
     .hero-content p { font-size: 1.05rem; }
     .hero-cta { padding: 0.9rem 2.5rem; font-size: 1.2rem; }
+    .hero-logo { width: 130px; height: 130px; }
   }
 
 /* 導覽列 */
@@ -173,6 +180,9 @@ main {
 }
 
 .nav-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
   color: white;
   font-weight: bold;
   font-size: 1.25rem;
@@ -180,6 +190,8 @@ main {
   margin-right: auto;
   text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.25);
 }
+
+.nav-logo { height: 40px; width: 40px; flex-shrink: 0; }
 
 .nav-toggle,
 .nav-home {
@@ -875,7 +887,7 @@ svg text {
     border-radius: 8px;
   }
 
-/* 三力運動地圖：找不到符合篩選條件的據點時，改顯示「還沒開課」呼籲區塊 */
+/* 滾動三力學運動地圖：找不到符合篩選條件的據點時，改顯示「還沒開課」呼籲區塊 */
 
 .map-cta {
   margin-top: 1rem;
@@ -961,6 +973,7 @@ svg text {
 
   .nav-bar { padding: 0.75rem 1rem; }
   .nav-brand { font-size: 1.05rem; }
+  .nav-logo { height: 32px; width: 32px; }
   .nav-links { gap: 0.5rem; right: 1rem; min-width: 200px; }
   .nav-links a { font-size: 0.9rem; padding: 0.25rem 0.45rem; }
 
