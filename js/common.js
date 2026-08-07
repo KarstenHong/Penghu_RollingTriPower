@@ -352,7 +352,7 @@ function renderNav() {
   );
   el.innerHTML = `
     <div class="nav-bar">
-      <a class="nav-brand" href="index.html"><img src="images/logo-banner.jpg" alt="澎湖縣滾動三力學運動地圖資訊平台" class="nav-logo" /></a>
+      <a class="nav-brand" href="index.html"><img src="images/logo-banner.jpg" alt="" class="nav-logo" />澎湖縣滾動三力學運動地圖資訊平台</a>
       <a class="nav-home" href="home-map.html">🏠 返回首頁</a>
       <div class="nav-menu">
         <button type="button" class="nav-toggle" id="nav-toggle" aria-label="開啟選單" aria-expanded="false">☰ 選單</button>

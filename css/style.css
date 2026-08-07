@@ -229,7 +229,7 @@ main {
   top: 100%;
   right: 0;
   flex-direction: column;
-  align-items: center;
+  align-items: flex-start;
   gap: 0.3rem;
   background: linear-gradient(135deg, #0a5c78 0%, #14919b 100%);
   padding: 1.3rem 1.2rem 1rem;
@@ -744,6 +744,16 @@ svg text {
   gap: 0.9rem;
   max-width: 480px;
 }
+
+/* 登入頁只有一個表單，內容比 main 卡片窄很多，改成整欄置中，不要貼著卡片左邊 */
+.centered-form-page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+  .centered-form-page .member-form { text-align: left; }
 
   .member-form label { display: flex; flex-direction: column; gap: 0.3rem; font-weight: bold; color: #333; }
 
