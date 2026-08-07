@@ -81,7 +81,7 @@ const VENUE_TYPES = [
   { id: "health_center", name: "衛生所" },
 ];
 
-// 上課時段（三力運動地圖規格的搜尋篩選要用），課程的上課時間本身是自由填寫的文字（例如「每週三14:00-16:00」），
+// 上課時段（滾動三力學運動地圖規格的搜尋篩選要用），課程的上課時間本身是自由填寫的文字（例如「每週三14:00-16:00」），
 // 沒辦法直接拿來篩選，所以另外加這個結構化欄位讓後台填課程時額外選一個時段
 const TIME_SLOTS = [
   { id: "weekday-morning", name: "平日上午" },
@@ -150,7 +150,7 @@ function sportIcon(id) {
   return SPORT_TYPES.find((s) => s.id === id)?.icon || "";
 }
 
-// 課程招生狀態，固定 6 種（客戶「三力運動地圖」規格指定），不像運動項目那樣需要後台新增，所以直接寫死；
+// 課程招生狀態，固定 6 種（客戶「滾動三力學運動地圖」規格指定），不像運動項目那樣需要後台新增，所以直接寫死；
 // 規格要求不能只靠顏色辨識，所以每個狀態都同時有文字跟圖示（多數用圓點，體驗活動用星形跟其他狀態明顯不同）
 const COURSE_STATUS = {
   enrolling: { label: "招生中", color: "#2a9d5f", icon: "●" },
@@ -225,9 +225,9 @@ function venueTypeName(id) {
 const NAV_LINKS = [
   { href: "home-map.html", label: "首頁" },
   { href: "posts.html?category=news", label: "最新消息" },
-  { href: "about-program.html", label: "認識三力學" },
+  { href: "about-program.html", label: "認識滾動三力學" },
   { href: "course-benefits.html", label: "課程效益" },
-  { href: "sports-map.html", label: "三力運動地圖" },
+  { href: "sports-map.html", label: "滾動三力學運動地圖" },
   { href: "join-course.html", label: "參與課程" },
   { href: "join-team.html", label: "加入指導團隊" },
   { href: "results-contact.html", label: "成果與資源／聯絡我們" },
@@ -352,7 +352,7 @@ function renderNav() {
   );
   el.innerHTML = `
     <div class="nav-bar">
-      <a class="nav-brand" href="index.html">澎湖縣三力運動地圖資訊平台</a>
+      <a class="nav-brand" href="index.html"><img src="images/logo-circle-sm.png" alt="" class="nav-logo" />澎湖縣滾動三力學運動地圖資訊平台</a>
       <a class="nav-home" href="home-map.html">🏠 返回首頁</a>
       <div class="nav-menu">
         <button type="button" class="nav-toggle" id="nav-toggle" aria-label="開啟選單" aria-expanded="false">☰ 選單</button>
