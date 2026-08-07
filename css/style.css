@@ -193,7 +193,7 @@ main {
   text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.25);
 }
 
-.nav-logo { height: 40px; width: 40px; flex-shrink: 0; }
+.nav-logo { height: 44px; width: auto; flex-shrink: 0; border-radius: 6px; }
 
 .nav-toggle,
 .nav-home {
@@ -229,7 +229,7 @@ main {
   top: 100%;
   right: 0;
   flex-direction: column;
-  align-items: flex-start;
+  align-items: center;
   gap: 0.3rem;
   background: linear-gradient(135deg, #0a5c78 0%, #14919b 100%);
   padding: 1.3rem 1.2rem 1rem;
@@ -975,7 +975,7 @@ svg text {
 
   .nav-bar { padding: 0.75rem 1rem; }
   .nav-brand { font-size: 1.05rem; }
-  .nav-logo { height: 32px; width: 32px; }
+  .nav-logo { height: 34px; width: auto; }
   .nav-links { gap: 0.5rem; right: 1rem; min-width: 200px; }
   .nav-links a { font-size: 0.9rem; padding: 0.25rem 0.45rem; }
 
