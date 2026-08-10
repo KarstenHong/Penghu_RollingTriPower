@@ -41,6 +41,9 @@
     }
 
     async function deleteFaq(id) {
+      const faq = faqs.find((f) => f.id === id);
+      const confirmed = await showConfirmDialog(`確定要刪除「${faq.question}」這則問題嗎？`, { confirmLabel: "刪除", danger: true });
+      if (!confirmed) return;
       await deleteItem("faq", id);
       await reload();
     }

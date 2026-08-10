@@ -42,6 +42,9 @@
     }
 
     async function deleteVenue(id) {
+      const venue = venues.find((v) => v.id === id);
+      const confirmed = await showConfirmDialog(`確定要刪除「${venue.name}」嗎？`, { confirmLabel: "刪除", danger: true });
+      if (!confirmed) return;
       await deleteItem("venues", id);
       await reload();
     }

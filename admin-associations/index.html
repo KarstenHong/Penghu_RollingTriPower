@@ -41,6 +41,9 @@
     }
 
     async function deleteAssociation(id) {
+      const association = associations.find((a) => a.id === id);
+      const confirmed = await showConfirmDialog(`確定要刪除「${association.name}」嗎？`, { confirmLabel: "刪除", danger: true });
+      if (!confirmed) return;
       await deleteItem("associations", id);
       await reload();
     }
