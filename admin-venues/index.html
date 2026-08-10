@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>場域管理 - 澎湖縣滾動三力學運動地圖資訊平台</title>
+  <link rel="stylesheet" href="/css/style.css" />
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+  <script src="/js/firebase-config.js"></script>
+  <script src="/js/data.js"></script>
+  <script src="/js/auth.js"></script>
+  <script src="/js/common.js"></script>
+</head>
+<body>
+  <div id="nav"></div>
+  <main>
+    <a href="/admin/" class="back-button">&larr; 返回後台首頁</a>
+    <h1>場域管理</h1>
+    <div id="content"><p>載入中...</p></div>
+  </main>
+
+  <script>
+    let venues = [];
+    let editing = null;
+
+    async function reload() {
+      venues = await getAll("venues");
+      render();
+    }
+
+    function newVenue() {
+      editing = { name: "", township: "", type: "", address: "", phone: "", sportTypes: [], lat: "", lng: "", photoUrl: "" };
+      render();
+    }
+
+    function editVenue(id) {
+      const v = venues.find((x) => x.id === id);
+      editing = JSON.parse(JSON.stringify(v));
+      render();
+    }
+
+    async function deleteVenue(id) {
+      await deleteItem("venues", id);
+      await reload();
+    }
+
+    async function saveVenue(e) {
+      e.preventDefault();
+      editing.name = document.getElementById("f-name").value;
+      editing.township = document.getElementById("f-township").value;
+      editing.type = document.getElementById("f-type").value;
+      editing.address = document.getElementById("f-address").value;
+      editing.phone = document.getElementById("f-phone").value;
+      editing.lat = parseFloat(document.getElementById("f-lat").value) || null;
+      editing.lng = parseFloat(document.getElementById("f-lng").value) || null;
+      editing.sportTypes = Array.from(document.querySelectorAll(".f-sport:checked")).map((c) => c.value);
+      editing.photoUrl = document.getElementById("f-photo").value;
+
+      if (editing.id) {
+        await setItem("venues", editing.id, editing);
+      } else {
+        await addItem("venues", editing);
+      }
+      editing = null;
+      await reload();
+    }
+
+    function render() {
+      document.getElementById("content").innerHTML = `
+        <button class="primary-button" onclick="newVenue()" style="display: block; margin: 0.8rem 0 1.2rem;">+ 新增場域</button>
+        <div class="table-scroll"><table class="admin-table">
+          <thead><tr><th>照片</th><th>名稱</th><th>鄉鎮</th><th>類型</th><th></th></tr></thead>
+          <tbody>
+            ${venues.map((v) => `
+              <tr>
+                <td>${v.photoUrl ? `<img src="${escapeHtml(v.photoUrl)}" alt="" style="width:60px;height:60px;object-fit:cover;border-radius:8px;" />` : ""}</td>
+                <td>${escapeHtml(v.name)}</td>
+                <td>${townshipName(v.township)}</td>
+                <td>${venueTypeName(v.type)}</td>
+                <td>
+                  <button onclick="editVenue('${v.id}')">編輯</button>
+                  <button onclick="deleteVenue('${v.id}')">刪除</button>
+                </td>
+              </tr>
+            `).join("")}
+          </tbody>
+        </table></div>
+      `;
+
+      if (!editing) { renderEditModal(null); return; }
+
+      renderEditModal(`
+        <form class="member-form" id="venue-form">
+          <label>名稱 <input type="text" id="f-name" value="${escapeHtml(editing.name)}" required /></label>
+          <label>鄉鎮
+            <select id="f-township">
+              <option value="">請選擇</option>
+              ${TOWNSHIPS.map((t) => `<option value="${t.id}" ${editing.township === t.id ? "selected" : ""}>${t.name}</option>`).join("")}
+            </select>
+          </label>
+          <label>類型
+            <select id="f-type">
+              <option value="">請選擇</option>
+              ${VENUE_TYPES.map((t) => `<option value="${t.id}" ${editing.type === t.id ? "selected" : ""}>${t.name}</option>`).join("")}
+            </select>
+          </label>
+          <label>地址 <input type="text" id="f-address" value="${escapeHtml(editing.address)}" /></label>
+          <label>電話 <input type="text" id="f-phone" value="${escapeHtml(editing.phone)}" /></label>
+          <label>照片網址（選填） <input type="text" id="f-photo" value="${escapeHtml(editing.photoUrl)}" /></label>
+          <label>緯度 Latitude（用於在鄉鎮地圖上標示位置，可到 Google 地圖上按右鍵複製座標）
+            <input type="number" step="any" id="f-lat" value="${editing.lat ?? ""}" placeholder="例如 23.5654" />
+          </label>
+          <label>經度 Longitude
+            <input type="number" step="any" id="f-lng" value="${editing.lng ?? ""}" placeholder="例如 119.5654" />
+          </label>
+          <fieldset>
+            <legend>提供的運動項目</legend>
+            ${activeSportTypes(editing.sportTypes || []).map((s) => `
+              <label class="checkbox-line">
+                <input type="checkbox" class="f-sport" value="${s.id}" ${(editing.sportTypes || []).includes(s.id) ? "checked" : ""} />
+                ${s.name}
+              </label>
+            `).join("")}
+          </fieldset>
+          <button type="submit" class="primary-button">儲存</button>
+          <button type="button" class="secondary-button" onclick="editing = null; render();">取消</button>
+        </form>
+      `, () => { editing = null; render(); });
+
+      document.getElementById("venue-form").addEventListener("submit", saveVenue);
+    }
+
+    requireAdmin(async () => {
+      await loadSportTypes();
+      await reload();
+    });
+  </script>
+</body>
+</html>

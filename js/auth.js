@@ -26,13 +26,13 @@ function onAuthReady(callback) {
 function requireAdmin(callback) {
   onAuthReady(async (user) => {
     if (!user) {
-      location.href = "login.html";
+      location.href = "/login/";
       return;
     }
     const profile = await getById("users", user.uid);
     if (!profile || profile.role !== "admin") {
       alert("您沒有後台管理權限");
-      location.href = "home-map.html";
+      location.href = "/home-map/";
       return;
     }
     callback(user, profile);

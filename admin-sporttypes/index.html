@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>運動項目管理 - 澎湖縣滾動三力學運動地圖資訊平台</title>
+  <link rel="stylesheet" href="/css/style.css" />
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+  <script src="/js/firebase-config.js"></script>
+  <script src="/js/data.js"></script>
+  <script src="/js/auth.js"></script>
+  <script src="/js/common.js"></script>
+</head>
+<body>
+  <div id="nav"></div>
+  <main>
+    <a href="/admin/" class="back-button">&larr; 返回後台首頁</a>
+    <h1>運動項目管理</h1>
+    <p class="hint-text">下架的項目不會再出現在民眾可以「新選」的地方（搜尋篩選、鄉鎮圖示、會員喜愛運動…），但已經選過的舊資料不受影響，名稱與圖示照樣顯示。</p>
+    <div id="content"><p>載入中...</p></div>
+  </main>
+
+  <script>
+    let sportTypes = [];
+    let editing = null;
+
+    async function reload() {
+      sportTypes = await getAll("sportTypes");
+      render();
+    }
+
+    async function seedDefaults() {
+      for (const s of DEFAULT_SPORT_TYPES) {
+        await setItem("sportTypes", s.id, s);
+      }
+      await reload();
+    }
+
+    function newSport() {
+      editing = { name: "", icon: "", active: true };
+      render();
+    }
+
+    function editSport(id) {
+      editing = JSON.parse(JSON.stringify(sportTypes.find((s) => s.id === id)));
+      render();
+    }
+
+    async function toggleActive(id) {
+      const s = sportTypes.find((x) => x.id === id);
+      await setItem("sportTypes", id, { active: !s.active });
+      await reload();
+    }
+
+    async function saveSport(e) {
+      e.preventDefault();
+      editing.name = document.getElementById("f-name").value;
+      editing.icon = document.getElementById("f-icon").value || "images/icons/default.svg";
+      if (editing.active === undefined) editing.active = true;
+
+      if (editing.id) {
+        await setItem("sportTypes", editing.id, editing);
+      } else {
+        await addItem("sportTypes", editing);
+      }
+      editing = null;
+      await reload();
+    }
+
+    function render() {
+      let html = `<button class="primary-button" onclick="newSport()" style="display: block; margin: 0.8rem 0 1.2rem;">+ 新增運動項目</button>`;
+
+      if (!sportTypes.length) {
+        html += `
+          <p class="hint-text">目前還沒有運動項目資料。</p>
+          <button class="primary-button" onclick="seedDefaults()">建立預設的 8 種運動項目</button>
+        `;
+      } else {
+        html += `
+          <div class="table-scroll"><table class="admin-table">
+            <thead><tr><th>圖示</th><th>名稱</th><th>狀態</th><th></th></tr></thead>
+            <tbody>
+              ${sportTypes.map((s) => `
+                <tr>
+                  <td><img src="${escapeHtml(s.icon || "images/icons/default.svg")}" alt="" style="width:44px;height:44px;" /></td>
+                  <td>${escapeHtml(s.name)}</td>
+                  <td>${s.active !== false ? "上架中" : "已下架"}</td>
+                  <td>
+                    <button onclick="editSport('${s.id}')">編輯</button>
+                    <button onclick="toggleActive('${s.id}')">${s.active !== false ? "下架" : "上架"}</button>
+                  </td>
+                </tr>
+              `).join("")}
+            </tbody>
+          </table></div>
+        `;
+      }
+
+      document.getElementById("content").innerHTML = html;
+
+      if (!editing) { renderEditModal(null); return; }
+
+      renderEditModal(`
+        <form class="member-form" id="sport-form">
+          <label>名稱 <input type="text" id="f-name" value="${escapeHtml(editing.name)}" required /></label>
+          <label>圖示網址（選填，留空使用預設圖示） <input type="text" id="f-icon" value="${escapeHtml(editing.icon || "")}" /></label>
+          <button type="submit" class="primary-button">儲存</button>
+          <button type="button" class="secondary-button" onclick="editing = null; render();">取消</button>
+        </form>
+      `, () => { editing = null; render(); });
+
+      document.getElementById("sport-form").addEventListener("submit", saveSport);
+    }
+
+    requireAdmin(() => reload());
+  </script>
+</body>
+</html>
