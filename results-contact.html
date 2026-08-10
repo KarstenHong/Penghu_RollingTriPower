@@ -28,8 +28,8 @@
     let photos = [];
 
     async function initGallery() {
-      photos = await getAll("gallery");
-      photos.sort((a, b) => (b.date || "").localeCompare(a.date || ""));
+      const [albums, allPhotos] = await Promise.all([getAll("albums"), getAll("gallery")]);
+      photos = allPhotos.sort((a, b) => (b.date || "").localeCompare(a.date || ""));
 
       const el = document.getElementById("gallery-content");
       if (!photos.length) {
@@ -37,12 +37,20 @@
         return;
       }
 
-      el.innerHTML = '<div class="gallery-grid">' + photos.map((p, i) => `
-        <button type="button" class="gallery-thumb" onclick="openPhoto(${i})">
-          <img src="${escapeHtml(p.imageUrl)}" alt="" loading="lazy" />
-          ${p.caption ? `<span class="gallery-caption">${escapeHtml(p.caption)}</span>` : ""}
-        </button>
-      `).join("") + "</div>";
+      el.innerHTML = albums
+        .filter((a) => photos.some((p) => p.albumId === a.id))
+        .map((a) => `
+          <h2>${escapeHtml(a.name)}</h2>
+          <div class="gallery-grid">${photos
+            .map((p, i) => ({ p, i }))
+            .filter(({ p }) => p.albumId === a.id)
+            .map(({ p, i }) => `
+              <button type="button" class="gallery-thumb" onclick="openPhoto(${i})">
+                <img src="${escapeHtml(p.imageUrl)}" alt="" loading="lazy" />
+                ${p.caption ? `<span class="gallery-caption">${escapeHtml(p.caption)}</span>` : ""}
+              </button>
+            `).join("")}</div>
+        `).join("");
     }
 
     function openPhoto(i) {
