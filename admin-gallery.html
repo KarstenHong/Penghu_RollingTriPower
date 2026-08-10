@@ -123,36 +123,44 @@
       return out;
     }
 
+    // 編輯既有照片時只換一張圖；新增時可以一次選多個檔案，逐張壓縮後各自存成一筆，
+    // 說明／日期是共用同一份輸入值（批次上傳同一天的活動照片最常見的用法），事後要改個別說明再進編輯
     async function savePhoto(e) {
       e.preventDefault();
       const form = e.target;
-      const file = document.getElementById("f-photo-file").files[0];
+      const files = [...document.getElementById("f-photo-file").files];
       const caption = document.getElementById("f-caption").value;
       const date = document.getElementById("f-date").value;
       const saveBtn = form.querySelector('button[type="submit"]');
 
-      if (!file && !editingPhoto.imageUrl) {
+      if (!files.length && !editingPhoto.imageUrl) {
         alert("請選擇照片檔案");
         return;
       }
 
       saveBtn.disabled = true;
-      saveBtn.textContent = "處理中...";
       try {
-        let imageUrl = editingPhoto.imageUrl;
-        if (file) {
-          imageUrl = await fileToCompressedDataUrl(file);
-          if (imageUrl.length > 1000000) {
-            alert("這張照片壓縮後還是太大，請換一張較小的照片再試一次");
-            return;
-          }
-        }
-
-        const data = { albumId: currentAlbumId, imageUrl, caption, date };
         if (editingPhoto.id) {
-          await setItem("gallery", editingPhoto.id, data);
+          saveBtn.textContent = "處理中...";
+          let imageUrl = editingPhoto.imageUrl;
+          if (files[0]) {
+            imageUrl = await fileToCompressedDataUrl(files[0]);
+            if (imageUrl.length > 1000000) {
+              alert("這張照片壓縮後還是太大，請換一張較小的照片再試一次");
+              return;
+            }
+          }
+          await setItem("gallery", editingPhoto.id, { albumId: currentAlbumId, imageUrl, caption, date });
         } else {
-          await addItem("gallery", data);
+          for (let i = 0; i < files.length; i++) {
+            saveBtn.textContent = `處理中...（${i + 1}/${files.length}）`;
+            const imageUrl = await fileToCompressedDataUrl(files[i]);
+            if (imageUrl.length > 1000000) {
+              alert(`「${files[i].name}」壓縮後還是太大，已略過，請換一張較小的照片再試`);
+              continue;
+            }
+            await addItem("gallery", { albumId: currentAlbumId, imageUrl, caption, date });
+          }
         }
         editingPhoto = null;
         await reload();
@@ -236,11 +244,11 @@
       if (editingPhoto) {
         renderEditModal(`
           <form class="member-form" id="photo-form">
-            <label>照片檔案 ${editingPhoto.id ? "（不選則保留原照片）" : ""}
-              <input type="file" id="f-photo-file" accept="image/*" ${editingPhoto.id ? "" : "required"} />
+            <label>照片檔案 ${editingPhoto.id ? "（不選則保留原照片）" : "（可一次選多張）"}
+              <input type="file" id="f-photo-file" accept="image/*" ${editingPhoto.id ? "" : "multiple required"} />
             </label>
             ${editingPhoto.imageUrl ? `<img src="${escapeHtml(editingPhoto.imageUrl)}" alt="" style="width:100px;height:100px;object-fit:cover;border-radius:8px;" />` : ""}
-            <label>說明（選填） <input type="text" id="f-caption" value="${escapeHtml(editingPhoto.caption)}" /></label>
+            <label>說明${editingPhoto.id ? "（選填）" : "（選填，多張照片會共用同一份說明）"} <input type="text" id="f-caption" value="${escapeHtml(editingPhoto.caption)}" /></label>
             <label>日期 <input type="date" id="f-date" value="${escapeHtml(editingPhoto.date)}" /></label>
             <button type="submit" class="primary-button">儲存</button>
             <button type="button" class="secondary-button" onclick="editingPhoto = null; render();">取消</button>
