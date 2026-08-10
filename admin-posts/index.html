@@ -41,6 +41,9 @@
     }
 
     async function deletePost(id) {
+      const post = posts.find((p) => p.id === id);
+      const confirmed = await showConfirmDialog(`確定要刪除「${post.title}」這則公告嗎？`, { confirmLabel: "刪除", danger: true });
+      if (!confirmed) return;
       await deleteItem("posts", id);
       await reload();
     }

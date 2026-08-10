@@ -50,6 +50,12 @@
     }
 
     async function deleteCourse(id) {
+      const course = courses.find((c) => c.id === id);
+      const confirmed = await showConfirmDialog(
+        `確定要刪除「${venueName(course.venueId)}｜${sportName(course.sportType)}」這筆課程嗎？`,
+        { confirmLabel: "刪除", danger: true },
+      );
+      if (!confirmed) return;
       await deleteItem("courses", id);
       await reload();
     }
