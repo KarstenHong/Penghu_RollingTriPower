@@ -142,15 +142,19 @@ function townshipName(id) {
   return TOWNSHIPS.find((t) => t.id === id)?.name || id;
 }
 
+// 運動項目名稱是後台可編輯的 Firestore 資料，這裡直接做轉義（而不是要求每個呼叫端各自包 escapeHtml），
+// 這樣不管哪個頁面呼叫都不會漏，避免後台帳號被盜用時，有心人士能透過項目名稱對一般訪客執行 XSS
 function sportName(id) {
-  return SPORT_TYPES.find((s) => s.id === id)?.name || id;
+  return escapeHtml(SPORT_TYPES.find((s) => s.id === id)?.name || id);
 }
 
 // 既有 Firestore 資料可能是改成資料夾結構前存的相對路徑（例如 "images/icons/taichi.svg"），
-// 頁面現在都搬進子資料夾了，相對路徑會解析錯地方，這裡統一補成根路徑；外部網址／已經是根路徑的不動
+// 頁面現在都搬進子資料夾了，相對路徑會解析錯地方，這裡統一補成根路徑；外部網址／已經是根路徑的不動。
+// 圖示網址同樣是後台可編輯欄位，插進 href="..." 屬性前一併轉義，避免被拿來跳脫屬性做 XSS
 function sportIcon(id) {
   const icon = SPORT_TYPES.find((s) => s.id === id)?.icon || "";
-  return icon && !icon.startsWith("/") && !icon.startsWith("http") ? "/" + icon : icon;
+  const normalized = icon && !icon.startsWith("/") && !icon.startsWith("http") ? "/" + icon : icon;
+  return escapeHtml(normalized);
 }
 
 // 課程招生狀態，固定 6 種（客戶「滾動三力學運動地圖」規格指定），不像運動項目那樣需要後台新增，所以直接寫死；
