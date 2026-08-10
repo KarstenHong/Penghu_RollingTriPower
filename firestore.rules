@@ -53,13 +53,15 @@ service cloud.firestore {
     }
 
     // 會員資料：本人可讀寫自己的文件；admin 可讀所有人（後台管理會員時可擴充）
-    // role 欄位只能由已經是 admin 的人變更，避免使用者自行把自己升級成 admin
+    // 自行註冊只能建立 role: "user" 的文件（避免自己把自己升成 admin）；
+    // admin 額外可以建立/刪除別人的文件，供後台「管理者帳號管理」新增/刪除管理者用
     match /users/{uid} {
       allow read: if isSignedIn() && (request.auth.uid == uid || isAdmin());
-      allow create: if isSignedIn() && request.auth.uid == uid && request.resource.data.role == "user";
+      allow create: if (isSignedIn() && request.auth.uid == uid && request.resource.data.role == "user")
+                       || isAdmin();
       allow update: if isSignedIn() && request.auth.uid == uid &&
                        request.resource.data.role == resource.data.role;
-      allow delete: if false;
+      allow delete: if isAdmin();
     }
   }
 }
