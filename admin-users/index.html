@@ -25,6 +25,7 @@
   <script>
     let admins = [];
     let creating = false;
+    let editingAdmin = null;
 
     async function reload() {
       admins = (await getAll("users")).filter((u) => u.role === "admin");
@@ -75,6 +76,22 @@
       await reload();
     }
 
+    // 舊帳號是直接在 Firebase 主控台手動建立 users 文件的（早期做法），沒有存 email 欄位，
+    // 清單只能顯示文件 id（UID）；免費方案沒辦法從前端反查「這個 UID 對應哪個信箱」（要 Admin SDK），
+    // 只能請管理者自己補打一次，這裡存的 email 只是給這個清單顯示用，不會改動 Firebase Authentication 本身的登入信箱
+    function editAdmin(uid) {
+      editingAdmin = admins.find((a) => a.id === uid);
+      render();
+    }
+
+    async function saveAdminEmail(e) {
+      e.preventDefault();
+      const email = document.getElementById("f-edit-email").value.trim();
+      await setItem("users", editingAdmin.id, { email });
+      editingAdmin = null;
+      await reload();
+    }
+
     function render() {
       document.getElementById("content").innerHTML = `
         <button class="primary-button" onclick="newAdmin()" style="display: block; margin: 0.8rem 0 1.2rem;">+ 新增管理者</button>
@@ -83,26 +100,44 @@
           <tbody>
             ${admins.map((a) => `
               <tr>
-                <td>${escapeHtml(a.email || a.id)}</td>
-                <td><button onclick="removeAdmin('${a.id}')">刪除</button></td>
+                <td>${a.email ? escapeHtml(a.email) : `<span class="hint-text">（未設定 Email，UID：${escapeHtml(a.id)}）</span>`}</td>
+                <td>
+                  <button onclick="editAdmin('${a.id}')">${a.email ? "編輯" : "設定 Email"}</button>
+                  <button onclick="removeAdmin('${a.id}')">刪除</button>
+                </td>
               </tr>
             `).join("") || `<tr><td colspan="2">目前沒有管理者帳號。</td></tr>`}
           </tbody>
         </table></div>
       `;
 
-      if (!creating) { renderEditModal(null); return; }
+      if (creating) {
+        renderEditModal(`
+          <form class="member-form" id="admin-form">
+            <label>Email <input type="email" id="f-email" required /></label>
+            <p class="hint-text">建立後會寄送「設定密碼」信到這個信箱，對方自行設定密碼即可登入，不用先幫他想密碼。</p>
+            <button type="submit" class="primary-button">建立</button>
+            <button type="button" class="secondary-button" onclick="creating = false; render();">取消</button>
+          </form>
+        `, () => { creating = false; render(); });
+        document.getElementById("admin-form").addEventListener("submit", addAdmin);
+        return;
+      }
 
-      renderEditModal(`
-        <form class="member-form" id="admin-form">
-          <label>Email <input type="email" id="f-email" required /></label>
-          <p class="hint-text">建立後會寄送「設定密碼」信到這個信箱，對方自行設定密碼即可登入，不用先幫他想密碼。</p>
-          <button type="submit" class="primary-button">建立</button>
-          <button type="button" class="secondary-button" onclick="creating = false; render();">取消</button>
-        </form>
-      `, () => { creating = false; render(); });
+      if (editingAdmin) {
+        renderEditModal(`
+          <form class="member-form" id="admin-edit-form">
+            <label>Email <input type="email" id="f-edit-email" value="${escapeHtml(editingAdmin.email || "")}" required /></label>
+            <p class="hint-text">這裡只是補存這筆紀錄要顯示的 Email，不會變更對方在 Firebase Authentication 裡實際登入用的信箱。</p>
+            <button type="submit" class="primary-button">儲存</button>
+            <button type="button" class="secondary-button" onclick="editingAdmin = null; render();">取消</button>
+          </form>
+        `, () => { editingAdmin = null; render(); });
+        document.getElementById("admin-edit-form").addEventListener("submit", saveAdminEmail);
+        return;
+      }
 
-      document.getElementById("admin-form").addEventListener("submit", addAdmin);
+      renderEditModal(null);
     }
 
     requireAdmin(() => reload());
