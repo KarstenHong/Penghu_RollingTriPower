@@ -22,52 +22,189 @@
   </main>
 
   <script>
+    let albums = [];
     let photos = [];
-    let editing = null;
+    let currentAlbumId = null;
+    let editingAlbum = null;
+    let editingPhoto = null;
 
     async function reload() {
-      photos = await getAll("gallery");
-      photos.sort((a, b) => (b.date || "").localeCompare(a.date || ""));
+      [albums, photos] = await Promise.all([getAll("albums"), getAll("gallery")]);
+      if (currentAlbumId && !albums.some((a) => a.id === currentAlbumId)) currentAlbumId = null;
       render();
     }
 
+    function photoCount(albumId) {
+      return photos.filter((p) => p.albumId === albumId).length;
+    }
+
+    // ---- 相簿 ----
+
+    function newAlbum() {
+      editingAlbum = { name: "" };
+      render();
+    }
+
+    async function saveAlbum(e) {
+      e.preventDefault();
+      const name = document.getElementById("f-album-name").value.trim();
+      if (!name) return;
+      await addItem("albums", { name });
+      editingAlbum = null;
+      await reload();
+    }
+
+    async function deleteAlbum(id) {
+      const album = albums.find((a) => a.id === id);
+      const count = photoCount(id);
+      const confirmed = await showConfirmDialog(
+        count
+          ? `刪除相簿「${album.name}」會一併刪除其中 ${count} 張照片，確定要刪除嗎？`
+          : `確定要刪除相簿「${album.name}」嗎？`,
+        { confirmLabel: "刪除", danger: true },
+      );
+      if (!confirmed) return;
+
+      const toDelete = photos.filter((p) => p.albumId === id);
+      for (const p of toDelete) await deleteItem("gallery", p.id);
+      await deleteItem("albums", id);
+      if (currentAlbumId === id) currentAlbumId = null;
+      await reload();
+    }
+
+    // ---- 照片 ----
+
     function newPhoto() {
-      editing = { caption: "", date: new Date().toISOString().slice(0, 10), imageUrl: "" };
+      editingPhoto = { caption: "", date: new Date().toISOString().slice(0, 10) };
       render();
     }
 
     function editPhoto(id) {
-      editing = JSON.parse(JSON.stringify(photos.find((p) => p.id === id)));
+      editingPhoto = JSON.parse(JSON.stringify(photos.find((p) => p.id === id)));
       render();
     }
 
     async function deletePhoto(id) {
+      const confirmed = await showConfirmDialog("確定要刪除這張照片嗎？", { confirmLabel: "刪除", danger: true });
+      if (!confirmed) return;
       await deleteItem("gallery", id);
       await reload();
     }
 
-    async function savePhoto(e) {
-      e.preventDefault();
-      editing.imageUrl = document.getElementById("f-image").value;
-      editing.caption = document.getElementById("f-caption").value;
-      editing.date = document.getElementById("f-date").value;
+    // 免費方案沒有 Storage，改把照片壓縮後直接存進 Firestore 文件（單一文件上限 1MB，
+    // 所以先縮到最長邊 1280px、JPEG 品質視大小遞減壓縮，一般活動照片壓完遠低於上限）
+    async function fileToCompressedDataUrl(file, maxDim = 1280, maxBytes = 700000) {
+      const rawDataUrl = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
 
-      if (editing.id) {
-        await setItem("gallery", editing.id, editing);
-      } else {
-        await addItem("gallery", editing);
+      const img = await new Promise((resolve, reject) => {
+        const el = new Image();
+        el.onload = () => resolve(el);
+        el.onerror = reject;
+        el.src = rawDataUrl;
+      });
+
+      const scale = Math.min(1, maxDim / Math.max(img.width, img.height));
+      const canvas = document.createElement("canvas");
+      canvas.width = Math.round(img.width * scale);
+      canvas.height = Math.round(img.height * scale);
+      canvas.getContext("2d").drawImage(img, 0, 0, canvas.width, canvas.height);
+
+      let quality = 0.85;
+      let out = canvas.toDataURL("image/jpeg", quality);
+      while (out.length > maxBytes * 1.4 && quality > 0.35) {
+        quality -= 0.15;
+        out = canvas.toDataURL("image/jpeg", quality);
       }
-      editing = null;
-      await reload();
+      return out;
     }
 
+    async function savePhoto(e) {
+      e.preventDefault();
+      const form = e.target;
+      const file = document.getElementById("f-photo-file").files[0];
+      const caption = document.getElementById("f-caption").value;
+      const date = document.getElementById("f-date").value;
+      const saveBtn = form.querySelector('button[type="submit"]');
+
+      if (!file && !editingPhoto.imageUrl) {
+        alert("請選擇照片檔案");
+        return;
+      }
+
+      saveBtn.disabled = true;
+      saveBtn.textContent = "處理中...";
+      try {
+        let imageUrl = editingPhoto.imageUrl;
+        if (file) {
+          imageUrl = await fileToCompressedDataUrl(file);
+          if (imageUrl.length > 1000000) {
+            alert("這張照片壓縮後還是太大，請換一張較小的照片再試一次");
+            return;
+          }
+        }
+
+        const data = { albumId: currentAlbumId, imageUrl, caption, date };
+        if (editingPhoto.id) {
+          await setItem("gallery", editingPhoto.id, data);
+        } else {
+          await addItem("gallery", data);
+        }
+        editingPhoto = null;
+        await reload();
+      } finally {
+        saveBtn.disabled = false;
+        saveBtn.textContent = "儲存";
+      }
+    }
+
+    // ---- 畫面 ----
+
     function render() {
+      renderAlbumList();
+      renderPhotoSection();
+      renderModals();
+    }
+
+    function renderAlbumList() {
       document.getElementById("content").innerHTML = `
+        <button class="primary-button" onclick="newAlbum()" style="display: block; margin: 0.8rem 0 1.2rem;">+ 新增相簿</button>
+        <div class="table-scroll"><table class="admin-table">
+          <thead><tr><th>相簿名稱</th><th>照片數</th><th></th></tr></thead>
+          <tbody>
+            ${albums.map((a) => `
+              <tr${a.id === currentAlbumId ? ' style="background:#eaf6f8;"' : ""}>
+                <td>${escapeHtml(a.name)}</td>
+                <td>${photoCount(a.id)}</td>
+                <td>
+                  <button onclick="currentAlbumId='${a.id}'; render();">管理照片</button>
+                  <button onclick="deleteAlbum('${a.id}')">刪除</button>
+                </td>
+              </tr>
+            `).join("") || `<tr><td colspan="3">還沒有相簿，請先新增一個。</td></tr>`}
+          </tbody>
+        </table></div>
+        <div id="photo-section"></div>
+      `;
+    }
+
+    function renderPhotoSection() {
+      const el = document.getElementById("photo-section");
+      if (!currentAlbumId) return;
+      const album = albums.find((a) => a.id === currentAlbumId);
+      const list = photos.filter((p) => p.albumId === currentAlbumId);
+
+      el.innerHTML = `
+        <h2 style="margin-top: 2rem;">${escapeHtml(album.name)} 的照片</h2>
         <button class="primary-button" onclick="newPhoto()" style="display: block; margin: 0.8rem 0 1.2rem;">+ 新增照片</button>
         <div class="table-scroll"><table class="admin-table">
           <thead><tr><th>照片</th><th>說明</th><th>日期</th><th></th></tr></thead>
           <tbody>
-            ${photos.map((p) => `
+            ${list.map((p) => `
               <tr>
                 <td>${p.imageUrl ? `<img src="${escapeHtml(p.imageUrl)}" alt="" style="width:60px;height:60px;object-fit:cover;border-radius:8px;" />` : ""}</td>
                 <td>${escapeHtml(p.caption)}</td>
@@ -77,24 +214,43 @@
                   <button onclick="deletePhoto('${p.id}')">刪除</button>
                 </td>
               </tr>
-            `).join("")}
+            `).join("") || `<tr><td colspan="4">這個相簿還沒有照片。</td></tr>`}
           </tbody>
         </table></div>
       `;
+    }
 
-      if (!editing) { renderEditModal(null); return; }
+    function renderModals() {
+      if (editingAlbum) {
+        renderEditModal(`
+          <form class="member-form" id="album-form">
+            <label>相簿名稱 <input type="text" id="f-album-name" value="${escapeHtml(editingAlbum.name)}" required /></label>
+            <button type="submit" class="primary-button">儲存</button>
+            <button type="button" class="secondary-button" onclick="editingAlbum = null; render();">取消</button>
+          </form>
+        `, () => { editingAlbum = null; render(); });
+        document.getElementById("album-form").addEventListener("submit", saveAlbum);
+        return;
+      }
 
-      renderEditModal(`
-        <form class="member-form" id="photo-form">
-          <label>照片網址 <input type="text" id="f-image" value="${escapeHtml(editing.imageUrl)}" required /></label>
-          <label>說明（選填） <input type="text" id="f-caption" value="${escapeHtml(editing.caption)}" /></label>
-          <label>日期 <input type="date" id="f-date" value="${escapeHtml(editing.date)}" /></label>
-          <button type="submit" class="primary-button">儲存</button>
-          <button type="button" class="secondary-button" onclick="editing = null; render();">取消</button>
-        </form>
-      `, () => { editing = null; render(); });
+      if (editingPhoto) {
+        renderEditModal(`
+          <form class="member-form" id="photo-form">
+            <label>照片檔案 ${editingPhoto.id ? "（不選則保留原照片）" : ""}
+              <input type="file" id="f-photo-file" accept="image/*" ${editingPhoto.id ? "" : "required"} />
+            </label>
+            ${editingPhoto.imageUrl ? `<img src="${escapeHtml(editingPhoto.imageUrl)}" alt="" style="width:100px;height:100px;object-fit:cover;border-radius:8px;" />` : ""}
+            <label>說明（選填） <input type="text" id="f-caption" value="${escapeHtml(editingPhoto.caption)}" /></label>
+            <label>日期 <input type="date" id="f-date" value="${escapeHtml(editingPhoto.date)}" /></label>
+            <button type="submit" class="primary-button">儲存</button>
+            <button type="button" class="secondary-button" onclick="editingPhoto = null; render();">取消</button>
+          </form>
+        `, () => { editingPhoto = null; render(); });
+        document.getElementById("photo-form").addEventListener("submit", savePhoto);
+        return;
+      }
 
-      document.getElementById("photo-form").addEventListener("submit", savePhoto);
+      renderEditModal(null);
     }
 
     requireAdmin(() => reload());
