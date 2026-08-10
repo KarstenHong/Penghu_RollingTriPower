@@ -180,7 +180,7 @@ function renderPenghuMap(containerId, ids) {
   el.innerHTML = svg;
 
   el.querySelectorAll(".township-shape").forEach((shape) => {
-    const go = () => { location.href = "township.html?id=" + shape.dataset.township; };
+    const go = () => { location.href = "/township/?id=" + shape.dataset.township; };
     shape.addEventListener("click", go);
     shape.addEventListener("keydown", (e) => {
       if (e.key === "Enter" || e.key === " ") go();
@@ -222,7 +222,7 @@ function renderMapInset(containerId, townshipId) {
   `;
   el.setAttribute("role", "button");
   el.setAttribute("tabindex", "0");
-  const go = () => { location.href = "township.html?id=" + townshipId; };
+  const go = () => { location.href = "/township/?id=" + townshipId; };
   el.addEventListener("click", go);
   el.addEventListener("keydown", (e) => {
     if (e.key === "Enter" || e.key === " ") go();

@@ -17,44 +17,44 @@ const DEFAULT_SPORT_TYPES = [
   {
     id: "taichi",
     name: "太極拳",
-    icon: "images/icons/taichi.svg",
+    icon: "/images/icons/taichi.svg",
     active: true,
   },
   {
     id: "folkdance",
     name: "土風舞",
-    icon: "images/icons/folkdance.svg",
+    icon: "/images/icons/folkdance.svg",
     active: true,
   },
   {
     id: "croquet",
     name: "槌球",
-    icon: "images/icons/croquet.svg",
+    icon: "/images/icons/croquet.svg",
     active: true,
   },
   {
     id: "tabletennis",
     name: "桌球",
-    icon: "images/icons/tabletennis.svg",
+    icon: "/images/icons/tabletennis.svg",
     active: true,
   },
   {
     id: "badminton",
     name: "羽球",
-    icon: "images/icons/badminton.svg",
+    icon: "/images/icons/badminton.svg",
     active: true,
   },
   {
     id: "aerobics",
     name: "有氧運動",
-    icon: "images/icons/aerobics.svg",
+    icon: "/images/icons/aerobics.svg",
     active: true,
   },
-  { id: "yoga", name: "瑜珈", icon: "images/icons/yoga.svg", active: true },
+  { id: "yoga", name: "瑜珈", icon: "/images/icons/yoga.svg", active: true },
   {
     id: "walking",
     name: "健走",
-    icon: "images/icons/walking.svg",
+    icon: "/images/icons/walking.svg",
     active: true,
   },
 ];
@@ -146,8 +146,11 @@ function sportName(id) {
   return SPORT_TYPES.find((s) => s.id === id)?.name || id;
 }
 
+// 既有 Firestore 資料可能是改成資料夾結構前存的相對路徑（例如 "images/icons/taichi.svg"），
+// 頁面現在都搬進子資料夾了，相對路徑會解析錯地方，這裡統一補成根路徑；外部網址／已經是根路徑的不動
 function sportIcon(id) {
-  return SPORT_TYPES.find((s) => s.id === id)?.icon || "";
+  const icon = SPORT_TYPES.find((s) => s.id === id)?.icon || "";
+  return icon && !icon.startsWith("/") && !icon.startsWith("http") ? "/" + icon : icon;
 }
 
 // 課程招生狀態，固定 6 種（客戶「滾動三力學運動地圖」規格指定），不像運動項目那樣需要後台新增，所以直接寫死；
@@ -223,15 +226,15 @@ function venueTypeName(id) {
 // 頁籤文字把兩個標題都放出來，實際頁面裡也是兩個段落都顯示（見 results-contact.html、about-evaluation.html）。
 // 常見問題／社區活動查詢／活動資訊這幾頁客戶的新規劃裡沒有列在頁籤上，頁面本身還在，只是先不放進導覽列。
 const NAV_LINKS = [
-  { href: "home-map.html", label: "首頁" },
-  { href: "posts.html?category=news", label: "最新消息" },
-  { href: "about-program.html", label: "認識滾動三力學" },
-  { href: "course-benefits.html", label: "課程效益" },
-  { href: "sports-map.html", label: "滾動三力學運動地圖" },
-  { href: "join-course.html", label: "參與課程" },
-  { href: "join-team.html", label: "加入指導團隊" },
-  { href: "results-contact.html", label: "成果與資源／聯絡我們" },
-  { href: "about-evaluation.html", label: "關於我們／方案評估平台" },
+  { href: "/home-map/", label: "首頁" },
+  { href: "/posts/?category=news", label: "最新消息" },
+  { href: "/about-program/", label: "認識滾動三力學" },
+  { href: "/course-benefits/", label: "課程效益" },
+  { href: "/sports-map/", label: "滾動三力學運動地圖" },
+  { href: "/join-course/", label: "參與課程" },
+  { href: "/join-team/", label: "加入指導團隊" },
+  { href: "/results-contact/", label: "成果與資源／聯絡我們" },
+  { href: "/about-evaluation/", label: "關於我們／方案評估平台" },
 ];
 
 // 每個網頁都是獨立的頁面（沒有用單頁式框架），每次點連結都會整頁重新載入，
@@ -258,7 +261,7 @@ function setCachedAuth(value) {
 function authLinksHtml(role) {
   let html = "";
   if (role === "admin") {
-    html += `<a href="admin.html">後台維護</a>`;
+    html += `<a href="/admin/">後台維護</a>`;
   }
   html += `<a href="#" id="nav-logout" class="nav-logout-link">登出</a>`;
   return html;
@@ -276,7 +279,7 @@ function wireLogoutButton() {
       if (!confirmed) return;
       await logoutUser();
       setCachedAuth(null);
-      location.href = "home-map.html";
+      location.href = "/home-map/";
     });
 }
 
@@ -352,8 +355,8 @@ function renderNav() {
   );
   el.innerHTML = `
     <div class="nav-bar">
-      <a class="nav-brand" href="index.html"><img src="images/logo-banner.jpg" alt="" class="nav-logo" />澎湖縣滾動三力學運動地圖資訊平台</a>
-      <a class="nav-home" href="home-map.html">🏠 返回首頁</a>
+      <a class="nav-brand" href="/"><img src="/images/logo-banner.jpg" alt="" class="nav-logo" />澎湖縣滾動三力學運動地圖資訊平台</a>
+      <a class="nav-home" href="/home-map/">🏠 返回首頁</a>
       <div class="nav-menu">
         <button type="button" class="nav-toggle" id="nav-toggle" aria-label="開啟選單" aria-expanded="false">☰ 選單</button>
         <div class="nav-links" id="nav-links">${links}<span id="nav-auth-links"></span></div>
@@ -368,13 +371,13 @@ function renderNav() {
     authEl.innerHTML = authLinksHtml(cached.role);
     wireLogoutButton();
   } else {
-    authEl.innerHTML = `<a href="login.html">管理者登入</a>`;
+    authEl.innerHTML = `<a href="/login/">管理者登入</a>`;
   }
 
   onAuthReady(async (user) => {
     if (!user) {
       setCachedAuth(null);
-      authEl.innerHTML = `<a href="login.html">管理者登入</a>`;
+      authEl.innerHTML = `<a href="/login/">管理者登入</a>`;
       return;
     }
     const profile = await getById("users", user.uid);
