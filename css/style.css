@@ -975,6 +975,31 @@ svg text {
 
   .table-scroll .admin-table { margin-bottom: 0; min-width: 480px; }
 
+/* 指導員成長階梯 */
+
+.growth-ladder { display: flex; flex-direction: column; gap: 0.6rem; margin: 1.2rem 0; }
+
+.ladder-step {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  width: fit-content;
+  max-width: 100%;
+  padding: 0.7rem 1.2rem;
+  border-radius: 10px;
+  color: white;
+  font-weight: bold;
+  transition: margin-left 0.15s ease;
+}
+
+  .ladder-step .ladder-sub { font-weight: normal; font-size: 0.85em; opacity: 0.9; }
+
+  .ladder-step.level-5 { background: #9b6fd6; margin-left: 8rem; }
+  .ladder-step.level-4 { background: #d16b98; margin-left: 6rem; }
+  .ladder-step.level-3 { background: #4a7fc1; margin-left: 4rem; }
+  .ladder-step.level-2 { background: #4fb3bf; margin-left: 2rem; }
+  .ladder-step.level-1 { background: #8bc34a; margin-left: 0; }
+
 /* 手機版微調 */
 
 @media (max-width: 640px) {
@@ -997,6 +1022,14 @@ svg text {
   /* venue-list 最小欄寬 280px、directory-grid 260px，比很多手機的可用寬度還寬，
      沒有這個覆寫的話欄位撐不下去會把整頁往右推出去，變成要橫向捲動才看得到內容 */
   .venue-list, .directory-grid { grid-template-columns: 1fr; }
+
+  /* 階梯的縮排在桌機上是為了做出「越往上越靠右」的視覺效果，手機螢幕窄，
+     照桌機的縮排量會被推出畫面外要橫向捲動，這裡縮小每一階的縮排 */
+  .ladder-step.level-5 { margin-left: 2.4rem; }
+  .ladder-step.level-4 { margin-left: 1.8rem; }
+  .ladder-step.level-3 { margin-left: 1.2rem; }
+  .ladder-step.level-2 { margin-left: 0.6rem; }
+  .ladder-step.level-1 { margin-left: 0; }
 
   /* 手機地圖太小很難點準，把地圖區塊的內距縮小，讓地圖本身盡量畫大一點 */
   .map-wrap { padding: 0.5rem; }
