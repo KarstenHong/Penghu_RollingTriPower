@@ -58,23 +58,34 @@
       `;
     }
 
-    async function init() {
-      const [posts, photos] = await Promise.all([getAll("posts"), getAll("gallery")]);
-      posts.sort((a, b) => (b.date || "").localeCompare(a.date || ""));
-      photos.sort((a, b) => (b.date || "").localeCompare(a.date || ""));
-
+    // posts/gallery 只是用來幫兩張卡片加預覽內容，8 張卡片本身（含連結）不需要等這兩份資料。
+    // 原本用 Promise.all 等兩份資料都回來才畫整排卡片，手機網路慢或某次請求失敗時，
+    // 卡片會一直不出現、畫面看起來像沒載入完成；改成卡片先同步畫出來，預覽資料回來後才補上去
+    function render(posts, photos) {
       const grid = document.getElementById("directory-grid");
       grid.innerHTML = DIRECTORY_ITEMS.map((item) => {
-        if (item.title === "最新消息" && posts.length) {
+        if (item.title === "最新消息" && posts && posts.length) {
           const list = posts.slice(0, 2).map((p) => `<p class="directory-preview-line">・${escapeHtml(p.title)}</p>`).join("");
           return directoryCardHtml(item, list);
         }
-        if (item.title === "成果與資源／聯絡我們" && photos.length) {
+        if (item.title === "成果與資源／聯絡我們" && photos && photos.length) {
           const thumbs = `<div class="directory-thumbs">${photos.slice(0, 3).map((p) => `<img src="${escapeHtml(p.imageUrl)}" alt="" loading="lazy" />`).join("")}</div>`;
           return directoryCardHtml(item, thumbs);
         }
         return directoryCardHtml(item);
       }).join("");
+    }
+
+    async function init() {
+      render();
+      try {
+        const [posts, photos] = await Promise.all([getAll("posts"), getAll("gallery")]);
+        posts.sort((a, b) => (b.date || "").localeCompare(a.date || ""));
+        photos.sort((a, b) => (b.date || "").localeCompare(a.date || ""));
+        render(posts, photos);
+      } catch (err) {
+        console.warn("首頁預覽資料載入失敗，僅顯示基本卡片內容", err);
+      }
     }
 
     init();
