@@ -1,5 +1,10 @@
 // 共用常數與網站共用小工具（導覽列、字級切換）
 
+// 網站品牌名稱：唯一一處寫死的地方，導覽列、每個頁面的分頁標題都從這裡取用。
+// 之後如果要改名（例如從單一縣市擴大成全台灣），只要改這一行，不用進每個頁面的 <title> 改。
+// 純文字，不是密鑰／敏感資料，repo 是 public 也沒關係，本來就是要讓所有訪客看到的公開品牌名稱。
+const SITE_NAME = "澎湖縣滾動三力學運動地圖資訊平台";
+
 const TOWNSHIPS = [
   { id: "magong", name: "馬公市" },
   { id: "huxi", name: "湖西鄉" },
@@ -359,7 +364,7 @@ function renderNav() {
   );
   el.innerHTML = `
     <div class="nav-bar">
-      <a class="nav-brand" href="/"><img src="/images/logo-banner.jpg" alt="" class="nav-logo" />澎湖縣滾動三力學運動地圖資訊平台</a>
+      <a class="nav-brand" href="/"><img src="/images/logo-banner.jpg" alt="" class="nav-logo" />${SITE_NAME}</a>
       <a class="nav-home" href="/home-map/">🏠 返回首頁</a>
       <div class="nav-menu">
         <button type="button" class="nav-toggle" id="nav-toggle" aria-label="開啟選單" aria-expanded="false">☰ 選單</button>
@@ -422,8 +427,18 @@ function renderBackToTop() {
   });
 }
 
+// 每個頁面的 <title> 現在只寫頁面自己的名稱（例如「首頁」），共用的網站名稱後綴在這裡統一補上，
+// 不用在 29 個頁面的 <title> 裡各寫一次完整站名。用 includes() 判斷是避免補兩次：
+// 首頁（index.html）本來就是把站名放在標題最前面（SEO 用），不需要再補一次後綴。
+function applyTitleSuffix() {
+  if (!document.title.includes(SITE_NAME)) {
+    document.title = `${document.title} - ${SITE_NAME}`;
+  }
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   applyFontSize();
+  applyTitleSuffix();
   renderNav();
   renderBackToTop();
 });

@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>最新消息 - 澎湖縣滾動三力學運動地圖資訊平台</title>
+  <title>最新消息</title>
   <link rel="stylesheet" href="/css/style.css" />
   <link rel="icon" href="/images/favicon-32.png" type="image/png" />
   <link rel="apple-touch-icon" href="/images/favicon-180.png" />
@@ -25,7 +25,7 @@
   <script>
     const category = new URLSearchParams(location.search).get("category") || "news";
     document.getElementById("title").textContent = category === "event" ? "活動資訊" : "最新消息";
-    document.title = document.getElementById("title").textContent + " - 澎湖縣滾動三力學運動地圖資訊平台";
+    document.title = document.getElementById("title").textContent + " - " + SITE_NAME;
 
     async function init() {
       const posts = await getWhere("posts", "category", category);
