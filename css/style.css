@@ -615,6 +615,21 @@ svg text {
   vertical-align: middle;
 }
 
+/* 活動類型標籤（滾動三力學課程據點／地板滾球活動據點…），實心方角跟 status-badge 的
+   外框圓角區分開來，一眼就能看出這是「哪一種活動」而不是「招生狀態」 */
+.activity-type-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.15rem 0.6rem;
+  border-radius: 4px;
+  font-size: 0.85em;
+  font-weight: bold;
+  background: #0a5c78;
+  color: white;
+  margin-right: 0.5rem;
+  vertical-align: middle;
+}
+
 /* 每週固定時段的上課時間：一排星期圖示，有課的那天亮綠燈，時間文字接在後面 */
 .weekday-row { display: inline-flex; gap: 0.2rem; vertical-align: middle; margin-right: 0.5rem; }
 

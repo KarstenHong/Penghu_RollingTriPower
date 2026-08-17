@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>補上活動類型（一次性工具）</title>
+  <link rel="stylesheet" href="/css/style.css" />
+  <link rel="icon" href="/images/favicon-32.png" type="image/png" />
+  <link rel="apple-touch-icon" href="/images/favicon-180.png" />
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+  <script src="/js/firebase-config.js"></script>
+  <script src="/js/data.js"></script>
+  <script src="/js/auth.js"></script>
+  <script src="/js/common.js"></script>
+</head>
+<body>
+  <div id="nav"></div>
+  <main>
+    <h1>補上活動類型</h1>
+    <p class="hint-text">
+      這是一次性工具，只會用這一次：建立「活動類型管理」的兩種預設類型（滾動三力學課程據點／地板滾球活動據點），
+      並依原始 Sport_Spot.txt 的分類，把這個欄位補到目前已經匯入的 16 筆課程資料上（這批資料是活動類型欄位還沒做出來之前匯入的，沒有這個欄位）。
+      跑完之後這個頁面會被移除，不會留在正式網站上。
+    </p>
+    <button id="run-btn" class="primary-button" style="display:block; margin: 1rem 0;">開始補資料</button>
+    <div id="log"></div>
+  </main>
+
+  <script>
+    const COURSE_VENUE_NAMES = ["望安鄉中社社區發展協會", "馬公市東衛社區發展協會"];
+
+    function log(msg) {
+      document.getElementById("log").insertAdjacentHTML("beforeend", `<p>${escapeHtml(msg)}</p>`);
+    }
+
+    async function run() {
+      const btn = document.getElementById("run-btn");
+      btn.disabled = true;
+      document.getElementById("log").innerHTML = "";
+
+      log("建立活動類型預設資料...");
+      for (const a of DEFAULT_ACTIVITY_TYPES) {
+        await setItem("activityTypes", a.id, a);
+      }
+
+      log("讀取現有據點與課程...");
+      const [venues, courses] = await Promise.all([getAll("venues"), getAll("courses")]);
+
+      let updated = 0;
+      for (const c of courses) {
+        if (c.activityType) continue; // 已經有值的（例如之後新增的課程）不覆蓋
+        const venue = venues.find((v) => v.id === c.venueId);
+        if (!venue) continue;
+        const activityType = COURSE_VENUE_NAMES.includes(venue.name) ? "course" : "activity";
+        await setItem("courses", c.id, { activityType });
+        log(`已補上：${venue.name} → ${activityType === "course" ? "滾動三力學課程據點" : "地板滾球活動據點"}`);
+        updated++;
+      }
+
+      log(`完成！共補上 ${updated} 筆課程的活動類型。麻煩跟工程師說一聲，把這個頁面移除。`);
+      btn.textContent = "已完成";
+    }
+
+    document.getElementById("run-btn").addEventListener("click", run);
+    requireAdmin(() => {});
+  </script>
+</body>
+</html>

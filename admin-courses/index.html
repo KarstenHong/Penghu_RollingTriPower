@@ -39,7 +39,7 @@
 
     function newCourse() {
       editing = {
-        venueId: "", sportType: "", schedule: "", description: "", timeSlot: "",
+        venueId: "", sportType: "", activityType: "", schedule: "", description: "", timeSlot: "",
         status: "enrolling", startDate: "", endDate: "", targetAudience: "",
         instructorTeam: "", fee: "", registrationMethod: "", accessibilityInfo: "", otherNotes: "",
       };
@@ -66,6 +66,7 @@
       e.preventDefault();
       editing.venueId = document.getElementById("f-venue").value;
       editing.sportType = document.getElementById("f-sport").value;
+      editing.activityType = document.getElementById("f-activity-type").value;
       editing.schedule = document.getElementById("f-schedule").value;
       editing.description = document.getElementById("f-description").value;
       editing.timeSlot = document.getElementById("f-timeslot").value;
@@ -94,11 +95,12 @@
       document.getElementById("content").innerHTML = `
         <button class="primary-button" onclick="newCourse()" style="display: block; margin: 0.8rem 0 1.2rem;">+ 新增課程</button>
         <div class="table-scroll"><table class="admin-table">
-          <thead><tr><th>場域</th><th>運動類型</th><th>時間</th><th>招生狀態</th><th></th></tr></thead>
+          <thead><tr><th>場域</th><th>活動類型</th><th>運動類型</th><th>時間</th><th>招生狀態</th><th></th></tr></thead>
           <tbody>
             ${courses.map((c) => `
               <tr>
                 <td>${escapeHtml(venueName(c.venueId))}</td>
+                <td>${c.activityType ? activityTypeName(c.activityType) : ""}</td>
                 <td>${sportName(c.sportType)}</td>
                 <td>${escapeHtml(c.schedule)}</td>
                 <td>${COURSE_STATUS[c.status] ? escapeHtml(COURSE_STATUS[c.status].label) : ""}</td>
@@ -120,6 +122,12 @@
             <select id="f-venue">
               <option value="">請選擇</option>
               ${venues.map((v) => `<option value="${v.id}" ${editing.venueId === v.id ? "selected" : ""}>${escapeHtml(v.name)}</option>`).join("")}
+            </select>
+          </label>
+          <label>活動類型
+            <select id="f-activity-type">
+              <option value="">請選擇</option>
+              ${activeActivityTypes([editing.activityType]).map((a) => `<option value="${a.id}" ${editing.activityType === a.id ? "selected" : ""}>${escapeHtml(a.name)}</option>`).join("")}
             </select>
           </label>
           <label>運動類型
@@ -159,6 +167,7 @@
 
     requireAdmin(async () => {
       await loadSportTypes();
+      await loadActivityTypes();
       venues = await getAll("venues");
       await reload();
     });

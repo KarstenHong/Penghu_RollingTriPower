@@ -27,7 +27,7 @@
     const sport = new URLSearchParams(location.search).get("sport") || "";
 
     async function init() {
-      await loadSportTypes();
+      await Promise.all([loadSportTypes(), loadActivityTypes()]);
 
       const [venue, allCourses] = await Promise.all([
         getById("venues", venueId),

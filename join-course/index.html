@@ -23,6 +23,11 @@
     <p class="hint-text">搜尋鄰近的課程據點，查看上課時間、招生狀態與聯絡方式。</p>
 
     <div class="search-filters">
+      <label>活動類型
+        <select id="filter-activity-type" onchange="renderResults()">
+          <option value="">全部類型</option>
+        </select>
+      </label>
       <label>地區
         <select id="filter-township" onchange="renderResults()">
           <option value="">全部地區</option>
@@ -76,6 +81,9 @@
     }
 
     function fillFilterOptions() {
+      const at = document.getElementById("filter-activity-type");
+      activeActivityTypes().forEach((a) => at.insertAdjacentHTML("beforeend", `<option value="${a.id}">${escapeHtml(a.name)}</option>`));
+
       const t = document.getElementById("filter-township");
       TOWNSHIPS.forEach((x) => t.insertAdjacentHTML("beforeend", `<option value="${x.id}">${x.name}</option>`));
 
@@ -94,12 +102,14 @@
     }
 
     function renderResults() {
+      const activityType = document.getElementById("filter-activity-type").value;
       const township = document.getElementById("filter-township").value;
       const status = document.getElementById("filter-status").value;
       const timeSlot = document.getElementById("filter-timeslot").value;
       const keyword = document.getElementById("filter-keyword").value.trim().toLowerCase();
 
       const matching = courseRows().filter(({ course, venue }) =>
+        (!activityType || course.activityType === activityType) &&
         (!township || venue.township === township) &&
         (!status || course.status === status) &&
         (!timeSlot || course.timeSlot === timeSlot) &&
@@ -142,11 +152,12 @@
 
       el.innerHTML = `
         <div class="table-scroll"><table class="admin-table">
-          <thead><tr><th>鄉市</th><th>據點名稱</th><th>上課時間</th><th>課程狀態</th><th></th></tr></thead>
+          <thead><tr><th>鄉市</th><th>活動類型</th><th>據點名稱</th><th>上課時間</th><th>課程狀態</th><th></th></tr></thead>
           <tbody>
             ${matching.map(({ course, venue }) => `
               <tr>
                 <td>${townshipName(venue.township)}</td>
+                <td>${course.activityType ? activityTypeName(course.activityType) : ""}</td>
                 <td>${escapeHtml(venue.name)}</td>
                 <td>${scheduleHtml(course.schedule)}</td>
                 <td>${COURSE_STATUS[course.status] ? `<span class="status-badge" style="--status-color: ${COURSE_STATUS[course.status].color}">${COURSE_STATUS[course.status].icon} ${escapeHtml(COURSE_STATUS[course.status].label)}</span>` : ""}</td>
@@ -159,6 +170,7 @@
     }
 
     async function init() {
+      await loadActivityTypes();
       fillFilterOptions();
       [venues, courses] = await Promise.all([getAll("venues"), getAll("courses")]);
       renderResults();

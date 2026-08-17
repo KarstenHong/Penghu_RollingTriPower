@@ -70,7 +70,7 @@
 
     async function init() {
       renderTownshipMap("township-map", townshipId);
-      await loadSportTypes();
+      await Promise.all([loadSportTypes(), loadActivityTypes()]);
       const [allVenues, allCourses] = await Promise.all([getAll("venues"), getAll("courses")]);
       venues = allVenues.filter((v) => v.township === townshipId);
       courses = allCourses;
@@ -166,6 +166,7 @@
       tooltip.innerHTML = `
         <strong>${escapeHtml(venue.name)}</strong>
         <div>${sportName(sport)}${course ? `｜${escapeHtml(course.schedule)}` : ""}</div>
+        ${course && course.activityType ? `<span class="activity-type-tag">${activityTypeName(course.activityType)}</span>` : ""}
         ${status ? `<span class="status-badge" style="--status-color: ${status.color}">${status.icon} ${escapeHtml(status.label)}</span>` : ""}
       `;
       tooltip.hidden = false;
