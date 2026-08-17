@@ -15,51 +15,14 @@ const TOWNSHIPS = [
 ];
 
 // 運動項目原本是寫死在這裡的常數，現在改成後台可管理，實際資料存在 Firestore 的 sportTypes 集合。
-// 這份只留著當「第一次初始化」用的預設值（admin-sporttypes.html 在集合是空的時候會用這份資料建檔），
-// id 沿用原本的值，是因為既有的據點／課程資料裡已經存了這些 id 字串（例如 sportType: "taichi"），
-// 沿用才能讓舊資料繼續對得上，不用另外寫資料搬遷程式。
+// 這份只留著當「第一次初始化」用的預設值（admin-sporttypes.html 在集合是空的時候會用這份資料建檔）。
+// 客戶正式資料確認「滾動三力學」全部都是地板滾球，原本的太極拳／土風舞…8 種只是展示用的假資料，
+// 已經從 Firestore 移除，這裡也同步改成只留正式的這一項，避免之後重新播種又長回展示資料。
 const DEFAULT_SPORT_TYPES = [
   {
-    id: "taichi",
-    name: "太極拳",
-    icon: "/images/icons/taichi.svg",
-    active: true,
-  },
-  {
-    id: "folkdance",
-    name: "土風舞",
-    icon: "/images/icons/folkdance.svg",
-    active: true,
-  },
-  {
-    id: "croquet",
-    name: "槌球",
-    icon: "/images/icons/croquet.svg",
-    active: true,
-  },
-  {
-    id: "tabletennis",
-    name: "桌球",
-    icon: "/images/icons/tabletennis.svg",
-    active: true,
-  },
-  {
-    id: "badminton",
-    name: "羽球",
-    icon: "/images/icons/badminton.svg",
-    active: true,
-  },
-  {
-    id: "aerobics",
-    name: "有氧運動",
-    icon: "/images/icons/aerobics.svg",
-    active: true,
-  },
-  { id: "yoga", name: "瑜珈", icon: "/images/icons/yoga.svg", active: true },
-  {
-    id: "walking",
-    name: "健走",
-    icon: "/images/icons/walking.svg",
+    id: "floorcurling",
+    name: "地板滾球",
+    icon: "/images/icons/floorcurling.svg",
     active: true,
   },
 ];
