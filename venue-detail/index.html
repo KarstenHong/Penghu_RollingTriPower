@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>據點詳細介紹 - 澎湖縣滾動三力學運動地圖資訊平台</title>
+  <title>據點詳細介紹</title>
   <link rel="stylesheet" href="/css/style.css" />
   <link rel="icon" href="/images/favicon-32.png" type="image/png" />
   <link rel="apple-touch-icon" href="/images/favicon-180.png" />
@@ -40,7 +40,7 @@
         return;
       }
 
-      document.title = venue.name + " - 澎湖縣滾動三力學運動地圖資訊平台";
+      document.title = venue.name + " - " + SITE_NAME;
       const relatedCourses = allCourses.filter((c) => c.venueId === venueId && (!sport || c.sportType === sport));
 
       el.innerHTML = `
