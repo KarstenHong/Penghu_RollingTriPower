@@ -28,7 +28,7 @@
     document.title = document.getElementById("title").textContent + " - " + SITE_NAME;
 
     async function init() {
-      const posts = await getWhere("posts", "category", category);
+      const posts = (await getAll("posts")).filter((p) => p.category === category);
       posts.sort((a, b) => (b.date || "").localeCompare(a.date || ""));
 
       const el = document.getElementById("content");

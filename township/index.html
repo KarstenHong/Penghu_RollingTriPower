@@ -70,10 +70,9 @@
     async function init() {
       renderTownshipMap("township-map", townshipId);
       await loadSportTypes();
-      [venues, courses] = await Promise.all([
-        getWhere("venues", "township", townshipId),
-        getAll("courses"),
-      ]);
+      const [allVenues, allCourses] = await Promise.all([getAll("venues"), getAll("courses")]);
+      venues = allVenues.filter((v) => v.township === townshipId);
+      courses = allCourses;
       document.getElementById("empty-hint").style.display = venues.length ? "none" : "block";
       renderMarkers();
 
