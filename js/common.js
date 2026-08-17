@@ -238,8 +238,8 @@ function renderCourseCard(c) {
       <p class="course-line">
         ${c.activityType ? `<span class="activity-type-tag" style="--activity-color: ${activityTypeColor(c.activityType)}">${activityTypeName(c.activityType)}</span>` : ""}
         ${status ? `<span class="status-badge" style="--status-color: ${status.color}">${status.icon} ${escapeHtml(status.label)}</span>` : ""}
-        課程時間：${escapeHtml(c.schedule)}｜${escapeHtml(c.description)}
       </p>
+      <p class="course-line">課程時間：${escapeHtml(c.schedule)}｜${escapeHtml(c.description)}</p>
       ${detailRows.map(([label, value]) => `<p class="course-detail-line">${label}：${escapeHtml(value)}</p>`).join("")}
     </div>
   `;
