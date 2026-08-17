@@ -43,6 +43,32 @@ function activeSportTypes(keepIds = []) {
   );
 }
 
+// 客戶回饋課程分兩種（滾動三力學課程據點／地板滾球活動據點），日後可能還會再加其他活動類型，
+// 所以比照運動項目的做法做成後台可管理（實際資料存在 Firestore 的 activityTypes 集合），
+// 不是像 VENUE_TYPES／COURSE_STATUS 那樣寫死固定幾種。
+const DEFAULT_ACTIVITY_TYPES = [
+  { id: "course", name: "滾動三力學課程據點", active: true },
+  { id: "activity", name: "地板滾球活動據點", active: true },
+];
+
+let ACTIVITY_TYPES = [];
+
+async function loadActivityTypes() {
+  ACTIVITY_TYPES = await getAll("activityTypes");
+}
+
+function activeActivityTypes(keepIds = []) {
+  return ACTIVITY_TYPES.filter(
+    (a) => a.active !== false || keepIds.includes(a.id),
+  );
+}
+
+// 活動類型名稱是後台可編輯的 Firestore 資料，直接在這裡轉義（理由跟 sportName() 一樣：
+// 這樣不管哪個頁面呼叫都不會漏，避免後台帳號被盜用時能透過類型名稱對一般訪客執行 XSS）
+function activityTypeName(id) {
+  return escapeHtml(ACTIVITY_TYPES.find((a) => a.id === id)?.name || id);
+}
+
 const VENUE_TYPES = [
   { id: "community_center", name: "社區活動中心" },
   { id: "association", name: "社區協會" },
@@ -204,6 +230,7 @@ function renderCourseCard(c) {
   return `
     <div class="course-card">
       <p class="course-line">
+        ${c.activityType ? `<span class="activity-type-tag">${activityTypeName(c.activityType)}</span>` : ""}
         ${status ? `<span class="status-badge" style="--status-color: ${status.color}">${status.icon} ${escapeHtml(status.label)}</span>` : ""}
         課程時間：${escapeHtml(c.schedule)}｜${escapeHtml(c.description)}
       </p>

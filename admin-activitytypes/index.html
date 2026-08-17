@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>活動類型管理</title>
+  <link rel="stylesheet" href="/css/style.css" />
+  <link rel="icon" href="/images/favicon-32.png" type="image/png" />
+  <link rel="apple-touch-icon" href="/images/favicon-180.png" />
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+  <script src="/js/firebase-config.js"></script>
+  <script src="/js/data.js"></script>
+  <script src="/js/auth.js"></script>
+  <script src="/js/common.js"></script>
+</head>
+<body>
+  <div id="nav"></div>
+  <main>
+    <a href="/admin/" class="back-button">&larr; 返回後台首頁</a>
+    <h1>活動類型管理</h1>
+    <p class="hint-text">用來區分「滾動三力學課程據點」「地板滾球活動據點」這類活動性質，新增課程時可以選。下架的類型不會再出現在「新選」的地方，但已經選過的舊課程資料不受影響，名稱照樣顯示。</p>
+    <div id="content"><p>載入中...</p></div>
+  </main>
+
+  <script>
+    let activityTypes = [];
+    let editing = null;
+
+    async function reload() {
+      activityTypes = await getAll("activityTypes");
+      render();
+    }
+
+    async function seedDefaults() {
+      for (const a of DEFAULT_ACTIVITY_TYPES) {
+        await setItem("activityTypes", a.id, a);
+      }
+      await reload();
+    }
+
+    function newType() {
+      editing = { name: "", active: true };
+      render();
+    }
+
+    function editType(id) {
+      editing = JSON.parse(JSON.stringify(activityTypes.find((a) => a.id === id)));
+      render();
+    }
+
+    async function toggleActive(id) {
+      const a = activityTypes.find((x) => x.id === id);
+      await setItem("activityTypes", id, { active: !a.active });
+      await reload();
+    }
+
+    async function saveType(e) {
+      e.preventDefault();
+      editing.name = document.getElementById("f-name").value;
+      if (editing.active === undefined) editing.active = true;
+
+      if (editing.id) {
+        await setItem("activityTypes", editing.id, editing);
+      } else {
+        await addItem("activityTypes", editing);
+      }
+      editing = null;
+      await reload();
+      showToast("已儲存");
+    }
+
+    function render() {
+      let html = `<button class="primary-button" onclick="newType()" style="display: block; margin: 0.8rem 0 1.2rem;">+ 新增活動類型</button>`;
+
+      if (!activityTypes.length) {
+        html += `
+          <p class="hint-text">目前還沒有活動類型資料。</p>
+          <button class="primary-button" onclick="seedDefaults()">建立預設的 2 種活動類型</button>
+        `;
+      } else {
+        html += `
+          <div class="table-scroll"><table class="admin-table">
+            <thead><tr><th>名稱</th><th>狀態</th><th></th></tr></thead>
+            <tbody>
+              ${activityTypes.map((a) => `
+                <tr>
+                  <td>${escapeHtml(a.name)}</td>
+                  <td>${a.active !== false ? "上架中" : "已下架"}</td>
+                  <td>
+                    <button onclick="editType('${a.id}')">編輯</button>
+                    <button onclick="toggleActive('${a.id}')">${a.active !== false ? "下架" : "上架"}</button>
+                  </td>
+                </tr>
+              `).join("")}
+            </tbody>
+          </table></div>
+        `;
+      }
+
+      document.getElementById("content").innerHTML = html;
+
+      if (!editing) { renderEditModal(null); return; }
+
+      renderEditModal(`
+        <form class="member-form" id="type-form">
+          <label>名稱 <input type="text" id="f-name" value="${escapeHtml(editing.name)}" required /></label>
+          <button type="submit" class="primary-button">儲存</button>
+          <button type="button" class="secondary-button" onclick="editing = null; render();">取消</button>
+        </form>
+      `);
+
+      document.getElementById("type-form").addEventListener("submit", saveType);
+    }
+
+    requireAdmin(() => reload());
+  </script>
+</body>
+</html>

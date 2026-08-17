@@ -27,12 +27,14 @@
       <li><a href="/admin-associations/">社區協會聯絡資訊管理</a></li>
       <li><a href="/admin-gallery/">活動成果集管理</a></li>
       <li><a href="/admin-sporttypes/">運動項目管理</a></li>
+      <li><a href="/admin-activitytypes/">活動類型管理</a></li>
       <li><a href="/admin-users/">管理者帳號管理</a></li>
+      <li><a href="/backfill-activity-types/">補上活動類型（一次性工具，用過會移除）</a></li>
     </ul>
 
     <h2 style="margin-top: 2.5rem;">資料快取</h2>
     <p class="hint-text">
-      場域、課程、公告、常見問題、社區協會、運動項目、相簿這幾類資料，訪客瀏覽器會暫存一份，不用每次都重新讀一次資料庫。
+      場域、課程、公告、常見問題、社區協會、運動項目、活動類型、相簿這幾類資料，訪客瀏覽器會暫存一份，不用每次都重新讀一次資料庫。
       新增/編輯/刪除後會自動讓暫存失效，訪客下次瀏覽就會拿到最新資料；如果想立刻讓所有訪客重新讀取（不用等他們自己下次操作觸發），可以按這個按鈕。
     </p>
     <button class="secondary-button" id="reset-cache-btn" style="display: block;">重置訪客資料快取</button>

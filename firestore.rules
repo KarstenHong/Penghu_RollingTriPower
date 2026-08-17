@@ -52,6 +52,11 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
+    match /activityTypes/{id} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
     // 瀏覽器端快取版本號（見 js/data.js），只有一個文件 meta/cacheVersion，公開可讀、僅 admin 可寫
     match /meta/{id} {
       allow read: if true;
