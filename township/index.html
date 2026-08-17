@@ -122,10 +122,17 @@
           const x = cx - markerSize / 2;
           const y = py - markerSize / 2;
           // 白色底盤墊在圖示後面：運動圖示的顏色偶爾會跟該鄉鎮的地圖底色一樣，疊在一起會看不清楚，
-          // 白底不管地圖是什麼顏色都有足夠對比
+          // 白底不管地圖是什麼顏色都有足夠對比。客戶反映運動項目目前都是同一種（地板滾球），
+          // 圖示在地圖上看不出「滾動三力學課程據點」跟「地板滾球活動據點」的差別——這不該靠改運動
+          // 項目來解決（運動項目還要給搜尋篩選「這個據點有沒有教地板滾球」用，兩種據點都算有），
+          // 改成底盤外圈用活動類型的顏色當圈邊，同一個地板滾球圖示套不同顏色的圈就能一眼分辨，
+          // 之後後台新增第三種活動類型、換顏色，這裡也會自動跟著變，不用再改程式。
+          const course = courses.find((c) => c.venueId === venue.id && c.sportType === sport);
+          const ringColor = course && course.activityType ? activityTypeColor(course.activityType) : "rgba(0,0,0,0.2)";
+          const ariaType = course && course.activityType ? `，${activityTypeName(course.activityType)}` : "";
           svg += `
-            <g class="map-marker-hit" tabindex="0" role="button" data-venue="${venue.id}" data-sport="${sport}" aria-label="${escapeHtml(venue.name)} - ${sportName(sport)}">
-              <circle cx="${cx}" cy="${py}" r="${markerSize * 0.62}" fill="white" stroke="rgba(0,0,0,0.2)" stroke-width="1" class="map-marker-badge" />
+            <g class="map-marker-hit" tabindex="0" role="button" data-venue="${venue.id}" data-sport="${sport}" aria-label="${escapeHtml(venue.name)} - ${sportName(sport)}${ariaType}">
+              <circle cx="${cx}" cy="${py}" r="${markerSize * 0.62}" fill="white" stroke="${ringColor}" stroke-width="3" class="map-marker-badge" />
               <image href="${sportIcon(sport)}" x="${x}" y="${y}" width="${markerSize}" height="${markerSize}" class="map-marker" />
             </g>`;
         });
