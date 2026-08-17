@@ -18,6 +18,12 @@
 <body>
   <div id="nav"></div>
   <main>
+    <div class="page-tabs" role="tablist">
+      <button type="button" class="page-tab active" data-tab="about">關於我們</button>
+      <button type="button" class="page-tab" data-tab="evaluation">方案評估平台</button>
+    </div>
+
+    <div data-tab-panel="about">
     <h1>關於我們</h1>
 
     <h2>一、從澎湖出發，讓健康在社區持續滾動</h2>
@@ -66,9 +72,16 @@
 
     <h2 style="margin-top: 2.5rem;">四、讓三力在更多社區滾動</h2>
     <p>我們期待透過滾動三力學，讓長者在熟悉的生活環境中活動身體、動腦思考並建立人際連結，也協助更多社區培養陪伴長者健康老化的在地人才。未來，我們將繼續累積社區經驗、培育帶領人才並深化在地合作，陪伴更多長者動得了、想得到、連得起來。</p>
+    </div>
 
-    <h1 style="margin-top: 2.5rem;">方案評估平台</h1>
-    <p class="hint-text">內容製作中，敬請期待。</p>
+    <div data-tab-panel="evaluation" hidden>
+      <h1>方案評估平台</h1>
+      <p class="hint-text">內容製作中，敬請期待。</p>
+    </div>
   </main>
+
+  <script>
+    initTabs();
+  </script>
 </body>
 </html>

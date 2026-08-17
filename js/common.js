@@ -264,11 +264,26 @@ function venueTypeName(id) {
   return VENUE_TYPES.find((v) => v.id === id)?.name || id;
 }
 
+// ---- 頁籤 ----
+
+// 按鈕 data-tab 對應面板 data-tab-panel，切換時只顯示同一個值的那個面板
+// （見 results-contact.html、about-evaluation.html：一頁放兩個網頁內容時用）
+function initTabs() {
+  const tabs = document.querySelectorAll("[data-tab]");
+  const panels = document.querySelectorAll("[data-tab-panel]");
+  tabs.forEach((tab) => {
+    tab.addEventListener("click", () => {
+      tabs.forEach((t) => t.classList.toggle("active", t === tab));
+      panels.forEach((p) => { p.hidden = p.dataset.tabPanel !== tab.dataset.tab; });
+    });
+  });
+}
+
 // ---- 導覽列 ----
 
 // 頁籤文字＋順序照客戶「網頁建置.xlsx」的「上方標題」工作表。
 // H、I 兩欄客戶確認是「兩個標題合成一個頁籤」：成果與資源／聯絡我們共用一頁，關於我們／方案評估平台共用一頁，
-// 頁籤文字把兩個標題都放出來，實際頁面裡也是兩個段落都顯示（見 results-contact.html、about-evaluation.html）。
+// 頁籤文字把兩個標題都放出來，實際頁面裡用 initTabs() 切成兩個分頁顯示（見 results-contact.html、about-evaluation.html）。
 // 常見問題／社區活動查詢／活動資訊這幾頁客戶的新規劃裡沒有列在頁籤上，頁面本身還在，只是先不放進導覽列。
 const NAV_LINKS = [
   { href: "/home-map/", label: "首頁" },
