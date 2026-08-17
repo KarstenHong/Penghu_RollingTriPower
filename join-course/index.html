@@ -157,7 +157,7 @@
             ${matching.map(({ course, venue }) => `
               <tr>
                 <td>${townshipName(venue.township)}</td>
-                <td>${course.activityType ? activityTypeName(course.activityType) : ""}</td>
+                <td>${course.activityType ? `<span class="activity-type-tag" style="--activity-color: ${activityTypeColor(course.activityType)}">${activityTypeName(course.activityType)}</span>` : ""}</td>
                 <td>${escapeHtml(venue.name)}</td>
                 <td>${scheduleHtml(course.schedule)}</td>
                 <td>${COURSE_STATUS[course.status] ? `<span class="status-badge" style="--status-color: ${COURSE_STATUS[course.status].color}">${COURSE_STATUS[course.status].icon} ${escapeHtml(COURSE_STATUS[course.status].label)}</span>` : ""}</td>

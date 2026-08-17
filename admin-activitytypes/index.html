@@ -41,7 +41,7 @@
     }
 
     function newType() {
-      editing = { name: "", active: true };
+      editing = { name: "", color: "#0a5c78", active: true };
       render();
     }
 
@@ -59,6 +59,7 @@
     async function saveType(e) {
       e.preventDefault();
       editing.name = document.getElementById("f-name").value;
+      editing.color = document.getElementById("f-color").value;
       if (editing.active === undefined) editing.active = true;
 
       if (editing.id) {
@@ -82,10 +83,11 @@
       } else {
         html += `
           <div class="table-scroll"><table class="admin-table">
-            <thead><tr><th>名稱</th><th>狀態</th><th></th></tr></thead>
+            <thead><tr><th>顏色</th><th>名稱</th><th>狀態</th><th></th></tr></thead>
             <tbody>
               ${activityTypes.map((a) => `
                 <tr>
+                  <td><span style="display:inline-block; width:24px; height:24px; border-radius:50%; background:${escapeHtml(a.color || "#0a5c78")}; border:1px solid #ddd;"></span></td>
                   <td>${escapeHtml(a.name)}</td>
                   <td>${a.active !== false ? "上架中" : "已下架"}</td>
                   <td>
@@ -106,6 +108,7 @@
       renderEditModal(`
         <form class="member-form" id="type-form">
           <label>名稱 <input type="text" id="f-name" value="${escapeHtml(editing.name)}" required /></label>
+          <label>顏色 <input type="color" id="f-color" value="${escapeHtml(editing.color || "#0a5c78")}" /></label>
           <button type="submit" class="primary-button">儲存</button>
           <button type="button" class="secondary-button" onclick="editing = null; render();">取消</button>
         </form>
