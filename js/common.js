@@ -70,13 +70,50 @@ function escapeHtml(text) {
 
 // Google 雲端硬碟的「共用連結」（.../file/d/檔案ID/view?usp=sharing）不能直接當圖片網址用，
 // 瀏覽器會顯示雲端硬碟的網頁本身而不是圖片本身；後台填「圖片網址」貼這種連結是常見狀況，
-// 存檔前自動偵測、轉成可以直接讀取圖片的格式，不用每次都手動換算檔案 ID
+// 存檔前自動偵測、轉成可以直接讀取圖片的格式，不用每次都手動換算檔案 ID。
+// 不過 Google 那個直連網址本身不保證穩定（沒有公開文件、偶爾會擋掉或改行為），只當作
+// 退路用；真的要穩定顯示還是建議用 fileToCompressedDataUrl() 把圖片直接存進 Firestore。
 function normalizeImageUrl(url) {
   const trimmed = (url || "").trim();
   const m =
     trimmed.match(/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/) ||
     trimmed.match(/drive\.google\.com\/open\?id=([a-zA-Z0-9_-]+)/);
   return m ? `https://drive.google.com/uc?export=view&id=${m[1]}` : trimmed;
+}
+
+// 免費方案沒有 Firebase Storage，圖片改壓縮後直接存進 Firestore 文件（單一文件上限 1MB，
+// 所以先縮到最長邊 1280px、JPEG 品質視大小遞減壓縮，一般照片壓完遠低於上限）。
+// 場域照片、公告圖片、成果集照片共用這份，不用每個後台頁面各寫一份一樣的壓縮邏輯。
+async function fileToCompressedDataUrl(file, maxDim = 1280, maxBytes = 700000) {
+  const rawDataUrl = await new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = () => reject(new Error("讀取檔案失敗"));
+    reader.readAsDataURL(file);
+  });
+
+  // 瀏覽器不一定能解碼所有圖片格式（最常見的是 iPhone 預設的 HEIC/HEIC），
+  // 失敗時原本的 onerror 事件物件訊息看不出原因，這裡換成明確的錯誤說明
+  const img = await new Promise((resolve, reject) => {
+    const el = new Image();
+    el.onload = () => resolve(el);
+    el.onerror = () => reject(new Error("瀏覽器無法讀取這張圖片，可能是 HEIC 等不支援的格式，請先轉存成 JPG 或 PNG"));
+    el.src = rawDataUrl;
+  });
+
+  const scale = Math.min(1, maxDim / Math.max(img.width, img.height));
+  const canvas = document.createElement("canvas");
+  canvas.width = Math.round(img.width * scale);
+  canvas.height = Math.round(img.height * scale);
+  canvas.getContext("2d").drawImage(img, 0, 0, canvas.width, canvas.height);
+
+  let quality = 0.85;
+  let out = canvas.toDataURL("image/jpeg", quality);
+  while (out.length > maxBytes * 1.4 && quality > 0.35) {
+    quality -= 0.15;
+    out = canvas.toDataURL("image/jpeg", quality);
+  }
+  return out;
 }
 
 // 驗證台灣身分證字號格式是否正確（開頭英文字母對應戶籍地 + 檢查碼演算法），只用來抓輸入打錯字，不當作密碼或任何驗證用途

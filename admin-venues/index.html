@@ -53,6 +53,9 @@
 
     async function saveVenue(e) {
       e.preventDefault();
+      const saveBtn = e.target.querySelector('button[type="submit"]');
+      const file = document.getElementById("f-photo-file").files[0];
+
       editing.name = document.getElementById("f-name").value;
       editing.township = document.getElementById("f-township").value;
       editing.type = document.getElementById("f-type").value;
@@ -61,7 +64,26 @@
       editing.lat = parseFloat(document.getElementById("f-lat").value) || null;
       editing.lng = parseFloat(document.getElementById("f-lng").value) || null;
       editing.sportTypes = Array.from(document.querySelectorAll(".f-sport:checked")).map((c) => c.value);
-      editing.photoUrl = normalizeImageUrl(document.getElementById("f-photo").value);
+
+      // 上傳檔案的話優先用檔案（存進 Firestore、不會像 Google 雲端硬碟連結那樣偶爾失效），
+      // 沒選檔案才照原本的方式用「照片網址」欄位（給已經有穩定外部圖床網址的情況用）
+      if (file) {
+        saveBtn.disabled = true;
+        saveBtn.textContent = "處理中...";
+        try {
+          editing.photoUrl = await fileToCompressedDataUrl(file);
+        } catch (err) {
+          alert(`「${file.name}」處理失敗：${err.message}`);
+          saveBtn.disabled = false;
+          saveBtn.textContent = "儲存";
+          return;
+        }
+      } else {
+        // 網址欄位空白時不動 editing.photoUrl：已經上傳過照片的話，畫面上這欄位是刻意留空的
+        // （見下面 photoUrlFieldValue 的說明），空白不代表要清掉現有照片
+        const urlValue = document.getElementById("f-photo").value.trim();
+        if (urlValue) editing.photoUrl = normalizeImageUrl(urlValue);
+      }
 
       if (editing.id) {
         await setItem("venues", editing.id, editing);
@@ -97,6 +119,10 @@
 
       if (!editing) { renderEditModal(null); return; }
 
+      // 上傳過的照片網址欄位存的是很長的 Base64 字串，不適合整串塞進文字輸入框讓人誤改，
+      // 顯示成空白就好，靠上面的縮圖預覽提示「已經有照片了」
+      const photoUrlFieldValue = (editing.photoUrl || "").startsWith("data:") ? "" : editing.photoUrl;
+
       renderEditModal(`
         <form class="member-form" id="venue-form">
           <label>名稱 <input type="text" id="f-name" value="${escapeHtml(editing.name)}" required /></label>
@@ -114,7 +140,9 @@
           </label>
           <label>地址 <input type="text" id="f-address" value="${escapeHtml(editing.address)}" /></label>
           <label>電話 <input type="text" id="f-phone" value="${escapeHtml(editing.phone)}" /></label>
-          <label>照片網址（選填，貼 Google 雲端硬碟共用連結也可以，會自動轉換） <input type="text" id="f-photo" value="${escapeHtml(editing.photoUrl)}" /></label>
+          <label>上傳照片（選填，會取代下面的照片網址） <input type="file" id="f-photo-file" accept="image/*" /></label>
+          ${editing.photoUrl ? `<img src="${escapeHtml(editing.photoUrl)}" alt="" style="width:100px;height:100px;object-fit:cover;border-radius:8px;" />` : ""}
+          <label>照片網址（選填，貼 Google 雲端硬碟共用連結也可以，但不如上傳穩定） <input type="text" id="f-photo" value="${escapeHtml(photoUrlFieldValue)}" /></label>
           <label>緯度 Latitude（用於在鄉鎮地圖上標示位置，可到 Google 地圖上按右鍵複製座標）
             <input type="number" step="any" id="f-lat" value="${editing.lat ?? ""}" placeholder="例如 23.5654" />
           </label>
