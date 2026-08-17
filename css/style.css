@@ -615,23 +615,29 @@ svg text {
   vertical-align: middle;
 }
 
-/* 活動類型標籤（滾動三力學課程據點／地板滾球活動據點…），實心方角跟 status-badge 的
-   外框圓角區分開來，一眼就能看出這是「哪一種活動」而不是「招生狀態」 */
+/* 活動類型標籤：客戶反應原本的實心方框樣式太搶眼，同一欄裡大部分據點都是同一種類型時，
+   一整排色塊看起來很厚重、單調。改成「小色點＋文字」，用顏色一樣能一眼辨別類型，
+   但份量輕很多，不會變成滿版色塊牆。HTML 不用改（還是同一個 span 包名稱），純 CSS 調整。 */
 .activity-type-tag {
   display: inline-flex;
   align-items: center;
-  padding: 0.15rem 0.6rem;
-  border-radius: 4px;
-  font-size: 0.85em;
+  gap: 0.45rem;
+  font-size: 0.95em;
   font-weight: bold;
-  /* 跟 status-badge 一樣用「淺底＋同色文字＋同色框」而不是實心填滿，不管後台選了什麼顏色，
-     文字對比都還是看得清楚，不會有人選淺色結果變成白字看不到 */
-  background: color-mix(in srgb, var(--activity-color, #0a5c78) 15%, white);
   color: var(--activity-color, #0a5c78);
-  border: 1.5px solid var(--activity-color, #0a5c78);
-  margin-right: 0.5rem;
+  margin-right: 0.8rem;
   vertical-align: middle;
 }
+
+  .activity-type-tag::before {
+    content: "";
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--activity-color, #0a5c78);
+    flex-shrink: 0;
+  }
 
 /* 每週固定時段的上課時間：一排星期圖示自己一行，時間文字換到下一行，
    欄位不會被撐得太寬，表格裡其他欄位（例如鄉市）才有空間不用被迫換行 */
