@@ -628,6 +628,46 @@ svg text {
   vertical-align: middle;
 }
 
+/* 每週固定時段的上課時間：一排星期圖示，有課的那天亮綠燈，時間文字接在後面 */
+.weekday-row { display: inline-flex; gap: 0.2rem; vertical-align: middle; margin-right: 0.5rem; }
+
+.weekday-dot {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #e2e2e2;
+  color: #999;
+  font-size: 0.75rem;
+  font-weight: bold;
+}
+
+  .weekday-dot.active {
+    background: #2a9d5f;
+    color: white;
+    box-shadow: 0 0 6px rgba(42, 157, 95, 0.6);
+  }
+
+.weekday-time { font-size: 0.9em; color: #444; vertical-align: middle; }
+
+/* 表格裡的「查看據點」之類次要動作連結，比 secondary-button 小一號，跟表格行高比較搭 */
+.table-link-button {
+  display: inline-block;
+  padding: 0.3rem 0.9rem;
+  border-radius: 999px;
+  font-size: 0.9em;
+  font-weight: bold;
+  text-decoration: none;
+  color: #0a5c78;
+  background: white;
+  border: 1.5px solid #14919b;
+  transition: background 0.15s ease, transform 0.15s ease;
+}
+
+  .table-link-button:hover { background: #e3f4fb; transform: translateY(-1px); }
+
 /* 首頁目錄 */
 
 .directory-grid {
