@@ -54,6 +54,7 @@
       await addItem("albums", { name });
       editingAlbum = null;
       await reload();
+      showToast("已儲存");
     }
 
     async function deleteAlbum(id) {
@@ -182,6 +183,7 @@
         }
         editingPhoto = null;
         await reload();
+        showToast("已儲存");
       } finally {
         saveBtn.disabled = false;
         saveBtn.textContent = "儲存";
@@ -254,7 +256,7 @@
             <button type="submit" class="primary-button">儲存</button>
             <button type="button" class="secondary-button" onclick="editingAlbum = null; render();">取消</button>
           </form>
-        `, () => { editingAlbum = null; render(); });
+        `);
         document.getElementById("album-form").addEventListener("submit", saveAlbum);
         return;
       }
@@ -271,7 +273,7 @@
             <button type="submit" class="primary-button">儲存</button>
             <button type="button" class="secondary-button" onclick="editingPhoto = null; render();">取消</button>
           </form>
-        `, () => { editingPhoto = null; render(); });
+        `);
         document.getElementById("photo-form").addEventListener("submit", savePhoto);
         return;
       }

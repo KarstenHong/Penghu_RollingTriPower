@@ -64,6 +64,7 @@
       }
       editing = null;
       await reload();
+      showToast("已儲存");
     }
 
     function render() {
@@ -102,7 +103,7 @@
           <button type="submit" class="primary-button">儲存</button>
           <button type="button" class="secondary-button" onclick="editing = null; render();">取消</button>
         </form>
-      `, () => { editing = null; render(); });
+      `);
 
       document.getElementById("association-form").addEventListener("submit", saveAssociation);
     }
