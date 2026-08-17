@@ -50,6 +50,101 @@ main p { line-height: 1.7; }
 
 .copyright-note { font-size: 0.8em; color: #888; border-top: 1px solid #eee; padding-top: 1rem; margin-top: 2rem; }
 
+/* 五大效益的環狀圖：中心是主題、五個色球圍成一圈，用 sin()/cos() 依角度算位置，
+   半徑是容器的百分比，圖放大縮小球的位置都會跟著等比例縮放，不用替每個尺寸各調一次。
+   手機版放不下環狀排列（球會擠在一起或超出畫面），改成同一份 HTML 直接排成上下堆疊的一般列表，
+   不用另外寫一份手機版標記，圖跟列表的切換純粹是 CSS 決定 display/position。 */
+.benefit-orbit {
+  position: relative;
+  width: 100%;
+  max-width: 460px;
+  aspect-ratio: 1 / 1;
+  margin: 2rem auto;
+}
+
+.benefit-orbit-center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 40%;
+  aspect-ratio: 1 / 1;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #0a5c78 0%, #14919b 100%);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  font-weight: bold;
+  font-size: 1.05rem;
+  line-height: 1.4;
+  padding: 0.5rem;
+  box-shadow: 0 6px 20px rgba(10, 92, 120, 0.35);
+}
+
+.benefit-orbit-item {
+  position: absolute;
+  top: calc(50% + 37% * sin(var(--angle)));
+  left: calc(50% + 37% * cos(var(--angle)));
+  transform: translate(-50%, -50%);
+  width: 30%;
+  aspect-ratio: 1 / 1;
+  border-radius: 50%;
+  background: var(--orbit-color);
+  color: white;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  font-weight: bold;
+  font-size: 0.85rem;
+  line-height: 1.3;
+  gap: 0.15rem;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2);
+}
+
+.benefit-orbit-icon { font-size: 1.5rem; }
+
+.benefit-detail-list { margin: 1.5rem 0; }
+  .benefit-detail-list > div { margin-bottom: 1rem; }
+  .benefit-detail-list dt { font-weight: bold; color: #0a5c78; margin-bottom: 0.2rem; }
+  .benefit-detail-list dd { margin: 0; line-height: 1.7; }
+
+@media (max-width: 640px) {
+  .benefit-orbit {
+    position: static;
+    max-width: none;
+    aspect-ratio: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+    margin: 1.5rem 0;
+  }
+
+  .benefit-orbit-center,
+  .benefit-orbit-item {
+    position: static;
+    transform: none;
+    width: auto;
+    aspect-ratio: auto;
+    border-radius: 14px;
+  }
+
+  .benefit-orbit-center { padding: 1rem; }
+
+  .benefit-orbit-item {
+    flex-direction: row;
+    justify-content: flex-start;
+    gap: 0.6rem;
+    padding: 0.8rem 1.2rem;
+    font-size: 1rem;
+  }
+
+  .benefit-orbit-icon { font-size: 1.3rem; }
+}
+
 /* 鄉鎮頁：該鄉鎮的景觀照當作滿版背景（不做霧化模糊，照片清晰呈現），內容卡片維持一般頁面的實心白底，
    確保文字可讀性不受背景照片影響 */
 .township-bg {
@@ -583,6 +678,10 @@ svg text {
   gap: 1.1rem;
   margin: 1rem 0;
 }
+
+/* 內文較長的卡片（例如三力協助員／三力指導員的完整說明）改單欄上下排列，
+   不然並排的欄位會被拉得又高又窄，文字讀起來不好受，寬螢幕也會留下不必要的空白 */
+.venue-list.single-column { grid-template-columns: 1fr; }
 
 .venue-card {
   border: 1px solid #eee;
