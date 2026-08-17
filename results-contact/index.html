@@ -27,36 +27,58 @@
   </main>
 
   <script>
-    let photos = [];
+    // 相簿列表很輕（快取過），但照片本身是 Base64、很重，不能像相簿一樣整批先抓。
+    // 改成先畫出所有相簿的標題和空白格子，捲到快看到某個相簿時才抓那個相簿的照片，
+    // 訪客沒捲到的相簿就不會被下載，相簿/照片再多也不會拖慢一開始的載入。
+    let photosByAlbum = {};
 
     async function initGallery() {
-      const [albums, allPhotos] = await Promise.all([getAll("albums"), getAll("gallery")]);
-      photos = allPhotos.sort((a, b) => (b.date || "").localeCompare(a.date || ""));
-
+      const albums = await getAll("albums");
       const el = document.getElementById("gallery-content");
-      if (!photos.length) {
+
+      if (!albums.length) {
         el.innerHTML = '<p class="hint-text">目前還沒有成果照片，敬請期待。</p>';
         return;
       }
 
-      el.innerHTML = albums
-        .filter((a) => photos.some((p) => p.albumId === a.id))
-        .map((a) => `
-          <h2>${escapeHtml(a.name)}</h2>
-          <div class="gallery-grid">${photos
-            .map((p, i) => ({ p, i }))
-            .filter(({ p }) => p.albumId === a.id)
-            .map(({ p, i }) => `
-              <button type="button" class="gallery-thumb" onclick="openPhoto(${i})">
-                <img src="${escapeHtml(p.imageUrl)}" alt="" loading="lazy" />
-                ${p.caption ? `<span class="gallery-caption">${escapeHtml(p.caption)}</span>` : ""}
-              </button>
-            `).join("")}</div>
-        `).join("");
+      el.innerHTML = albums.map((a) => `
+        <h2>${escapeHtml(a.name)}</h2>
+        <div class="gallery-grid" id="album-${a.id}" data-album-id="${a.id}"><p class="hint-text">載入中...</p></div>
+      `).join("");
+
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) return;
+          observer.unobserve(entry.target);
+          loadAlbumPhotos(entry.target.dataset.albumId);
+        });
+      }, { rootMargin: "300px" });
+
+      document.querySelectorAll("#gallery-content [data-album-id]").forEach((grid) => observer.observe(grid));
     }
 
-    function openPhoto(i) {
-      const p = photos[i];
+    async function loadAlbumPhotos(albumId) {
+      const grid = document.getElementById(`album-${albumId}`);
+      const photos = (await getWhere("gallery", "albumId", albumId)).sort((a, b) => (b.date || "").localeCompare(a.date || ""));
+      photosByAlbum[albumId] = photos;
+
+      if (!photos.length) {
+        // 空相簿：跟原本「只顯示有照片的相簿」的行為一致，把標題也一起拿掉
+        grid.previousElementSibling?.remove();
+        grid.remove();
+        return;
+      }
+
+      grid.innerHTML = photos.map((p, i) => `
+        <button type="button" class="gallery-thumb" onclick="openPhoto('${albumId}', ${i})">
+          <img src="${escapeHtml(p.imageUrl)}" alt="" loading="lazy" />
+          ${p.caption ? `<span class="gallery-caption">${escapeHtml(p.caption)}</span>` : ""}
+        </button>
+      `).join("");
+    }
+
+    function openPhoto(albumId, i) {
+      const p = photosByAlbum[albumId][i];
       const overlay = document.createElement("div");
       overlay.className = "confirm-overlay";
       overlay.innerHTML = `

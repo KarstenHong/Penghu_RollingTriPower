@@ -52,6 +52,12 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
+    // 瀏覽器端快取版本號（見 js/data.js），只有一個文件 meta/cacheVersion，公開可讀、僅 admin 可寫
+    match /meta/{id} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
     // 會員資料：本人可讀寫自己的文件；admin 可讀所有人（後台管理會員時可擴充）
     // 自行註冊只能建立 role: "user" 的文件（避免自己把自己升成 admin）；
     // admin 額外可以建立/刪除別人的文件，供後台「管理者帳號管理」新增/刪除管理者用
