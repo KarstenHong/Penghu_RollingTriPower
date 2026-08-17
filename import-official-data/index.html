@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>匯入正式據點資料（一次性工具）</title>
+  <link rel="stylesheet" href="/css/style.css" />
+  <link rel="icon" href="/images/favicon-32.png" type="image/png" />
+  <link rel="apple-touch-icon" href="/images/favicon-180.png" />
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+  <script src="/js/firebase-config.js"></script>
+  <script src="/js/data.js"></script>
+  <script src="/js/auth.js"></script>
+  <script src="/js/common.js"></script>
+</head>
+<body>
+  <div id="nav"></div>
+  <main>
+    <h1>匯入正式據點資料</h1>
+    <p class="hint-text">
+      這是一次性工具，只會用這一次：清除展示用的假據點／課程／運動項目，改成客戶提供的正式「滾動三力學課程據點」與「地板滾球活動據點」資料（來源：Sport_Spot.txt）。
+      跑完之後這個頁面會被移除，不會留在正式網站上。
+    </p>
+    <p class="hint-text" style="color:#c0392b;">
+      ⚠️ 這 14 個地板滾球活動據點、2 個滾動三力學課程據點目前<strong>沒有經緯度</strong>（來源資料沒有座標，自動查詢又查到錯誤位置，怕標錯點所以沒有亂填），
+      匯入後它們會出現在「參與課程」「社區活動查詢」與各自的據點詳細頁，但暫時不會出現在地圖上的圖釘，需要之後到「場域管理」逐一用 Google 地圖右鍵複製座標補上。
+    </p>
+    <button id="run-btn" class="primary-button" style="display:block; margin: 1rem 0;">開始匯入</button>
+    <div id="log"></div>
+  </main>
+
+  <script>
+    // ---- 資料來源：Sport_Spot.txt（客戶提供的正式據點清單），民國年已換算成西元年 ----
+    const COURSE_INTRO =
+      "「滾動三力學」12週整合式健康促進課程，課程包含身體啟動、技能建構、認知任務、團體策略及經驗整合。";
+    const ACTIVITY_INTRO = "社區地板滾球活動，以地板滾球練習與比賽為主要內容。";
+
+    const OFFICIAL_DATA = [
+      {
+        name: "望安鄉中社社區發展協會", township: "wangan", address: "澎湖縣望安鄉中社村61-1號", phone: "0939215038",
+        course: { schedule: "每週三14:00–16:00", description: COURSE_INTRO, startDate: "2026-06-30", endDate: "2026-09-15",
+          instructorTeam: "指導者：蔡文進｜協同指導者：葉明璋", registrationMethod: "聯絡人：葉明璋｜電話：0939215038", timeSlot: "weekday-afternoon" },
+      },
+      {
+        name: "馬公市東衛社區發展協會", township: "magong", address: "澎湖縣馬公市東衛里27-6號", phone: "06-9211576",
+        course: { schedule: "每週三09:00–11:00", description: COURSE_INTRO, startDate: "2026-07-01", endDate: "2026-09-16",
+          instructorTeam: "指導者：蔡文進｜協同指導者：陳美滿、呂昌森", registrationMethod: "聯絡人：莊福氣｜電話：06-9211576", timeSlot: "weekday-morning" },
+      },
+      {
+        name: "馬公市西衛社區發展協會", township: "magong", address: "澎湖縣馬公市西衛里84號", phone: "06-9266540",
+        course: { schedule: "每週五14:00–16:00", description: ACTIVITY_INTRO, startDate: "2026-07-03", endDate: "2026-09-18",
+          instructorTeam: "活動帶領：鄒芬蘭｜協同帶領：李桂傳、吳鑑清、洪于庭、伍美莉｜協同指導單位：澎湖縣地板滾球協會", registrationMethod: "聯絡人：吳文照｜電話：06-9266540", timeSlot: "weekday-afternoon" },
+      },
+      {
+        name: "白沙鄉吉貝惜福長青協會", township: "baisha", address: "澎湖縣白沙鄉吉貝村12-1號", phone: "06-9911333",
+        course: { schedule: "每週二14:00–16:00", description: ACTIVITY_INTRO, startDate: "2026-06-30", endDate: "2026-09-15",
+          instructorTeam: "活動帶領：黃群毓｜協同帶領：陳美雀｜協同指導單位：澎湖縣地板滾球協會", registrationMethod: "聯絡人：鄭尊伶｜電話：06-9911333", timeSlot: "weekday-afternoon" },
+      },
+      {
+        name: "馬公市重光社區發展協會", township: "magong", address: "澎湖縣馬公市重光里52號", phone: "06-9275232",
+        course: { schedule: "每週二、四 上午10:00–11:00（若有宣導等活動，練球停止）", description: ACTIVITY_INTRO,
+          instructorTeam: "協助指導單位：澎湖縣地板滾球協會", registrationMethod: "活動聯絡人：薛富益｜電話：06-9275232", timeSlot: "weekday-morning" },
+      },
+      {
+        name: "馬公市朝陽社區發展協會", township: "magong", address: "澎湖縣馬公市朝陽里六合路21巷18號", phone: "06-9260389",
+        course: { schedule: "每個月活動時間不一定，請電洽。", description: ACTIVITY_INTRO,
+          instructorTeam: "協助指導單位：澎湖縣地板滾球協會", registrationMethod: "活動聯絡人：顏明清｜電話：06-9260389" },
+      },
+      {
+        name: "馬公市光明社區發展協會", township: "magong", address: "澎湖縣馬公市光明里信義路9巷26號", phone: "06-9270559",
+        course: { schedule: "每個月活動時間不一定，請電洽。", description: ACTIVITY_INTRO,
+          instructorTeam: "協助指導單位：澎湖縣地板滾球協會", registrationMethod: "活動聯絡人：黃淑媛｜電話：06-9270559" },
+      },
+      {
+        name: "馬公市鎖港社區發展協會", township: "magong", address: "澎湖縣馬公市鎖港里633號（鎖港社區活動中心）", phone: "06-9950589",
+        course: { schedule: "每個月活動時間不一定，請電洽。", description: ACTIVITY_INTRO,
+          instructorTeam: "協助指導單位：澎湖縣地板滾球協會", registrationMethod: "活動聯絡人：陳文靜｜電話：06-9950589" },
+      },
+      {
+        name: "西嶼鄉竹灣社區發展協會", township: "xiyu", address: "澎湖縣西嶼鄉竹灣村224號", phone: "06-9982928",
+        course: { schedule: "每個月活動時間不一定，請電洽。", description: ACTIVITY_INTRO,
+          instructorTeam: "協助指導單位：澎湖縣地板滾球協會", registrationMethod: "活動聯絡人：陳仁和｜電話：06-9982928" },
+      },
+      {
+        name: "白沙鄉通樑社區發展協會", township: "baisha", address: "澎湖縣白沙鄉通梁村39號（通梁活動中心）", phone: "06-9931009",
+        course: { schedule: "每個月活動時間不一定，請電洽。", description: ACTIVITY_INTRO,
+          instructorTeam: "協助指導單位：澎湖縣地板滾球協會", registrationMethod: "活動聯絡人：林福瑞｜電話：06-9931009" },
+      },
+      {
+        name: "馬公市前寮社區發展協會", township: "magong", address: "澎湖縣馬公市前寮里33-1號", phone: "06-9214214",
+        course: { schedule: "每個月活動時間不一定，請電洽。", description: ACTIVITY_INTRO,
+          instructorTeam: "協助指導單位：澎湖縣地板滾球協會", registrationMethod: "活動聯絡人：林團圓｜電話：06-9214214" },
+      },
+      {
+        name: "白沙鄉城前社區發展協會", township: "baisha", address: "澎湖縣白沙鄉城前村17-1號（城前社區活動中心）", phone: "06-9931985",
+        course: { schedule: "每個月活動時間不一定，請電洽。", description: ACTIVITY_INTRO,
+          instructorTeam: "協助指導單位：澎湖縣地板滾球協會", registrationMethod: "活動聯絡人：蕭煒仕｜電話：06-9931985" },
+      },
+      {
+        name: "湖西鄉湖東社區發展協會", township: "huxi", address: "澎湖縣湖西鄉湖東村23-1號（湖東社區活動中心）", phone: "06-9923955",
+        course: { schedule: "每個月活動時間不一定，請電洽。", description: ACTIVITY_INTRO,
+          instructorTeam: "協助指導單位：澎湖縣地板滾球協會", registrationMethod: "活動聯絡人：許政忠｜電話：06-9923955" },
+      },
+      {
+        name: "湖西鄉青螺社區發展協會", township: "huxi", address: "澎湖縣湖西鄉青螺村1-1號（青螺村活動中心）", phone: "0963-171534",
+        course: { schedule: "每個月活動時間不一定，請電洽。", description: ACTIVITY_INTRO,
+          instructorTeam: "協助指導單位：澎湖縣地板滾球協會", registrationMethod: "活動聯絡人：李玉立｜電話：0963-171534" },
+      },
+      {
+        name: "湖西鄉中西社區發展協會", township: "huxi", address: "澎湖縣湖西鄉中西村中寮19-1號", phone: "06-9921731",
+        course: { schedule: "每個月活動時間不一定，請電洽。", description: ACTIVITY_INTRO,
+          instructorTeam: "協助指導單位：澎湖縣地板滾球協會", registrationMethod: "活動聯絡人：郭宜媚｜電話：06-9921731（湖西鄉公所民政課）" },
+      },
+      {
+        name: "湖西鄉鼎灣社區發展協會", township: "huxi", address: "澎湖縣湖西鄉鼎灣村37號", phone: "06-9213709",
+        course: { schedule: "每個月活動時間不一定，請電洽。", description: ACTIVITY_INTRO,
+          instructorTeam: "協助指導單位：澎湖縣地板滾球協會", registrationMethod: "活動聯絡人：洪良利｜電話：06-9213709" },
+      },
+    ];
+
+    const OLD_DEMO_SPORT_TYPE_IDS = ["taichi", "folkdance", "croquet", "tabletennis", "badminton", "aerobics", "yoga", "walking"];
+
+    function log(msg) {
+      document.getElementById("log").insertAdjacentHTML("beforeend", `<p>${escapeHtml(msg)}</p>`);
+    }
+
+    async function run() {
+      const btn = document.getElementById("run-btn");
+      btn.disabled = true;
+      document.getElementById("log").innerHTML = "";
+
+      log("刪除展示用據點與課程資料...");
+      const [oldVenues, oldCourses] = await Promise.all([getAll("venues"), getAll("courses")]);
+      for (const v of oldVenues) await deleteItem("venues", v.id);
+      for (const c of oldCourses) await deleteItem("courses", c.id);
+      log(`已刪除 ${oldVenues.length} 個舊據點、${oldCourses.length} 筆舊課程。`);
+
+      log("移除展示用的運動項目（太極拳／土風舞…8 種），改建立正式的「地板滾球」...");
+      for (const id of OLD_DEMO_SPORT_TYPE_IDS) await deleteItem("sportTypes", id);
+      await setItem("sportTypes", "floorcurling", { name: "地板滾球", icon: "/images/icons/floorcurling.svg", active: true });
+
+      log("匯入正式據點與課程資料...");
+      for (const item of OFFICIAL_DATA) {
+        const venueId = await addItem("venues", {
+          name: item.name,
+          township: item.township,
+          type: "association",
+          address: item.address,
+          phone: item.phone,
+          sportTypes: ["floorcurling"],
+          lat: null,
+          lng: null,
+          photoUrl: "",
+        });
+        await addItem("courses", {
+          venueId,
+          sportType: "floorcurling",
+          schedule: item.course.schedule,
+          description: item.course.description,
+          timeSlot: item.course.timeSlot || "",
+          status: "ongoing",
+          startDate: item.course.startDate || "",
+          endDate: item.course.endDate || "",
+          targetAudience: "",
+          instructorTeam: item.course.instructorTeam || "",
+          fee: "",
+          registrationMethod: item.course.registrationMethod || "",
+          accessibilityInfo: "",
+          otherNotes: "",
+        });
+        log(`已建立：${item.name}`);
+      }
+
+      log(`匯入完成！共 ${OFFICIAL_DATA.length} 個據點與課程。麻煩跟工程師說一聲，把這個匯入頁面移除。`);
+      btn.textContent = "已完成";
+    }
+
+    document.getElementById("run-btn").addEventListener("click", run);
+    requireAdmin(() => {});
+  </script>
+</body>
+</html>
