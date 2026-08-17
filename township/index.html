@@ -115,7 +115,7 @@
       const markerSize = vw * Math.max(getMarkerSizeRatio(), minSizeRatio);
       let svg = "";
       Object.values(byVenue).forEach(({ venue, sports }) => {
-        const [px, py] = projectLatLng(venue.lat, venue.lng);
+        const [px, py] = projectVenueMarker(venue);
         sports.forEach((sport, i) => {
           const offset = (i - (sports.length - 1) / 2) * markerSize * 0.85;
           const cx = px + offset;
