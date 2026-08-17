@@ -52,11 +52,33 @@
 
     async function savePost(e) {
       e.preventDefault();
+      const saveBtn = e.target.querySelector('button[type="submit"]');
+      const file = document.getElementById("f-image-file").files[0];
+
       editing.category = document.getElementById("f-category").value;
       editing.title = document.getElementById("f-title").value;
       editing.date = document.getElementById("f-date").value;
       editing.content = document.getElementById("f-content").value;
-      editing.imageUrl = normalizeImageUrl(document.getElementById("f-image").value);
+
+      // 上傳檔案的話優先用檔案（存進 Firestore、不會像 Google 雲端硬碟連結那樣偶爾失效），
+      // 沒選檔案才照原本的方式用「圖片網址」欄位（給已經有穩定外部圖床網址的情況用）
+      if (file) {
+        saveBtn.disabled = true;
+        saveBtn.textContent = "處理中...";
+        try {
+          editing.imageUrl = await fileToCompressedDataUrl(file);
+        } catch (err) {
+          alert(`「${file.name}」處理失敗：${err.message}`);
+          saveBtn.disabled = false;
+          saveBtn.textContent = "儲存";
+          return;
+        }
+      } else {
+        // 網址欄位空白時不動 editing.imageUrl：已經上傳過照片的話，畫面上這欄位是刻意留空的
+        // （見下面 imageUrlFieldValue 的說明），空白不代表要清掉現有圖片
+        const urlValue = document.getElementById("f-image").value.trim();
+        if (urlValue) editing.imageUrl = normalizeImageUrl(urlValue);
+      }
 
       if (editing.id) {
         await setItem("posts", editing.id, editing);
@@ -91,6 +113,10 @@
 
       if (!editing) { renderEditModal(null); return; }
 
+      // 上傳過的圖片網址欄位存的是很長的 Base64 字串，不適合整串塞進文字輸入框讓人誤改，
+      // 顯示成空白就好，靠上面的縮圖預覽提示「已經有圖片了」
+      const imageUrlFieldValue = (editing.imageUrl || "").startsWith("data:") ? "" : editing.imageUrl;
+
       renderEditModal(`
         <form class="member-form" id="post-form">
           <label>分類
@@ -102,7 +128,9 @@
           <label>標題 <input type="text" id="f-title" value="${escapeHtml(editing.title)}" required /></label>
           <label>日期 <input type="date" id="f-date" value="${escapeHtml(editing.date)}" /></label>
           <label>內容 <textarea id="f-content">${escapeHtml(editing.content)}</textarea></label>
-          <label>圖片網址（選填，貼 Google 雲端硬碟共用連結也可以，會自動轉換） <input type="text" id="f-image" value="${escapeHtml(editing.imageUrl)}" /></label>
+          <label>上傳圖片（選填，會取代下面的圖片網址） <input type="file" id="f-image-file" accept="image/*" /></label>
+          ${editing.imageUrl ? `<img src="${escapeHtml(editing.imageUrl)}" alt="" style="width:100px;height:100px;object-fit:cover;border-radius:8px;" />` : ""}
+          <label>圖片網址（選填，貼 Google 雲端硬碟共用連結也可以，但不如上傳穩定） <input type="text" id="f-image" value="${escapeHtml(imageUrlFieldValue)}" /></label>
           <button type="submit" class="primary-button">儲存</button>
           <button type="button" class="secondary-button" onclick="editing = null; render();">取消</button>
         </form>
