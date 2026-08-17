@@ -36,6 +36,20 @@ main {
 
 .hint-text { font-size: 1.05em; color: #444; }
 
+/* 長篇說明文字（認識滾動三力學、課程效益等）的內文段落，瀏覽器預設行距偏窄，
+   加寬一點讀起來比較不吃力，跟長輩無障礙閱讀的整體方向一致 */
+main p { line-height: 1.7; }
+
+/* 條列式內文（例如「誰適合參與」的條件清單），行距/間距比瀏覽器預設寬鬆一點，長輩讀起來比較不吃力 */
+.plain-list { padding-left: 1.4rem; }
+  .plain-list li { margin: 0.5rem 0; line-height: 1.6; }
+
+/* 參考文獻／版權聲明：字體縮小、顏色轉淡，跟正文內容區隔開來，不會搶內文的閱讀焦點 */
+.reference-list { padding-left: 1.4rem; font-size: 0.85em; color: #666; }
+  .reference-list li { margin: 0.5rem 0; line-height: 1.5; }
+
+.copyright-note { font-size: 0.8em; color: #888; border-top: 1px solid #eee; padding-top: 1rem; margin-top: 2rem; }
+
 /* 鄉鎮頁：該鄉鎮的景觀照當作滿版背景（不做霧化模糊，照片清晰呈現），內容卡片維持一般頁面的實心白底，
    確保文字可讀性不受背景照片影響 */
 .township-bg {
