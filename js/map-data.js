@@ -149,6 +149,21 @@ function projectLatLng(lat, lng) {
   return [(x - p.minX) * p.scale + 20, (y - p.minY) * p.scale + 20];
 }
 
+// 手繪簡化地圖在少數海岸線細節（小突出、小灣澳）會被簡化掉，準確的 GPS 座標投影後可能剛好落在
+// 被簡化掉的那一小段「陸地外」，圖示看起來像浮在海上——不是座標填錯（跟 Google 地圖核對過是準的），
+// 也不去動整份手繪地圖資料冒著扭曲整體形狀的風險，改成只對「已知會落在簡化海岸線外」的據點，
+// 畫圖示時做幾個像素等級、肉眼看不出偏移的微調，讓圖示落在陸地範圍內。發現新的類似案例，比照這裡加一筆。
+// 用據點 id（不是名稱）當 key，後台改名稱不會讓這筆微調悄悄失效
+const MARKER_POSITION_OVERRIDES = {
+  mywUiRGRbtFvZwrpIxH2: { dx: 6, dy: 7 }, // 重光社區發展協會
+};
+
+function projectVenueMarker(venue) {
+  const [x, y] = projectLatLng(venue.lat, venue.lng);
+  const override = MARKER_POSITION_OVERRIDES[venue.id];
+  return override ? [x + override.dx, y + override.dy] : [x, y];
+}
+
 // ids 省略時畫全部六個鄉鎮（用固定的整體 viewBox）；
 // 有給 ids 時只畫這幾個鄉鎮，並把視角縮放到它們的範圍（首頁「本島」地圖用這個，望安、七美隔太遠會被排除）
 function renderPenghuMap(containerId, ids) {
