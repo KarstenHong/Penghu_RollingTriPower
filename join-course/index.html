@@ -114,7 +114,7 @@
                 <td>${escapeHtml(venue.name)}</td>
                 <td>${escapeHtml(course.schedule)}</td>
                 <td>${COURSE_STATUS[course.status] ? `<span class="status-badge" style="--status-color: ${COURSE_STATUS[course.status].color}">${COURSE_STATUS[course.status].icon} ${escapeHtml(COURSE_STATUS[course.status].label)}</span>` : ""}</td>
-                <td><a href="/township/?id=${venue.township}">查看據點</a></td>
+                <td><a href="/venue-detail/?venue=${venue.id}">查看據點</a></td>
               </tr>
             `).join("")}
           </tbody>
