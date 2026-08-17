@@ -108,6 +108,19 @@
           townshipName(venue.township).toLowerCase().includes(keyword))
       );
 
+      // 排序：先照鄉鎮（照 TOWNSHIPS 固定順序分組，同鄉鎮排在一起方便找），同鄉鎮內有明確每週
+      // 時段的（能轉成星期圖示的）排前面，「活動時間不一定，請電洽」這種排後面，最後用據點名稱
+      // 排序保持穩定，不會每次重新整理順序都不一樣
+      const townshipOrder = TOWNSHIPS.map((t) => t.id);
+      matching.sort((a, b) => {
+        const townshipDiff = townshipOrder.indexOf(a.venue.township) - townshipOrder.indexOf(b.venue.township);
+        if (townshipDiff) return townshipDiff;
+        const aDefinite = parseWeeklySchedule(a.course.schedule) ? 0 : 1;
+        const bDefinite = parseWeeklySchedule(b.course.schedule) ? 0 : 1;
+        if (aDefinite !== bDefinite) return aDefinite - bDefinite;
+        return a.venue.name.localeCompare(b.venue.name, "zh-Hant");
+      });
+
       const el = document.getElementById("results-content");
 
       if (!matching.length) {
