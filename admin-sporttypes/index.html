@@ -72,13 +72,14 @@
       await reload();
     }
 
-    // 點圖示會整個表單重畫（讓選中的圖示立刻highlight），重畫前先把「名稱」目前打的字存回
-    // editing，不然還沒送出表單就先選圖示，剛打的名稱會因為重畫回到舊的值而不見
+    // 只更新圖示格子本身的選取樣式，不整個 render()：renderEditModal() 每次呼叫都會把整個
+    // 編輯視窗砍掉重建（連同 .confirm-overlay 的淡入動畫也會重播一次），選一下圖示卻讓整個視窗
+    // 重新閃一次、名稱欄位輸入到一半的游標位置也會不見，感覺像整頁被重新整理，體驗不好
     function selectIcon(file) {
-      const nameInput = document.getElementById("f-name");
-      if (nameInput) editing.name = nameInput.value;
       editing.icon = "/images/icons/" + file;
-      render();
+      document.querySelectorAll("#sport-form .icon-button").forEach((btn) => {
+        btn.classList.toggle("selected", btn.dataset.file === file);
+      });
     }
 
     async function saveSport(e) {
@@ -139,7 +140,7 @@
               const path = "/images/icons/" + icon.file;
               const selected = (editing.icon || "/images/icons/default.svg") === path;
               return `
-                <button type="button" class="icon-button${selected ? " selected" : ""}" onclick="selectIcon('${icon.file}')">
+                <button type="button" class="icon-button${selected ? " selected" : ""}" data-file="${icon.file}" onclick="selectIcon('${icon.file}')">
                   <img src="${path}" alt="" />
                   ${escapeHtml(icon.label)}
                 </button>
