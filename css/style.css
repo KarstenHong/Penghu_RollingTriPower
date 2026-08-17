@@ -624,14 +624,18 @@ svg text {
   border-radius: 4px;
   font-size: 0.85em;
   font-weight: bold;
-  background: #0a5c78;
-  color: white;
+  /* 跟 status-badge 一樣用「淺底＋同色文字＋同色框」而不是實心填滿，不管後台選了什麼顏色，
+     文字對比都還是看得清楚，不會有人選淺色結果變成白字看不到 */
+  background: color-mix(in srgb, var(--activity-color, #0a5c78) 15%, white);
+  color: var(--activity-color, #0a5c78);
+  border: 1.5px solid var(--activity-color, #0a5c78);
   margin-right: 0.5rem;
   vertical-align: middle;
 }
 
-/* 每週固定時段的上課時間：一排星期圖示，有課的那天亮綠燈，時間文字接在後面 */
-.weekday-row { display: inline-flex; gap: 0.2rem; vertical-align: middle; margin-right: 0.5rem; }
+/* 每週固定時段的上課時間：一排星期圖示自己一行，時間文字換到下一行，
+   欄位不會被撐得太寬，表格裡其他欄位（例如鄉市）才有空間不用被迫換行 */
+.weekday-row { display: flex; gap: 0.2rem; margin-bottom: 0.2rem; }
 
 .weekday-dot {
   display: inline-flex;
@@ -652,7 +656,7 @@ svg text {
     box-shadow: 0 0 6px rgba(42, 157, 95, 0.6);
   }
 
-.weekday-time { font-size: 0.9em; color: #444; vertical-align: middle; }
+.weekday-time { font-size: 0.9em; color: #444; }
 
 /* 表格裡的「查看據點」之類次要動作連結，比 secondary-button 小一號，跟表格行高比較搭 */
 .table-link-button {

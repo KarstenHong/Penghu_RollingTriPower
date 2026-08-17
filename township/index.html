@@ -166,7 +166,7 @@
       tooltip.innerHTML = `
         <strong>${escapeHtml(venue.name)}</strong>
         <div>${sportName(sport)}${course ? `｜${escapeHtml(course.schedule)}` : ""}</div>
-        ${course && course.activityType ? `<span class="activity-type-tag">${activityTypeName(course.activityType)}</span>` : ""}
+        ${course && course.activityType ? `<span class="activity-type-tag" style="--activity-color: ${activityTypeColor(course.activityType)}">${activityTypeName(course.activityType)}</span>` : ""}
         ${status ? `<span class="status-badge" style="--status-color: ${status.color}">${status.icon} ${escapeHtml(status.label)}</span>` : ""}
       `;
       tooltip.hidden = false;

@@ -47,8 +47,8 @@ function activeSportTypes(keepIds = []) {
 // 所以比照運動項目的做法做成後台可管理（實際資料存在 Firestore 的 activityTypes 集合），
 // 不是像 VENUE_TYPES／COURSE_STATUS 那樣寫死固定幾種。
 const DEFAULT_ACTIVITY_TYPES = [
-  { id: "course", name: "滾動三力學課程據點", active: true },
-  { id: "activity", name: "地板滾球活動據點", active: true },
+  { id: "course", name: "滾動三力學課程據點", color: "#14919b", active: true },
+  { id: "activity", name: "地板滾球活動據點", color: "#e76f51", active: true },
 ];
 
 let ACTIVITY_TYPES = [];
@@ -67,6 +67,12 @@ function activeActivityTypes(keepIds = []) {
 // 這樣不管哪個頁面呼叫都不會漏，避免後台帳號被盜用時能透過類型名稱對一般訪客執行 XSS）
 function activityTypeName(id) {
   return escapeHtml(ACTIVITY_TYPES.find((a) => a.id === id)?.name || id);
+}
+
+// 後台可以幫每個活動類型選顏色（見 admin-activitytypes.html），標籤用這個顏色跟其他類型區分開來；
+// 沒設顏色的舊資料 fallback 回原本的深藍色，不會變成沒顏色
+function activityTypeColor(id) {
+  return escapeHtml(ACTIVITY_TYPES.find((a) => a.id === id)?.color || "#0a5c78");
 }
 
 const VENUE_TYPES = [
@@ -230,7 +236,7 @@ function renderCourseCard(c) {
   return `
     <div class="course-card">
       <p class="course-line">
-        ${c.activityType ? `<span class="activity-type-tag">${activityTypeName(c.activityType)}</span>` : ""}
+        ${c.activityType ? `<span class="activity-type-tag" style="--activity-color: ${activityTypeColor(c.activityType)}">${activityTypeName(c.activityType)}</span>` : ""}
         ${status ? `<span class="status-badge" style="--status-color: ${status.color}">${status.icon} ${escapeHtml(status.label)}</span>` : ""}
         課程時間：${escapeHtml(c.schedule)}｜${escapeHtml(c.description)}
       </p>
