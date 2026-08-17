@@ -510,6 +510,28 @@ body.sports-map-page #map svg {
   .back-to-top.visible { opacity: 1; visibility: visible; transform: translateY(0); }
   .back-to-top:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(10, 92, 120, 0.45); }
 
+/* 後台儲存成功的提示，全站共用（見 js/common.js 的 showToast） */
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: 1.5rem;
+  transform: translateX(-50%);
+  background: #2a9d5f;
+  color: white;
+  font-weight: bold;
+  padding: 0.75rem 1.4rem;
+  border-radius: 999px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+  z-index: 200;
+  animation: toast-in-out 2.5s ease forwards;
+}
+
+@keyframes toast-in-out {
+  0% { opacity: 0; transform: translateX(-50%) translateY(10px); }
+  10%, 85% { opacity: 1; transform: translateX(-50%) translateY(0); }
+  100% { opacity: 0; transform: translateX(-50%) translateY(10px); }
+}
+
 svg text {
   font-size: 20px;
   font-weight: bold;

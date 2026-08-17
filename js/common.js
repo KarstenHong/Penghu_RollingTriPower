@@ -166,7 +166,9 @@ function renderCourseCard(c) {
 
 // 後台的新增／編輯表單改成彈出視窗呈現，不用捲到清單下方才看得到表單，表單本身很長時視窗內自己捲動就好。
 // formHtml 是 null（沒有正在編輯）時只是把視窗關掉；每次呼叫都會先關掉舊的再開新的，不會疊出好幾層視窗。
-function renderEditModal(formHtml, onClose) {
+// 點視窗外面／按 Escape 不會關閉：填表填到一半誤觸背景或滑鼠手震按到 Esc，
+// 內容會整個不見要重打，改成只能按表單裡明確的「取消」或「儲存」按鈕離開
+function renderEditModal(formHtml) {
   document.getElementById("edit-modal-overlay")?.remove();
   if (!formHtml) return;
 
@@ -175,16 +177,6 @@ function renderEditModal(formHtml, onClose) {
   overlay.id = "edit-modal-overlay";
   overlay.innerHTML = `<div class="edit-modal-dialog" role="dialog" aria-modal="true">${formHtml}</div>`;
   document.body.appendChild(overlay);
-
-  overlay.addEventListener("click", (e) => {
-    if (e.target === overlay) onClose();
-  });
-  document.addEventListener("keydown", function onKeydown(e) {
-    if (e.key === "Escape") {
-      document.removeEventListener("keydown", onKeydown);
-      onClose();
-    }
-  });
 }
 
 function venueTypeName(id) {
@@ -295,6 +287,18 @@ function showConfirmDialog(
       .addEventListener("click", () => close(true));
     document.addEventListener("keydown", onKeydown);
   });
+}
+
+// 後台儲存成功後的提醒：畫面右下角跳出小提示、自動消失，不用像 showConfirmDialog 那樣等使用者按按鈕，
+// 儲存本來就是常常連續做的動作（改完一筆接著改下一筆），跳出還要點掉的視窗反而擋路
+function showToast(message) {
+  document.getElementById("toast")?.remove();
+  const el = document.createElement("div");
+  el.id = "toast";
+  el.className = "toast";
+  el.textContent = message;
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 2500);
 }
 
 // 頁籤收合成一個按鈕：有滑鼠的裝置用 CSS :hover 自動展開/收合（見 style.css），
