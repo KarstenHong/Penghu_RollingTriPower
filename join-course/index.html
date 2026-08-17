@@ -52,6 +52,28 @@
     let venues = [];
     let courses = [];
 
+    // 上課時間欄位是自由填寫的文字，只有「每週X」開頭、後面接時間的固定格式才轉成星期圖示＋時間，
+    // 其餘寫法（例如「每個月活動時間不一定，請電洽。」）保留原樣，不用勉強套格式
+    const WEEKDAY_CHARS = ["一", "二", "三", "四", "五", "六", "日"];
+
+    function parseWeeklySchedule(schedule) {
+      const m = (schedule || "").match(/^每週([一二三四五六日、]+)\s*(.*)$/);
+      if (!m) return null;
+      const activeDays = new Set();
+      WEEKDAY_CHARS.forEach((ch, i) => { if (m[1].includes(ch)) activeDays.add(i); });
+      if (!activeDays.size) return null;
+      return { activeDays, time: m[2] };
+    }
+
+    function scheduleHtml(schedule) {
+      const parsed = parseWeeklySchedule(schedule);
+      if (!parsed) return escapeHtml(schedule);
+      const dots = WEEKDAY_CHARS.map((ch, i) =>
+        `<span class="weekday-dot${parsed.activeDays.has(i) ? " active" : ""}">${ch}</span>`
+      ).join("");
+      return `<span class="weekday-row">${dots}</span><span class="weekday-time">${escapeHtml(parsed.time)}</span>`;
+    }
+
     function fillFilterOptions() {
       const t = document.getElementById("filter-township");
       TOWNSHIPS.forEach((x) => t.insertAdjacentHTML("beforeend", `<option value="${x.id}">${x.name}</option>`));
@@ -112,9 +134,9 @@
               <tr>
                 <td>${townshipName(venue.township)}</td>
                 <td>${escapeHtml(venue.name)}</td>
-                <td>${escapeHtml(course.schedule)}</td>
+                <td>${scheduleHtml(course.schedule)}</td>
                 <td>${COURSE_STATUS[course.status] ? `<span class="status-badge" style="--status-color: ${COURSE_STATUS[course.status].color}">${COURSE_STATUS[course.status].icon} ${escapeHtml(COURSE_STATUS[course.status].label)}</span>` : ""}</td>
-                <td><a href="/venue-detail/?venue=${venue.id}">查看據點</a></td>
+                <td><a class="table-link-button" href="/venue-detail/?venue=${venue.id}">查看據點</a></td>
               </tr>
             `).join("")}
           </tbody>
