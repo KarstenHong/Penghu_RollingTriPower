@@ -25,6 +25,22 @@
   </main>
 
   <script>
+    // 圖示檔案清單：這幾個是 images/icons/ 資料夾裡現有的圖示，之後美編/工程師加新圖示檔案時，
+    // 記得也要在這裡加一筆，不然新圖示不會出現在後台可選清單裡（純靜態網站沒辦法自動列出資料夾內容）
+    const AVAILABLE_ICONS = [
+      { file: "default.svg", label: "預設" },
+      { file: "floorcurling.svg", label: "地板滾球" },
+      { file: "course12week.svg", label: "12週課程" },
+      { file: "taichi.svg", label: "太極拳" },
+      { file: "folkdance.svg", label: "土風舞" },
+      { file: "croquet.svg", label: "槌球" },
+      { file: "tabletennis.svg", label: "桌球" },
+      { file: "badminton.svg", label: "羽球" },
+      { file: "aerobics.svg", label: "有氧運動" },
+      { file: "yoga.svg", label: "瑜珈" },
+      { file: "walking.svg", label: "健走" },
+    ];
+
     let sportTypes = [];
     let editing = null;
 
@@ -56,10 +72,19 @@
       await reload();
     }
 
+    // 點圖示會整個表單重畫（讓選中的圖示立刻highlight），重畫前先把「名稱」目前打的字存回
+    // editing，不然還沒送出表單就先選圖示，剛打的名稱會因為重畫回到舊的值而不見
+    function selectIcon(file) {
+      const nameInput = document.getElementById("f-name");
+      if (nameInput) editing.name = nameInput.value;
+      editing.icon = "/images/icons/" + file;
+      render();
+    }
+
     async function saveSport(e) {
       e.preventDefault();
       editing.name = document.getElementById("f-name").value;
-      editing.icon = document.getElementById("f-icon").value || "images/icons/default.svg";
+      if (!editing.icon) editing.icon = "/images/icons/default.svg";
       if (editing.active === undefined) editing.active = true;
 
       if (editing.id) {
@@ -87,7 +112,7 @@
             <tbody>
               ${sportTypes.map((s) => `
                 <tr>
-                  <td><img src="${escapeHtml(s.icon || "images/icons/default.svg")}" alt="" style="width:44px;height:44px;" /></td>
+                  <td><img src="${escapeHtml(s.icon || "/images/icons/default.svg")}" alt="" style="width:44px;height:44px;" /></td>
                   <td>${escapeHtml(s.name)}</td>
                   <td>${s.active !== false ? "上架中" : "已下架"}</td>
                   <td>
@@ -108,7 +133,19 @@
       renderEditModal(`
         <form class="member-form" id="sport-form">
           <label>名稱 <input type="text" id="f-name" value="${escapeHtml(editing.name)}" required /></label>
-          <label>圖示網址（選填，留空使用預設圖示） <input type="text" id="f-icon" value="${escapeHtml(editing.icon || "")}" /></label>
+          <label>圖示（點選一個）</label>
+          <div class="icon-grid">
+            ${AVAILABLE_ICONS.map((icon) => {
+              const path = "/images/icons/" + icon.file;
+              const selected = (editing.icon || "/images/icons/default.svg") === path;
+              return `
+                <button type="button" class="icon-button${selected ? " selected" : ""}" onclick="selectIcon('${icon.file}')">
+                  <img src="${path}" alt="" />
+                  ${escapeHtml(icon.label)}
+                </button>
+              `;
+            }).join("")}
+          </div>
           <button type="submit" class="primary-button">儲存</button>
           <button type="button" class="secondary-button" onclick="editing = null; render();">取消</button>
         </form>
