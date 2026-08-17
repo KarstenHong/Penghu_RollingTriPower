@@ -385,11 +385,11 @@ function renderNav() {
     <div class="nav-bar">
       <a class="nav-brand" href="/"><img src="/images/logo-banner.jpg" alt="" class="nav-logo" />${SITE_NAME}</a>
       <a class="nav-home" href="/home-map/">🏠 返回首頁</a>
-      <span id="nav-admin-slot"></span>
       <div class="nav-menu">
         <button type="button" class="nav-toggle" id="nav-toggle" aria-label="開啟選單" aria-expanded="false">☰ 選單</button>
         <div class="nav-links" id="nav-links">${links}</div>
       </div>
+      <span id="nav-admin-slot"></span>
       <span id="nav-auth-slot"></span>
     </div>
   `;

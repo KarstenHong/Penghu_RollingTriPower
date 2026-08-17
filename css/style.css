@@ -218,20 +218,26 @@ main {
 
   .nav-toggle:hover,
   .nav-home:hover,
-  .nav-admin-link:hover,
   .nav-auth-btn:hover { background: rgba(255, 255, 255, 0.28); }
 
-  /* 登出是不可逆的動作，故意做得跟其他導覽按鈕不一樣，比較不會誤觸；
-     未登入時同一個位置顯示「管理者登入」，用預設的按鈕樣式就好，不用特別顯眼 */
+  /* 後台維護、登出都刻意做得跟一般導覽按鈕不一樣（深底+白框），才不會被誤認成普通頁籤連結混在
+     選單旁邊；登出另外多了 hover 變紅，因為它是不可逆動作，需要比後台維護更明顯的警示 */
+  .nav-admin-link,
   .nav-auth-btn.nav-logout-link {
     background: rgba(0, 0, 0, 0.18);
     border: 2px solid rgba(255, 255, 255, 0.6);
+  }
+
+  .nav-admin-link:hover {
+    background: rgba(255, 255, 255, 0.28);
   }
 
   .nav-auth-btn.nav-logout-link:hover {
     background: #c0392b;
     border-color: #c0392b;
   }
+
+  /* 未登入時同一個位置顯示「管理者登入」，用預設的按鈕樣式就好，不用特別顯眼 */
 
 /* 選單按鈕跟下拉選單包在同一個 .nav-menu 裡，hover 判斷用父層而不是「按鈕:hover 才顯示」，
    這樣滑鼠從按鈕往下移到選單清單的路徑上，不會有一段「兩邊都沒 hover 到」的空隙讓選單提早收合。
