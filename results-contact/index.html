@@ -18,12 +18,21 @@
 <body>
   <div id="nav"></div>
   <main>
-    <h1>成果與資源</h1>
-    <p class="hint-text">學員們參加社區運動的精彩紀錄</p>
-    <div id="gallery-content"><p>載入中...</p></div>
+    <div class="page-tabs" role="tablist">
+      <button type="button" class="page-tab active" data-tab="results">成果與資源</button>
+      <button type="button" class="page-tab" data-tab="contact">聯絡我們</button>
+    </div>
 
-    <h1 style="margin-top: 2.5rem;">聯絡我們</h1>
-    <div id="contact-content"><p>載入中...</p></div>
+    <div data-tab-panel="results">
+      <h1>成果與資源</h1>
+      <p class="hint-text">學員們參加社區運動的精彩紀錄</p>
+      <div id="gallery-content"><p>載入中...</p></div>
+    </div>
+
+    <div data-tab-panel="contact" hidden>
+      <h1>聯絡我們</h1>
+      <div id="contact-content"><p>載入中...</p></div>
+    </div>
   </main>
 
   <script>
@@ -132,6 +141,7 @@
 
     initGallery();
     initContact();
+    initTabs();
   </script>
 </body>
 </html>

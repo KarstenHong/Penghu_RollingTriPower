@@ -1066,6 +1066,23 @@ svg text {
 .back-button { display: block; margin-bottom: 1rem; color: #0a5c78; font-weight: bold; border: none; padding: 0; background: none; transition: color 0.15s ease; }
   .back-button:hover { color: #14919b; text-decoration: underline; }
 
+/* 頁籤：一個頁面放兩個網頁內容時用（例如成果與資源／聯絡我們），避免全部資訊擠在同一個畫面 */
+.page-tabs { display: flex; gap: 0.6rem; border-bottom: 2px solid #eee; margin-bottom: 1.5rem; flex-wrap: wrap; }
+.page-tab {
+  padding: 0.7rem 1.3rem;
+  border: none;
+  background: none;
+  font-size: 1.05em;
+  font-weight: bold;
+  color: #6b7280;
+  cursor: pointer;
+  border-bottom: 3px solid transparent;
+  margin-bottom: -2px;
+  transition: color 0.15s ease, border-color 0.15s ease;
+}
+  .page-tab:hover { color: #0a5c78; }
+  .page-tab.active { color: #0a5c78; border-bottom-color: #14919b; }
+
 .error-text { color: #c0392b; font-weight: bold; }
 .success-text { color: #2a9d5f; font-weight: bold; }
 
