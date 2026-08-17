@@ -196,7 +196,9 @@ main {
 .nav-logo { height: 44px; width: auto; flex-shrink: 0; border-radius: 6px; }
 
 .nav-toggle,
-.nav-home {
+.nav-home,
+.nav-admin-link,
+.nav-auth-btn {
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
@@ -209,13 +211,27 @@ main {
   font-size: 1rem;
   font-weight: bold;
   cursor: pointer;
+  text-decoration: none;
+  white-space: nowrap;
   transition: background 0.15s ease;
 }
 
   .nav-toggle:hover,
-  .nav-home:hover { background: rgba(255, 255, 255, 0.28); }
+  .nav-home:hover,
+  .nav-admin-link:hover,
+  .nav-auth-btn:hover { background: rgba(255, 255, 255, 0.28); }
 
-  .nav-home { text-decoration: none; white-space: nowrap; }
+  /* 登出是不可逆的動作，故意做得跟其他導覽按鈕不一樣，比較不會誤觸；
+     未登入時同一個位置顯示「管理者登入」，用預設的按鈕樣式就好，不用特別顯眼 */
+  .nav-auth-btn.nav-logout-link {
+    background: rgba(0, 0, 0, 0.18);
+    border: 2px solid rgba(255, 255, 255, 0.6);
+  }
+
+  .nav-auth-btn.nav-logout-link:hover {
+    background: #c0392b;
+    border-color: #c0392b;
+  }
 
 /* 選單按鈕跟下拉選單包在同一個 .nav-menu 裡，hover 判斷用父層而不是「按鈕:hover 才顯示」，
    這樣滑鼠從按鈕往下移到選單清單的路徑上，不會有一段「兩邊都沒 hover 到」的空隙讓選單提早收合。
@@ -249,15 +265,6 @@ main {
     }
   }
 
-  /* #nav-auth-links 這個 span 裡面塞了好幾個連結（會員資料/我的最愛/登出），
-     它本身雖然是 .nav-links 的 flex item，但沒有設 display:flex 的話，
-     裡面的連結彼此之間就沒有 gap，跟其他頁籤的間距會對不起來 */
-  #nav-auth-links {
-    display: flex;
-    align-items: center;
-    gap: 0.9rem;
-  }
-
   .nav-links a {
     color: white;
     text-decoration: none;
@@ -270,32 +277,6 @@ main {
   .nav-links a:hover {
     background: rgba(255, 255, 255, 0.2);
     text-decoration: none;
-  }
-
-  /* 未登入時的「會員登入 / 註冊」按鈕，故意跟其他導覽連結長得不一樣，讓它更顯眼 */
-  .nav-links a.nav-cta {
-    background: #f4a261;
-    color: #5a2d0c;
-    font-weight: bold;
-    padding: 0.4rem 1.1rem;
-    border-radius: 999px;
-    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
-  }
-
-  .nav-links a.nav-cta:hover {
-    background: #f7b787;
-  }
-
-  /* 登出是不可逆的動作，故意做得跟一般導覽連結不一樣，長輩比較不會誤觸 */
-  .nav-links a.nav-logout-link {
-    background: rgba(0, 0, 0, 0.18);
-    border: 2px solid rgba(255, 255, 255, 0.6);
-    font-weight: bold;
-  }
-
-  .nav-links a.nav-logout-link:hover {
-    background: #c0392b;
-    border-color: #c0392b;
   }
 
 /* 字級切換 */

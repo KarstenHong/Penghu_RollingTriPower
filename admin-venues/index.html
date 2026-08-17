@@ -61,7 +61,7 @@
       editing.lat = parseFloat(document.getElementById("f-lat").value) || null;
       editing.lng = parseFloat(document.getElementById("f-lng").value) || null;
       editing.sportTypes = Array.from(document.querySelectorAll(".f-sport:checked")).map((c) => c.value);
-      editing.photoUrl = document.getElementById("f-photo").value;
+      editing.photoUrl = normalizeImageUrl(document.getElementById("f-photo").value);
 
       if (editing.id) {
         await setItem("venues", editing.id, editing);
@@ -114,7 +114,7 @@
           </label>
           <label>地址 <input type="text" id="f-address" value="${escapeHtml(editing.address)}" /></label>
           <label>電話 <input type="text" id="f-phone" value="${escapeHtml(editing.phone)}" /></label>
-          <label>照片網址（選填） <input type="text" id="f-photo" value="${escapeHtml(editing.photoUrl)}" /></label>
+          <label>照片網址（選填，貼 Google 雲端硬碟共用連結也可以，會自動轉換） <input type="text" id="f-photo" value="${escapeHtml(editing.photoUrl)}" /></label>
           <label>緯度 Latitude（用於在鄉鎮地圖上標示位置，可到 Google 地圖上按右鍵複製座標）
             <input type="number" step="any" id="f-lat" value="${editing.lat ?? ""}" placeholder="例如 23.5654" />
           </label>

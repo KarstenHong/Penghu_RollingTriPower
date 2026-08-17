@@ -68,6 +68,17 @@ function escapeHtml(text) {
     .replace(/'/g, "&#39;");
 }
 
+// Google 雲端硬碟的「共用連結」（.../file/d/檔案ID/view?usp=sharing）不能直接當圖片網址用，
+// 瀏覽器會顯示雲端硬碟的網頁本身而不是圖片本身；後台填「圖片網址」貼這種連結是常見狀況，
+// 存檔前自動偵測、轉成可以直接讀取圖片的格式，不用每次都手動換算檔案 ID
+function normalizeImageUrl(url) {
+  const trimmed = (url || "").trim();
+  const m =
+    trimmed.match(/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/) ||
+    trimmed.match(/drive\.google\.com\/open\?id=([a-zA-Z0-9_-]+)/);
+  return m ? `https://drive.google.com/uc?export=view&id=${m[1]}` : trimmed;
+}
+
 // 驗證台灣身分證字號格式是否正確（開頭英文字母對應戶籍地 + 檢查碼演算法），只用來抓輸入打錯字，不當作密碼或任何驗證用途
 function isValidTaiwanId(id) {
   if (!/^[A-Z][12]\d{8}$/.test(id)) return false;
@@ -222,13 +233,17 @@ function setCachedAuth(value) {
   }
 }
 
-function authLinksHtml(role) {
-  let html = "";
+// 後台維護、登出（或未登入時的管理者登入）不放進選單裡，是隨時都看得到的獨立按鈕，
+// 分別放在「返回首頁」右邊、選單右邊——admin-link 放不放看角色，auth-link 兩種狀態一定會有一個
+function adminLinkHtml(role) {
+  return role === "admin" ? `<a href="/admin/" class="nav-admin-link">後台維護</a>` : "";
+}
+
+function authLinkHtml(role) {
   if (role === "admin") {
-    html += `<a href="/admin/">後台維護</a>`;
+    return `<a href="#" id="nav-logout" class="nav-auth-btn nav-logout-link">登出</a>`;
   }
-  html += `<a href="#" id="nav-logout" class="nav-logout-link">登出</a>`;
-  return html;
+  return `<a href="/login/" class="nav-auth-btn">管理者登入</a>`;
 }
 
 function wireLogoutButton() {
@@ -333,34 +348,38 @@ function renderNav() {
     <div class="nav-bar">
       <a class="nav-brand" href="/"><img src="/images/logo-banner.jpg" alt="" class="nav-logo" />${SITE_NAME}</a>
       <a class="nav-home" href="/home-map/">🏠 返回首頁</a>
+      <span id="nav-admin-slot"></span>
       <div class="nav-menu">
         <button type="button" class="nav-toggle" id="nav-toggle" aria-label="開啟選單" aria-expanded="false">☰ 選單</button>
-        <div class="nav-links" id="nav-links">${links}<span id="nav-auth-links"></span></div>
+        <div class="nav-links" id="nav-links">${links}</div>
       </div>
+      <span id="nav-auth-slot"></span>
     </div>
   `;
   wireNavToggle();
 
-  const authEl = document.getElementById("nav-auth-links");
-  const cached = getCachedAuth();
-  if (cached) {
-    authEl.innerHTML = authLinksHtml(cached.role);
-    wireLogoutButton();
-  } else {
-    authEl.innerHTML = `<a href="/login/">管理者登入</a>`;
+  const adminEl = document.getElementById("nav-admin-slot");
+  const authEl = document.getElementById("nav-auth-slot");
+
+  function applyAuthUi(role) {
+    adminEl.innerHTML = adminLinkHtml(role);
+    authEl.innerHTML = authLinkHtml(role);
+    if (role === "admin") wireLogoutButton();
   }
+
+  const cached = getCachedAuth();
+  applyAuthUi(cached ? cached.role : null);
 
   onAuthReady(async (user) => {
     if (!user) {
       setCachedAuth(null);
-      authEl.innerHTML = `<a href="/login/">管理者登入</a>`;
+      applyAuthUi(null);
       return;
     }
     const profile = await getById("users", user.uid);
     const role = profile && profile.role === "admin" ? "admin" : "user";
     setCachedAuth({ uid: user.uid, role });
-    authEl.innerHTML = authLinksHtml(role);
-    wireLogoutButton();
+    applyAuthUi(role);
   });
 }
 
