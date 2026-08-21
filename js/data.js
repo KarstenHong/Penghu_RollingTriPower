@@ -60,6 +60,25 @@ async function getWhere(collection, field, value) {
   return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
 }
 
+// 條件查詢再加排序＋張數上限，給相簿輪播牆只抓前幾張代表照片用（見 results-contact.html）。
+// 注意：where 等於篩選 + orderBy 不同欄位排序，Firestore 需要一個複合索引才能查，第一次上線
+// 遇到 FAILED_PRECONDITION 錯誤時，錯誤訊息裡會附一個建立索引的連結，點一次、等索引建好即可，
+// 之後就會一直正常，不用每次部署都重建
+async function getWhereOrdered(collection, field, value, orderField, direction, limitCount) {
+  const snap = await db.collection(collection)
+    .where(field, "==", value)
+    .orderBy(orderField, direction)
+    .limit(limitCount)
+    .get();
+  return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+}
+
+// 只算符合條件的筆數，不下載內容——用來知道相簿總共有幾張照片，不用整批抓下來才知道張數
+async function countWhere(collection, field, value) {
+  const snap = await db.collection(collection).where(field, "==", value).count().get();
+  return snap.data().count;
+}
+
 async function addItem(collection, data) {
   const ref = await db.collection(collection).add(data);
   if (CACHEABLE_COLLECTIONS.includes(collection)) await bumpCacheVersion();

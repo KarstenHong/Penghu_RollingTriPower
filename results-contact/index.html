@@ -73,21 +73,27 @@
       document.querySelectorAll("#gallery-content [data-album-id]").forEach((grid) => observer.observe(grid));
     }
 
+    // 先只算張數（不下載內容），張數不多就直接整批抓、跟以前一樣顯示全部；
+    // 張數多才只抓前幾張代表照片做輪播，流量只花在訪客實際會看到的內容，
+    // 剩下的照片留到訪客真的點「查看全部」才下載
     async function loadAlbumPhotos(albumId) {
       const grid = document.getElementById(`album-${albumId}`);
-      const photos = (await getWhere("gallery", "albumId", albumId)).sort((a, b) => (b.date || "").localeCompare(a.date || ""));
-      photosByAlbum[albumId] = photos;
+      const total = await countWhere("gallery", "albumId", albumId);
 
-      if (!photos.length) {
+      if (!total) {
         // 空相簿：跟原本「只顯示有照片的相簿」的行為一致，把標題也一起拿掉
         grid.previousElementSibling?.remove();
         grid.remove();
         return;
       }
 
-      if (photos.length > CAROUSEL_THRESHOLD) {
-        renderCarousel(albumId, photos);
+      if (total > CAROUSEL_THRESHOLD) {
+        const preview = await getWhereOrdered("gallery", "albumId", albumId, "date", "desc", CAROUSEL_THRESHOLD);
+        photosByAlbum[albumId] = preview;
+        renderCarousel(albumId, preview, total);
       } else {
+        const photos = (await getWhere("gallery", "albumId", albumId)).sort((a, b) => (b.date || "").localeCompare(a.date || ""));
+        photosByAlbum[albumId] = photos;
         renderFullGrid(albumId, photos);
       }
     }
@@ -103,11 +109,11 @@
       `).join("");
     }
 
-    // 輪播只放前 5 張代表照片（已經照日期新到舊排序），點照片一樣開燈箱，
-    // 燈箱要看的是 photosByAlbum 裡完整的那份資料，索引直接對得起來，不用另外做對照表
-    function renderCarousel(albumId, photos) {
+    // preview 是只抓前幾張的預覽資料（不是整本相簿），點照片開燈箱一樣對得起來，因為
+    // loadAlbumPhotos 存進 photosByAlbum 的也是同一份預覽資料，索引不會錯位；
+    // 「查看全部」要看全部相片時，expandAlbum 會重新抓一次完整資料、換掉這份預覽
+    function renderCarousel(albumId, preview, total) {
       const el = document.getElementById(`album-${albumId}`);
-      const preview = photos.slice(0, CAROUSEL_THRESHOLD);
       carouselIndex[albumId] = 0;
 
       el.className = "gallery-carousel";
@@ -124,7 +130,7 @@
         <div class="gallery-carousel-dots">
           ${preview.map((_, i) => `<button type="button" class="gallery-carousel-dot${i === 0 ? " active" : ""}" aria-label="第 ${i + 1} 張" onclick="goToCarouselSlide('${albumId}', ${i}, ${preview.length})"></button>`).join("")}
         </div>
-        <a href="#" class="table-link-button" onclick="expandAlbum('${albumId}'); return false;">查看全部 ${photos.length} 張 &rarr;</a>
+        <a href="#" class="table-link-button" onclick="expandAlbum('${albumId}'); return false;">查看全部 ${total} 張 &rarr;</a>
       `;
 
       startCarouselAutoplay(albumId, preview.length);
@@ -158,9 +164,15 @@
       delete carouselTimers[albumId];
     }
 
-    function expandAlbum(albumId) {
+    // 展開全部才真正抓整本相簿（先前只抓了輪播用的前幾張），抓完整批替換掉 photosByAlbum
+    // 裡原本的預覽資料，之後點展開後任何一張縮圖，燈箱索引都會對到正確的完整清單
+    async function expandAlbum(albumId) {
       stopCarouselAutoplay(albumId);
-      renderFullGrid(albumId, photosByAlbum[albumId]);
+      const el = document.getElementById(`album-${albumId}`);
+      el.innerHTML = '<p class="hint-text">載入中...</p>';
+      const photos = (await getWhere("gallery", "albumId", albumId)).sort((a, b) => (b.date || "").localeCompare(a.date || ""));
+      photosByAlbum[albumId] = photos;
+      renderFullGrid(albumId, photos);
     }
 
     function openPhoto(albumId, i) {
