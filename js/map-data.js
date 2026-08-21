@@ -107,7 +107,7 @@ const PENGHU_MAP = {
       "detailBbox": [
         274,
         20,
-        362,
+        417,
         270
       ]
     },
