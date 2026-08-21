@@ -149,16 +149,13 @@ function projectLatLng(lat, lng) {
   return [(x - p.minX) * p.scale + 20, (y - p.minY) * p.scale + 20];
 }
 
-// 手繪簡化地圖在少數海岸線細節（小突出、小灣澳）會被簡化掉，準確的 GPS 座標投影後可能剛好落在
-// 被簡化掉的那一小段「陸地外」，圖示看起來像浮在海上——不是座標填錯（跟 Google 地圖核對過是準的），
-// 也不去動整份手繪地圖資料冒著扭曲整體形狀的風險，改成只對「已知會落在簡化海岸線外」的據點，
-// 畫圖示時做幾個像素等級、肉眼看不出偏移的微調，讓圖示落在陸地範圍內。發現新的類似案例，比照這裡加一筆。
-// 用據點 id（不是名稱）當 key，後台改名稱不會讓這筆微調悄悄失效
+// 手繪簡化地圖偶爾會讓準確的 GPS 座標投影後落在陸地外一點點（海岸線簡化細節），或是在小島密集
+// 的地方因為投影公式的線性誤差被放大、跳到隔壁小島——不是座標填錯，是地圖本身的簡化/精度限制。
+// 過去這個微調要工程師手動改程式碼、部署才能生效；現在改成後台場域管理頁「地圖位置微調」直接存進
+// 該筆場域自己的 markerOffsetX/markerOffsetY 欄位，客戶自己就能調整，不用等工程師。
 //
-// 鳥嶼社區發展協會這筆是另一種情況：附近有兩個很小的島（鳥嶼本島、北邊的小白沙嶼），面積小，
-// 投影公式是簡化過的線性換算（不是精準地圖投影），在這種鄰近小島的地方誤差會被放大，導致準確的
-// GPS 座標投影後落到旁邊的小白沙嶼上，而不是鳥嶼本島——不是幾像素等級的誤差，是明顯跳到隔壁島，
-// 所以這筆的 dx/dy 特地調大，把圖示拉回鳥嶼本島（跟 Google 地圖上「鳥嶼社區活動中心」的位置核對過）
+// 這個舊表只留給還沒被搬到 Firestore 欄位的舊資料當備援（venue.markerOffsetX optional chaining
+// 是 undefined 才會查這裡），等後台把這兩筆的偏移量存過一次、確認欄位有值之後，這個表就可以整個刪掉。
 const MARKER_POSITION_OVERRIDES = {
   mywUiRGRbtFvZwrpIxH2: { dx: 6, dy: 7 }, // 重光社區發展協會
   jinGfYoQ1g9Ghk2kdScE: { dx: -6, dy: 25 }, // 鳥嶼社區發展協會（原始投影落在小白沙嶼，拉回鳥嶼本島）
@@ -166,8 +163,10 @@ const MARKER_POSITION_OVERRIDES = {
 
 function projectVenueMarker(venue) {
   const [x, y] = projectLatLng(venue.lat, venue.lng);
-  const override = MARKER_POSITION_OVERRIDES[venue.id];
-  return override ? [x + override.dx, y + override.dy] : [x, y];
+  const legacy = MARKER_POSITION_OVERRIDES[venue.id];
+  const dx = venue.markerOffsetX ?? legacy?.dx ?? 0;
+  const dy = venue.markerOffsetY ?? legacy?.dy ?? 0;
+  return [x + dx, y + dy];
 }
 
 // ids 省略時畫全部六個鄉鎮（用固定的整體 viewBox）；

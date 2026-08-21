@@ -14,6 +14,7 @@
   <script src="/js/data.js"></script>
   <script src="/js/auth.js"></script>
   <script src="/js/common.js"></script>
+  <script src="/js/map-data.js"></script>
 </head>
 <body>
   <div id="nav"></div>
@@ -33,13 +34,17 @@
     }
 
     function newVenue() {
-      editing = { name: "", township: "", type: "", address: "", phone: "", sportTypes: [], lat: "", lng: "", photoUrl: "" };
+      editing = { name: "", township: "", type: "", address: "", phone: "", sportTypes: [], lat: "", lng: "", photoUrl: "", markerOffsetX: null, markerOffsetY: null };
       render();
     }
 
     function editVenue(id) {
       const v = venues.find((x) => x.id === id);
       editing = JSON.parse(JSON.stringify(v));
+      // JSON.stringify 會把 undefined 的欄位整個拿掉，舊資料（還沒用過地圖微調工具）在這裡補回
+      // null，不要留 undefined——Firestore 存檔時遇到 undefined 值會直接丟例外，null 才是安全值
+      editing.markerOffsetX = editing.markerOffsetX ?? null;
+      editing.markerOffsetY = editing.markerOffsetY ?? null;
       render();
     }
 
@@ -127,7 +132,7 @@
         <form class="member-form" id="venue-form">
           <label>名稱 <input type="text" id="f-name" value="${escapeHtml(editing.name)}" required /></label>
           <label>鄉鎮
-            <select id="f-township">
+            <select id="f-township" onchange="renderMarkerPreview()">
               <option value="">請選擇</option>
               ${TOWNSHIPS.map((t) => `<option value="${t.id}" ${editing.township === t.id ? "selected" : ""}>${t.name}</option>`).join("")}
             </select>
@@ -144,11 +149,12 @@
           ${editing.photoUrl ? `<img src="${escapeHtml(editing.photoUrl)}" alt="" style="width:100px;height:100px;object-fit:cover;border-radius:8px;" />` : ""}
           <label>照片網址（選填，貼 Google 雲端硬碟共用連結也可以，但不如上傳穩定） <input type="text" id="f-photo" value="${escapeHtml(photoUrlFieldValue)}" /></label>
           <label>緯度 Latitude（用於在鄉鎮地圖上標示位置，可到 Google 地圖上按右鍵複製座標）
-            <input type="number" step="any" id="f-lat" value="${editing.lat ?? ""}" placeholder="例如 23.5654" />
+            <input type="number" step="any" id="f-lat" value="${editing.lat ?? ""}" placeholder="例如 23.5654" oninput="renderMarkerPreview()" />
           </label>
           <label>經度 Longitude
-            <input type="number" step="any" id="f-lng" value="${editing.lng ?? ""}" placeholder="例如 119.5654" />
+            <input type="number" step="any" id="f-lng" value="${editing.lng ?? ""}" placeholder="例如 119.5654" oninput="renderMarkerPreview()" />
           </label>
+          <div id="marker-preview-section"></div>
           <fieldset>
             <legend>提供的運動項目</legend>
             ${activeSportTypes(editing.sportTypes || []).map((s) => `
@@ -164,6 +170,79 @@
       `);
 
       document.getElementById("venue-form").addEventListener("submit", saveVenue);
+      renderMarkerPreview();
+    }
+
+    // 地圖位置微調：讓後台可以直接看到、調整圖示在地圖上的實際位置，不用再麻煩工程師改程式碼。
+    // 只更新 #marker-preview-section 這個小區塊，不會動到表單其他欄位（不會像整個 renderEditModal()
+    // 重建那樣讓輸入到一半的欄位、動畫都重播一次）
+    function renderMarkerPreview() {
+      const section = document.getElementById("marker-preview-section");
+      if (!section) return;
+
+      const township = document.getElementById("f-township").value;
+      const lat = parseFloat(document.getElementById("f-lat").value);
+      const lng = parseFloat(document.getElementById("f-lng").value);
+
+      if (!township || isNaN(lat) || isNaN(lng)) {
+        section.innerHTML = `<p class="hint-text">請先填寫鄉鎮與經緯度，這裡會顯示地圖預覽，可以直接點擊調整圖示位置。</p>`;
+        return;
+      }
+
+      const previewVenue = { id: editing.id, lat, lng, markerOffsetX: editing.markerOffsetX, markerOffsetY: editing.markerOffsetY };
+      const [mx, my] = projectVenueMarker(previewVenue);
+      const offsetX = editing.markerOffsetX ?? 0;
+      const offsetY = editing.markerOffsetY ?? 0;
+
+      section.innerHTML = `
+        <label>地圖位置微調（選填）</label>
+        <p class="hint-text">如果圖示位置跟實際地點不符，可以直接點擊地圖上正確的位置，或用下面的按鈕微調，儲存後立即生效。</p>
+        <div class="map-wrap" style="max-width: 260px; padding: 0.6rem;">
+          <div id="marker-preview-map"></div>
+        </div>
+        <p class="hint-text">目前偏移量：X=${offsetX}, Y=${offsetY}</p>
+        <div style="display: grid; grid-template-columns: repeat(3, 40px); grid-template-rows: repeat(3, 40px); gap: 4px; margin: 0.6rem 0;">
+          <span></span><button type="button" onclick="nudgeMarker(0, -1)">&uarr;</button><span></span>
+          <button type="button" onclick="nudgeMarker(-1, 0)">&larr;</button><span></span><button type="button" onclick="nudgeMarker(1, 0)">&rarr;</button>
+          <span></span><button type="button" onclick="nudgeMarker(0, 1)">&darr;</button><span></span>
+        </div>
+        <button type="button" class="secondary-button" onclick="resetMarkerOffset()" style="display: block;">重設為原始座標位置</button>
+      `;
+
+      renderTownshipMap("marker-preview-map", township);
+      const svg = document.querySelector("#marker-preview-map svg");
+      if (!svg) return;
+
+      svg.style.maxWidth = "100%";
+      svg.insertAdjacentHTML("beforeend", `
+        <circle cx="${mx}" cy="${my}" r="6" fill="white" stroke="rgba(0,0,0,0.3)" stroke-width="1" />
+        <circle cx="${mx}" cy="${my}" r="3.5" fill="#e76f51" />
+      `);
+      svg.style.cursor = "crosshair";
+      svg.addEventListener("click", (e) => {
+        const pt = svg.createSVGPoint();
+        pt.x = e.clientX;
+        pt.y = e.clientY;
+        const svgPt = pt.matrixTransform(svg.getScreenCTM().inverse());
+        const [rawX, rawY] = projectLatLng(lat, lng);
+        editing.markerOffsetX = Math.round(svgPt.x - rawX);
+        editing.markerOffsetY = Math.round(svgPt.y - rawY);
+        renderMarkerPreview();
+      });
+    }
+
+    function nudgeMarker(dx, dy) {
+      editing.markerOffsetX = (editing.markerOffsetX ?? 0) + dx;
+      editing.markerOffsetY = (editing.markerOffsetY ?? 0) + dy;
+      renderMarkerPreview();
+    }
+
+    // 重設是明確設回 0（不是清成 null）：null 在 projectVenueMarker() 裡還是會去查舊的
+    // MARKER_POSITION_OVERRIDES 表當備援，跟這顆按鈕「回到真正原始座標位置」的預期不符
+    function resetMarkerOffset() {
+      editing.markerOffsetX = 0;
+      editing.markerOffsetY = 0;
+      renderMarkerPreview();
     }
 
     requireAdmin(async () => {
