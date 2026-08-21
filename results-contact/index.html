@@ -73,28 +73,28 @@
       document.querySelectorAll("#gallery-content [data-album-id]").forEach((grid) => observer.observe(grid));
     }
 
-    // 先只算張數（不下載內容），張數不多就直接整批抓、跟以前一樣顯示全部；
-    // 張數多才只抓前幾張代表照片做輪播，流量只花在訪客實際會看到的內容，
-    // 剩下的照片留到訪客真的點「查看全部」才下載
+    // 多抓 1 張只是用來判斷「這本相簿還有沒有超過預覽張數」，不代表輪播會多顯示一張——
+    // Firestore 的 count() 聚合查詢在目前載入的 compat SDK 版本用不了（試過會噴
+    // "count is not a function"），改用這個不依賴 count() 的做法一樣能避免整批下載，
+    // 代價是「查看全部」按鈕沒辦法顯示精確張數，只能講「查看全部相片」
     async function loadAlbumPhotos(albumId) {
       const grid = document.getElementById(`album-${albumId}`);
-      const total = await countWhere("gallery", "albumId", albumId);
+      const fetched = await getWhereOrdered("gallery", "albumId", albumId, "date", "desc", CAROUSEL_THRESHOLD + 1);
 
-      if (!total) {
+      if (!fetched.length) {
         // 空相簿：跟原本「只顯示有照片的相簿」的行為一致，把標題也一起拿掉
         grid.previousElementSibling?.remove();
         grid.remove();
         return;
       }
 
-      if (total > CAROUSEL_THRESHOLD) {
-        const preview = await getWhereOrdered("gallery", "albumId", albumId, "date", "desc", CAROUSEL_THRESHOLD);
+      if (fetched.length > CAROUSEL_THRESHOLD) {
+        const preview = fetched.slice(0, CAROUSEL_THRESHOLD);
         photosByAlbum[albumId] = preview;
-        renderCarousel(albumId, preview, total);
+        renderCarousel(albumId, preview);
       } else {
-        const photos = (await getWhere("gallery", "albumId", albumId)).sort((a, b) => (b.date || "").localeCompare(a.date || ""));
-        photosByAlbum[albumId] = photos;
-        renderFullGrid(albumId, photos);
+        photosByAlbum[albumId] = fetched;
+        renderFullGrid(albumId, fetched);
       }
     }
 
@@ -112,7 +112,7 @@
     // preview 是只抓前幾張的預覽資料（不是整本相簿），點照片開燈箱一樣對得起來，因為
     // loadAlbumPhotos 存進 photosByAlbum 的也是同一份預覽資料，索引不會錯位；
     // 「查看全部」要看全部相片時，expandAlbum 會重新抓一次完整資料、換掉這份預覽
-    function renderCarousel(albumId, preview, total) {
+    function renderCarousel(albumId, preview) {
       const el = document.getElementById(`album-${albumId}`);
       carouselIndex[albumId] = 0;
 
@@ -130,7 +130,7 @@
         <div class="gallery-carousel-dots">
           ${preview.map((_, i) => `<button type="button" class="gallery-carousel-dot${i === 0 ? " active" : ""}" aria-label="第 ${i + 1} 張" onclick="goToCarouselSlide('${albumId}', ${i}, ${preview.length})"></button>`).join("")}
         </div>
-        <a href="#" class="table-link-button" onclick="expandAlbum('${albumId}'); return false;">查看全部 ${total} 張 &rarr;</a>
+        <a href="#" class="table-link-button" onclick="expandAlbum('${albumId}'); return false;">查看全部相片 &rarr;</a>
       `;
 
       startCarouselAutoplay(albumId, preview.length);

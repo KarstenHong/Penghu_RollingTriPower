@@ -73,12 +73,6 @@ async function getWhereOrdered(collection, field, value, orderField, direction, 
   return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
 }
 
-// 只算符合條件的筆數，不下載內容——用來知道相簿總共有幾張照片，不用整批抓下來才知道張數
-async function countWhere(collection, field, value) {
-  const snap = await db.collection(collection).where(field, "==", value).count().get();
-  return snap.data().count;
-}
-
 async function addItem(collection, data) {
   const ref = await db.collection(collection).add(data);
   if (CACHEABLE_COLLECTIONS.includes(collection)) await bumpCacheVersion();
