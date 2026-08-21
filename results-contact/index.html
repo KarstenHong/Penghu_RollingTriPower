@@ -41,6 +41,13 @@
     // 訪客沒捲到的相簿就不會被下載，相簿/照片再多也不會拖慢一開始的載入。
     let photosByAlbum = {};
 
+    // 相簿照片數一多，一次全部展開成格狀畫面會很長、縮圖也載得多，超過這個張數改成預設用
+    // 輪播只顯示代表照片，點「查看全部」才展開；張數不多的相簿直接顯示全部，輪播反而多此一舉
+    const CAROUSEL_THRESHOLD = 5;
+    const CAROUSEL_INTERVAL_MS = 4000;
+    let carouselTimers = {}; // albumId -> setInterval id
+    let carouselIndex = {}; // albumId -> 目前顯示第幾張
+
     async function initGallery() {
       const albums = await getAll("albums");
       const el = document.getElementById("gallery-content");
@@ -78,12 +85,82 @@
         return;
       }
 
-      grid.innerHTML = photos.map((p, i) => `
+      if (photos.length > CAROUSEL_THRESHOLD) {
+        renderCarousel(albumId, photos);
+      } else {
+        renderFullGrid(albumId, photos);
+      }
+    }
+
+    function renderFullGrid(albumId, photos) {
+      const el = document.getElementById(`album-${albumId}`);
+      el.className = "gallery-grid";
+      el.innerHTML = photos.map((p, i) => `
         <button type="button" class="gallery-thumb" onclick="openPhoto('${albumId}', ${i})">
           <img src="${escapeHtml(p.imageUrl)}" alt="" loading="lazy" />
           ${p.caption ? `<span class="gallery-caption">${escapeHtml(p.caption)}</span>` : ""}
         </button>
       `).join("");
+    }
+
+    // 輪播只放前 5 張代表照片（已經照日期新到舊排序），點照片一樣開燈箱，
+    // 燈箱要看的是 photosByAlbum 裡完整的那份資料，索引直接對得起來，不用另外做對照表
+    function renderCarousel(albumId, photos) {
+      const el = document.getElementById(`album-${albumId}`);
+      const preview = photos.slice(0, CAROUSEL_THRESHOLD);
+      carouselIndex[albumId] = 0;
+
+      el.className = "gallery-carousel";
+      el.innerHTML = `
+        <div class="gallery-carousel-viewport">
+          ${preview.map((p, i) => `
+            <button type="button" class="gallery-carousel-slide${i === 0 ? " active" : ""}" onclick="openPhoto('${albumId}', ${i})">
+              <img src="${escapeHtml(p.imageUrl)}" alt="" loading="lazy" />
+            </button>
+          `).join("")}
+          <button type="button" class="gallery-carousel-arrow prev" aria-label="上一張" onclick="carouselStep('${albumId}', ${preview.length}, -1)">&lsaquo;</button>
+          <button type="button" class="gallery-carousel-arrow next" aria-label="下一張" onclick="carouselStep('${albumId}', ${preview.length}, 1)">&rsaquo;</button>
+        </div>
+        <div class="gallery-carousel-dots">
+          ${preview.map((_, i) => `<button type="button" class="gallery-carousel-dot${i === 0 ? " active" : ""}" aria-label="第 ${i + 1} 張" onclick="goToCarouselSlide('${albumId}', ${i}, ${preview.length})"></button>`).join("")}
+        </div>
+        <a href="#" class="table-link-button" onclick="expandAlbum('${albumId}'); return false;">查看全部 ${photos.length} 張 &rarr;</a>
+      `;
+
+      startCarouselAutoplay(albumId, preview.length);
+      const viewport = el.querySelector(".gallery-carousel-viewport");
+      viewport.addEventListener("mouseenter", () => stopCarouselAutoplay(albumId));
+      viewport.addEventListener("mouseleave", () => startCarouselAutoplay(albumId, preview.length));
+    }
+
+    function goToCarouselSlide(albumId, index, total) {
+      carouselIndex[albumId] = index;
+      const el = document.getElementById(`album-${albumId}`);
+      el.querySelectorAll(".gallery-carousel-slide").forEach((slide, i) => slide.classList.toggle("active", i === index));
+      el.querySelectorAll(".gallery-carousel-dot").forEach((dot, i) => dot.classList.toggle("active", i === index));
+      // 手動切換（點箭頭/圓點）後重新計時，避免手動切完馬上又被自動播放蓋掉
+      if (carouselTimers[albumId]) startCarouselAutoplay(albumId, total);
+    }
+
+    function carouselStep(albumId, total, delta) {
+      const current = carouselIndex[albumId] || 0;
+      goToCarouselSlide(albumId, (current + delta + total) % total, total);
+    }
+
+    function startCarouselAutoplay(albumId, total) {
+      stopCarouselAutoplay(albumId);
+      carouselTimers[albumId] = setInterval(() => carouselStep(albumId, total, 1), CAROUSEL_INTERVAL_MS);
+    }
+
+    function stopCarouselAutoplay(albumId) {
+      if (!carouselTimers[albumId]) return;
+      clearInterval(carouselTimers[albumId]);
+      delete carouselTimers[albumId];
+    }
+
+    function expandAlbum(albumId) {
+      stopCarouselAutoplay(albumId);
+      renderFullGrid(albumId, photosByAlbum[albumId]);
     }
 
     function openPhoto(albumId, i) {
