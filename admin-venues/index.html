@@ -191,12 +191,8 @@
 
       const previewVenue = { id: editing.id, lat, lng, markerOffsetX: editing.markerOffsetX, markerOffsetY: editing.markerOffsetY };
       const [mx, my] = projectVenueMarker(previewVenue);
-      // 顯示的偏移量要跟地圖上實際畫出來的位置一致：markerOffsetX/Y 還沒設定過（null）時，
-      // 圖示是靠舊的 MARKER_POSITION_OVERRIDES 表撐著，這裡也要退回同一個值，不能顯示成 0，
-      // 不然文字寫「目前偏移量 0」但圖示明明不在原始座標位置，會誤導後續的微調按鈕
-      const legacy = MARKER_POSITION_OVERRIDES[editing.id] || {};
-      const offsetX = editing.markerOffsetX ?? legacy.dx ?? 0;
-      const offsetY = editing.markerOffsetY ?? legacy.dy ?? 0;
+      const offsetX = editing.markerOffsetX ?? 0;
+      const offsetY = editing.markerOffsetY ?? 0;
 
       section.innerHTML = `
         <label>地圖位置微調（選填）</label>
@@ -236,19 +232,11 @@
     }
 
     function nudgeMarker(dx, dy) {
-      // 起算點要用「目前實際顯示的位置」（可能是舊的 MARKER_POSITION_OVERRIDES 退回值），
-      // 不能直接當 0 起算，不然對還沒存過新欄位的舊資料按一下方向鍵，圖示會從已經修正好的
-      // 位置跳掉，變成只套用這一次的 1 像素微調、完全丟掉舊的修正量
-      const legacy = MARKER_POSITION_OVERRIDES[editing.id] || {};
-      const baseX = editing.markerOffsetX ?? legacy.dx ?? 0;
-      const baseY = editing.markerOffsetY ?? legacy.dy ?? 0;
-      editing.markerOffsetX = baseX + dx;
-      editing.markerOffsetY = baseY + dy;
+      editing.markerOffsetX = (editing.markerOffsetX ?? 0) + dx;
+      editing.markerOffsetY = (editing.markerOffsetY ?? 0) + dy;
       renderMarkerPreview();
     }
 
-    // 重設是明確設回 0（不是清成 null）：null 在 projectVenueMarker() 裡還是會去查舊的
-    // MARKER_POSITION_OVERRIDES 表當備援，跟這顆按鈕「回到真正原始座標位置」的預期不符
     function resetMarkerOffset() {
       editing.markerOffsetX = 0;
       editing.markerOffsetY = 0;
