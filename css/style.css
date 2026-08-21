@@ -871,6 +871,8 @@ svg text {
   margin: 1rem 0;
 }
 
+  .gallery-grid > .table-link-button { grid-column: 1 / -1; justify-self: start; }
+
 .gallery-thumb {
   position: relative;
   aspect-ratio: 1 / 1;

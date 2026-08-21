@@ -94,11 +94,13 @@
         renderCarousel(albumId, preview);
       } else {
         photosByAlbum[albumId] = fetched;
-        renderFullGrid(albumId, fetched);
+        renderFullGrid(albumId, fetched, false);
       }
     }
 
-    function renderFullGrid(albumId, photos) {
+    // showCollapse 只有從輪播展開時才會是 true（可以收合回輪播牆）；相簿本來就沒超過預覽張數
+    // 就沒有輪播可收合，不顯示這顆按鈕
+    function renderFullGrid(albumId, photos, showCollapse) {
       const el = document.getElementById(`album-${albumId}`);
       el.className = "gallery-grid";
       el.innerHTML = photos.map((p, i) => `
@@ -106,7 +108,9 @@
           <img src="${escapeHtml(p.imageUrl)}" alt="" loading="lazy" />
           ${p.caption ? `<span class="gallery-caption">${escapeHtml(p.caption)}</span>` : ""}
         </button>
-      `).join("");
+      `).join("") + (showCollapse
+        ? `<a href="#" class="table-link-button" onclick="collapseAlbum('${albumId}'); return false;">收合為輪播牆 &larr;</a>`
+        : "");
     }
 
     // preview 是只抓前幾張的預覽資料（不是整本相簿），點照片開燈箱一樣對得起來，因為
@@ -172,7 +176,13 @@
       el.innerHTML = '<p class="hint-text">載入中...</p>';
       const photos = (await getWhere("gallery", "albumId", albumId)).sort((a, b) => (b.date || "").localeCompare(a.date || ""));
       photosByAlbum[albumId] = photos;
-      renderFullGrid(albumId, photos);
+      renderFullGrid(albumId, photos, photos.length > CAROUSEL_THRESHOLD);
+    }
+
+    // 收合回輪播牆不用重抓，photosByAlbum 裡已經是完整、排好序的資料，直接取前幾張當預覽即可
+    function collapseAlbum(albumId) {
+      const preview = photosByAlbum[albumId].slice(0, CAROUSEL_THRESHOLD);
+      renderCarousel(albumId, preview);
     }
 
     function openPhoto(albumId, i) {
