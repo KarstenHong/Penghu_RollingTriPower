@@ -151,22 +151,11 @@ function projectLatLng(lat, lng) {
 
 // 手繪簡化地圖偶爾會讓準確的 GPS 座標投影後落在陸地外一點點（海岸線簡化細節），或是在小島密集
 // 的地方因為投影公式的線性誤差被放大、跳到隔壁小島——不是座標填錯，是地圖本身的簡化/精度限制。
-// 過去這個微調要工程師手動改程式碼、部署才能生效；現在改成後台場域管理頁「地圖位置微調」直接存進
-// 該筆場域自己的 markerOffsetX/markerOffsetY 欄位，客戶自己就能調整，不用等工程師。
-//
-// 這個舊表只留給還沒被搬到 Firestore 欄位的舊資料當備援（venue.markerOffsetX optional chaining
-// 是 undefined 才會查這裡），等後台把這兩筆的偏移量存過一次、確認欄位有值之後，這個表就可以整個刪掉。
-const MARKER_POSITION_OVERRIDES = {
-  mywUiRGRbtFvZwrpIxH2: { dx: 6, dy: 7 }, // 重光社區發展協會
-  jinGfYoQ1g9Ghk2kdScE: { dx: -6, dy: 25 }, // 鳥嶼社區發展協會（原始投影落在小白沙嶼，拉回鳥嶼本島）
-};
-
+// 這個微調存在該筆場域自己的 markerOffsetX/markerOffsetY 欄位（後台場域管理頁「地圖位置微調」
+// 可以直接點地圖或用方向鍵調整），客戶自己就能處理，不用等工程師改程式碼、部署。
 function projectVenueMarker(venue) {
   const [x, y] = projectLatLng(venue.lat, venue.lng);
-  const legacy = MARKER_POSITION_OVERRIDES[venue.id];
-  const dx = venue.markerOffsetX ?? legacy?.dx ?? 0;
-  const dy = venue.markerOffsetY ?? legacy?.dy ?? 0;
-  return [x + dx, y + dy];
+  return [x + (venue.markerOffsetX || 0), y + (venue.markerOffsetY || 0)];
 }
 
 // ids 省略時畫全部六個鄉鎮（用固定的整體 viewBox）；
