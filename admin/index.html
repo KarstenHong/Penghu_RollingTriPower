@@ -20,17 +20,13 @@
   <div id="nav"></div>
   <main>
     <h1>後台維護</h1>
+    <p class="hint-text">選擇要維護的項目，點卡片進入該管理頁面。</p>
+
+    <div class="directory-grid" id="admin-grid"></div>
+
+    <h2 style="margin-top: 2.5rem;">其他</h2>
     <ul class="admin-nav">
-      <li><a href="/admin-venues/">場域管理（活動中心／協會／衛生所）</a></li>
-      <li><a href="/admin-courses/">運動課程管理</a></li>
-      <li><a href="/admin-posts/">最新消息／活動資訊管理</a></li>
-      <li><a href="/admin-faq/">常見問題管理</a></li>
-      <li><a href="/admin-associations/">社區協會聯絡資訊管理</a></li>
-      <li><a href="/admin-gallery/">活動成果集管理</a></li>
-      <li><a href="/admin-sporttypes/">運動項目管理</a></li>
-      <li><a href="/admin-activitytypes/">活動類型管理</a></li>
-      <li><a href="/admin-users/">管理者帳號管理</a></li>
-      <li><a href="/admin-help/">後台操作說明</a></li>
+      <li><a href="/admin-help/">💡 後台操作說明</a></li>
     </ul>
 
     <h2 style="margin-top: 2.5rem;">資料快取</h2>
@@ -42,6 +38,29 @@
   </main>
 
   <script>
+    // 卡片樣式跟首頁的分類卡（.directory-grid／.directory-card）共用同一套 CSS，
+    // 維護入口跟訪客首頁看起來是同一家的介面，不用另外寫一套卡片樣式
+    const ADMIN_ITEMS = [
+      { icon: "📍", title: "場域管理", href: "/admin-venues/", teaser: "新增、編輯活動中心／協會／衛生所等據點的基本資料與地圖位置。" },
+      { icon: "🏃", title: "運動課程管理", href: "/admin-courses/", teaser: "設定各據點開的課程：運動類型、活動類型、上課時間與招生狀態。" },
+      { icon: "📰", title: "最新消息／活動資訊管理", href: "/admin-posts/", teaser: "發布最新消息與活動公告，前台首頁與消息列表會同步顯示。" },
+      { icon: "❓", title: "常見問題管理", href: "/admin-faq/", teaser: "維護前台「常見問題」頁面顯示的問答內容。" },
+      { icon: "☎️", title: "社區協會聯絡資訊管理", href: "/admin-associations/", teaser: "維護各社區協會的聯絡窗口、電話等資訊。" },
+      { icon: "📷", title: "活動成果集管理", href: "/admin-gallery/", teaser: "上傳、整理活動照片，呈現在成果相簿頁面。" },
+      { icon: "🏸", title: "運動項目管理", href: "/admin-sporttypes/", teaser: "新增運動項目與圖示，給場域、課程選用，也是地圖圖釘的依據。" },
+      { icon: "🏷️", title: "活動類型管理", href: "/admin-activitytypes/", teaser: "設定課程的活動類型分類與代表色，套用在課程資料上。" },
+      { icon: "👤", title: "管理者帳號管理", href: "/admin-users/", teaser: "新增或移除其他管理者的後台登入權限。" },
+    ];
+
+    document.getElementById("admin-grid").innerHTML = ADMIN_ITEMS.map((item) => `
+      <a class="directory-card" href="${item.href}">
+        <span class="directory-icon">${item.icon}</span>
+        <h3>${escapeHtml(item.title)}</h3>
+        <p>${escapeHtml(item.teaser)}</p>
+        <span class="directory-more">前往管理 →</span>
+      </a>
+    `).join("");
+
     document.getElementById("reset-cache-btn").addEventListener("click", async () => {
       const confirmed = await showConfirmDialog("確定要重置訪客的資料快取嗎？", { confirmLabel: "重置" });
       if (!confirmed) return;
