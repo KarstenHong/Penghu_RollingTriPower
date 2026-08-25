@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>後台操作說明</title>
+  <link rel="stylesheet" href="/css/style.css" />
+  <link rel="icon" href="/images/favicon-32.png" type="image/png" />
+  <link rel="apple-touch-icon" href="/images/favicon-180.png" />
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-check-compat.js"></script>
+  <script src="/js/firebase-config.js"></script>
+  <script src="/js/data.js"></script>
+  <script src="/js/auth.js"></script>
+  <script src="/js/common.js"></script>
+</head>
+<body>
+  <div id="nav"></div>
+  <main>
+    <a href="/admin/" class="back-button">&larr; 返回後台首頁</a>
+    <h1>後台操作說明</h1>
+    <p class="hint-text">不確定某個設定要怎麼做的時候，可以先來這裡找找看。</p>
+
+    <div class="faq-list">
+      <details class="faq-item">
+        <summary>怎麼新增一個運動地圖據點？</summary>
+        <p>分兩步，兩步都要做，地圖上才會完整顯示：</p>
+        <p>① 到「場域管理」新增場域：填名稱、鄉鎮、地址、電話、經緯度（存檔前可以直接在地圖預覽上點擊微調位置），並勾選「提供的運動項目」。地圖上會不會出現圖釘、圖釘用哪個運動的圖示，是照這裡勾選的運動項目決定的。</p>
+        <p>② 到「運動課程管理」新增課程：選剛剛建立的場域、選運動類型（要跟場域勾選的其中一項對應）、活動類型、上課時間、招生狀態等。滑鼠移到地圖圖釘上、或點進據點詳細頁看到的上課時間、活動類型標籤、招生狀態，都是來自這筆課程資料。</p>
+        <p>如果只做①沒做②：地圖上看得到圖釘，但點進去會顯示「目前這個據點還沒有課程資料」。</p>
+      </details>
+
+      <details class="faq-item">
+        <summary>怎麼新增運動項目，並讓它出現在地圖上？</summary>
+        <p>① 到「運動項目管理」新增運動項目（填名稱、選一個圖示）。</p>
+        <p>② 到「場域管理」編輯要套用的場域，在「提供的運動項目」勾選剛新增的項目並儲存，地圖上就會多一個對應圖示的圖釘。</p>
+        <p>③ 如果這個運動項目也要實際開課，記得再到「運動課程管理」新增或編輯課程，「運動類型」欄位選它。</p>
+      </details>
+
+      <details class="faq-item">
+        <summary>新增活動類型之後，要怎麼讓據點套用這個類型？</summary>
+        <p>活動類型是掛在「課程」上，不是掛在「場域」本身——場域的編輯畫面裡沒有活動類型欄位。</p>
+        <p>做法：到「運動課程管理」，找到（或新增）該場域的課程，在「活動類型」欄位選擇新加的活動類型並儲存。存好之後，地圖圖釘的提示框跟據點詳細頁就會顯示這個活動類型的顏色標籤。</p>
+      </details>
+
+      <details class="faq-item">
+        <summary>「下架」運動項目／活動類型會怎樣？跟刪除有什麼不同？</summary>
+        <p>下架之後，這個項目就不會再出現在「新增／編輯場域或課程」時可以勾選的清單裡，但已經套用過的場域、課程資料完全不受影響，名稱、圖示、顏色照樣正常顯示在前台。</p>
+        <p>如果之後想再把它套用到新的場域或課程，要先回「運動項目管理」／「活動類型管理」重新上架，才會出現在可選清單裡。</p>
+      </details>
+
+      <details class="faq-item">
+        <summary>怎麼新增或移除其他管理者帳號？</summary>
+        <p>到「管理者帳號管理」按「新增管理者」，輸入對方 Email 即可，不用先幫他想密碼——系統會自動寄一封「設定密碼」信到那個信箱，對方收信設定密碼後就能登入後台。</p>
+        <p>「刪除」只會拿掉對方的後台管理權限，對方的登入帳號本身還在，如果要讓對方完全不能登入，需要到 Firebase 主控台的 Authentication 頁面手動刪除該帳號。</p>
+      </details>
+
+      <details class="faq-item">
+        <summary>忘記管理者帳號密碼怎麼辦？</summary>
+        <p>到登入頁按「忘記密碼」，輸入登入用的 Email 就會收到重設密碼信。如果連自己登入用的 Email 是哪一個都不確定，需要請其他管理者到「管理者帳號管理」查看，或到 Firebase 主控台的 Authentication 頁面查詢。</p>
+      </details>
+
+      <details class="faq-item">
+        <summary>後台改了資料，前台網站怎麼還沒更新？</summary>
+        <p>場域、課程、公告、常見問題等資料，訪客瀏覽器會暫存一份加快載入速度，正常情況下訪客下次瀏覽就會自動拿到最新資料，不用特別處理。</p>
+        <p>如果想讓所有訪客「現在立刻」看到最新內容，不用等他們自己觸發，可以回「後台首頁」按「重置訪客資料快取」。</p>
+      </details>
+    </div>
+  </main>
+
+  <script>
+    requireAdmin(() => {});
+  </script>
+</body>
+</html>
