@@ -1292,8 +1292,8 @@ svg text {
   transition: margin-left 0.15s ease;
 }
 
-  .ladder-step .ladder-sub { font-weight: normal; font-size: 0.85em; opacity: 0.9; }
-
+  /* level-1～5 是完整的五階量表；join-team 目前只放三階，並刻意挑 1／3／5 讓縮排落差明顯。
+     沒用到的 2、4 保留著，之後要加中間階時直接掛 class 就有樣式，不會變成沒背景色的白條。 */
   .ladder-step.level-5 { background: #9b6fd6; margin-left: 8rem; }
   .ladder-step.level-4 { background: #d16b98; margin-left: 6rem; }
   .ladder-step.level-3 { background: #4a7fc1; margin-left: 4rem; }

@@ -148,44 +148,6 @@ async function fileToCompressedDataUrl(file, maxDim = 1280, maxBytes = 700000) {
   return out;
 }
 
-// 驗證台灣身分證字號格式是否正確（開頭英文字母對應戶籍地 + 檢查碼演算法），只用來抓輸入打錯字，不當作密碼或任何驗證用途
-function isValidTaiwanId(id) {
-  if (!/^[A-Z][12]\d{8}$/.test(id)) return false;
-  const letterValues = {
-    A: 10,
-    B: 11,
-    C: 12,
-    D: 13,
-    E: 14,
-    F: 15,
-    G: 16,
-    H: 17,
-    I: 34,
-    J: 18,
-    K: 19,
-    L: 20,
-    M: 21,
-    N: 22,
-    O: 35,
-    P: 23,
-    Q: 24,
-    R: 25,
-    S: 26,
-    T: 27,
-    U: 28,
-    V: 29,
-    W: 32,
-    X: 30,
-    Y: 31,
-    Z: 33,
-  };
-  const n = String(letterValues[id[0]]);
-  const digits = [n[0], n[1], ...id.slice(1).split("")].map(Number);
-  const weights = [1, 9, 8, 7, 6, 5, 4, 3, 2, 1, 1];
-  const sum = digits.reduce((acc, d, i) => acc + d * weights[i], 0);
-  return sum % 10 === 0;
-}
-
 function townshipName(id) {
   return TOWNSHIPS.find((t) => t.id === id)?.name || id;
 }
@@ -284,8 +246,9 @@ function initTabs() {
 // 頁籤文字＋順序照客戶「網頁建置.xlsx」的「上方標題」工作表。
 // H、I 兩欄客戶確認是「兩個標題合成一個頁籤」：成果與資源／聯絡我們共用一頁，關於我們／方案評估平台共用一頁，
 // 頁籤文字把兩個標題都放出來，實際頁面裡用 initTabs() 切成兩個分頁顯示（見 results-contact.html、about-evaluation.html）。
-// 社區活動查詢／活動資訊這幾頁客戶的新規劃裡沒有列在頁籤上，頁面本身還在，只是先不放進導覽列。
-// 常見問題原本也是這種「先不放導覽列」的頁面，後來客戶確認前台不需要，已經整頁刪除（連同後台的常見問題管理）。
+// 客戶新規劃裡沒有列進頁籤的幾頁（常見問題、社區活動查詢、活動成果集獨立頁、聯絡我們獨立頁），
+// 確認前台都不需要後已經整頁刪除，功能都由現有頁面涵蓋：
+// 查詢據點 → 參與課程；成果照片與聯絡方式 → 成果與資源／聯絡我們的兩個分頁。
 const NAV_LINKS = [
   { href: "/home-map/", label: "首頁" },
   { href: "/posts/?category=news", label: "最新消息" },

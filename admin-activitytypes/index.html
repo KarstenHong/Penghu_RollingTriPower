@@ -79,7 +79,7 @@
       if (!activityTypes.length) {
         html += `
           <p class="hint-text">目前還沒有活動類型資料。</p>
-          <button class="primary-button" onclick="seedDefaults()">建立預設的 2 種活動類型</button>
+          <button class="primary-button" onclick="seedDefaults()">建立預設的 ${DEFAULT_ACTIVITY_TYPES.length} 種活動類型</button>
         `;
       } else {
         html += `

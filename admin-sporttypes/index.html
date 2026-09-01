@@ -105,7 +105,7 @@
       if (!sportTypes.length) {
         html += `
           <p class="hint-text">目前還沒有運動項目資料。</p>
-          <button class="primary-button" onclick="seedDefaults()">建立預設的 8 種運動項目</button>
+          <button class="primary-button" onclick="seedDefaults()">建立預設的 ${DEFAULT_SPORT_TYPES.length} 種運動項目</button>
         `;
       } else {
         html += `
