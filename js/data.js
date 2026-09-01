@@ -3,7 +3,7 @@
 // 這些集合資料量小、只有後台會改，快取在瀏覽器本機（localStorage），訪客不用每次都重新讀一次整個
 // 集合。gallery 刻意不放進來：裡面存的是 Base64 照片，量大又持續長大，不適合、也不該整份存進每個
 // 訪客自己的裝置裡（改用分頁/延遲載入處理，見 results-contact.html、gallery.html）。
-const CACHEABLE_COLLECTIONS = ["venues", "courses", "posts", "faq", "associations", "sportTypes", "activityTypes", "albums"];
+const CACHEABLE_COLLECTIONS = ["venues", "courses", "posts", "associations", "sportTypes", "activityTypes", "albums"];
 
 // 快取新舊用一個「全站共用版本號」判斷，不是每個集合各自一個版本——這些集合都不大，一起失效重抓
 // 的成本很低，換來邏輯簡單很多。任何一個可快取集合被後台寫入時都會自動把版本號往前推進（見下面
