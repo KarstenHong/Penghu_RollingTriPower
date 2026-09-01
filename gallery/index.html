@@ -97,7 +97,7 @@
       document.addEventListener("keydown", onKeydown);
     }
 
-    init();
+    init().catch((err) => showLoadError("content", err));
   </script>
 </body>
 </html>

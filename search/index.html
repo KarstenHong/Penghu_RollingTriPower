@@ -86,7 +86,7 @@
       render();
     }
 
-    init();
+    init().catch((err) => showLoadError("results", err));
   </script>
 </body>
 </html>

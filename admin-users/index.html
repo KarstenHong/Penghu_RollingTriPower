@@ -90,7 +90,14 @@
     async function saveAdminEmail(e) {
       e.preventDefault();
       const email = document.getElementById("f-edit-email").value.trim();
-      await setItem("users", editingAdmin.id, { email });
+      try {
+        await setItem("users", editingAdmin.id, { email });
+      } catch (err) {
+        // 沒有這層的話，寫入被拒（例如規則還沒更新）時畫面完全沒有反應，
+        // 表單就停在原地、改的內容默默不見，操作者以為存好了
+        showToast("儲存失敗：" + (err.message || err));
+        return;
+      }
       editingAdmin = null;
       await reload();
       showToast("已儲存");

@@ -402,6 +402,21 @@ function showToast(message) {
   setTimeout(() => el.remove(), 2500);
 }
 
+// 資料載入失敗時的畫面。各頁的 init() 原本都是裸呼叫，Firestore 一斷線／權限錯誤／缺索引，
+// 畫面就永遠停在「載入中...」——長輩不會知道是還在轉還是壞了，只能一直等。
+// 用法：init().catch((err) => showLoadError("content", err))
+function showLoadError(containerId, err) {
+  if (err) console.error("[load]", err);
+  const el = document.getElementById(containerId);
+  if (!el) return;
+  el.innerHTML = `
+    <div class="load-error">
+      <p>資料載入失敗，請檢查網路連線後再試一次。</p>
+      <button type="button" class="primary-button" onclick="location.reload()">重新整理</button>
+    </div>
+  `;
+}
+
 // 頁籤收合成一個按鈕：有滑鼠的裝置用 CSS :hover 自動展開/收合（見 style.css），
 // 觸控裝置沒有 hover，改成點按鈕切換開關、點選單以外的地方自動收合
 function wireNavToggle() {
@@ -436,7 +451,7 @@ function renderNav() {
       <a class="nav-home" href="/home-map/">🏠 返回首頁</a>
       <div class="nav-menu">
         <button type="button" class="nav-toggle" id="nav-toggle" aria-label="開啟選單" aria-expanded="false">☰ 選單</button>
-        <div class="nav-links" id="nav-links">${links}</div>
+        <div class="nav-links" id="nav-links">${links}<span id="nav-menu-auth-slot"></span></div>
       </div>
       <span id="nav-admin-slot"></span>
       <span id="nav-auth-slot"></span>
@@ -446,10 +461,15 @@ function renderNav() {
 
   const adminEl = document.getElementById("nav-admin-slot");
   const authEl = document.getElementById("nav-auth-slot");
+  const menuAuthEl = document.getElementById("nav-menu-auth-slot");
 
   function applyAuthUi(role) {
     adminEl.innerHTML = adminLinkHtml(role);
     authEl.innerHTML = authLinkHtml(role);
+    // 未登入時，「管理者登入」在手機上另外放一份到「☰ 選單」裡（CSS 控制哪一份顯示，見 style.css）。
+    // 一般民眾用不到這個按鈕，卻在手機上佔掉頁首一整排；已登入的管理者則維持放在頁首，
+    // 因為那時「後台維護／登出」是正在使用中的功能，收進選單反而難按。
+    menuAuthEl.innerHTML = role === "admin" ? "" : `<a href="/login/" class="nav-menu-auth">管理者登入</a>`;
     if (role === "admin") wireLogoutButton();
   }
 

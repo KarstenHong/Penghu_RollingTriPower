@@ -152,18 +152,20 @@
         return;
       }
 
+      // 每個 td 都帶 data-label：手機版會把表格轉成一張張卡片，用 data-label 當欄位名顯示
+      // （見 style.css 的 .course-results-table）。桌機維持正常表格，不受影響。
       el.innerHTML = `
-        <div class="table-scroll"><table class="admin-table">
+        <div class="table-scroll"><table class="admin-table course-results-table">
           <thead><tr><th>鄉市</th><th>活動類型</th><th>據點名稱</th><th>上課時間</th><th>課程狀態</th><th></th></tr></thead>
           <tbody>
             ${matching.map(({ course, venue }) => `
               <tr>
-                <td>${townshipName(venue.township)}</td>
-                <td>${course.activityType ? `<span class="activity-type-tag" style="--activity-color: ${activityTypeColor(course.activityType)}">${activityTypeName(course.activityType)}</span>` : ""}</td>
-                <td>${escapeHtml(venue.name)}</td>
-                <td>${scheduleHtml(course.schedule)}</td>
-                <td>${COURSE_STATUS[course.status] ? `<span class="status-badge" style="--status-color: ${COURSE_STATUS[course.status].color}">${COURSE_STATUS[course.status].icon} ${escapeHtml(COURSE_STATUS[course.status].label)}</span>` : ""}</td>
-                <td><a class="table-link-button" href="/venue-detail/?venue=${venue.id}">查看據點</a></td>
+                <td data-label="鄉市">${townshipName(venue.township)}</td>
+                <td data-label="活動類型">${course.activityType ? `<span class="activity-type-tag" style="--activity-color: ${activityTypeColor(course.activityType)}">${activityTypeName(course.activityType)}</span>` : ""}</td>
+                <td data-label="據點名稱" class="cell-title">${escapeHtml(venue.name)}</td>
+                <td data-label="上課時間">${scheduleHtml(course.schedule)}</td>
+                <td data-label="課程狀態">${COURSE_STATUS[course.status] ? `<span class="status-badge" style="--status-color: ${COURSE_STATUS[course.status].color}">${COURSE_STATUS[course.status].icon} ${escapeHtml(COURSE_STATUS[course.status].label)}</span>` : ""}</td>
+                <td class="cell-action"><a class="table-link-button" href="/venue-detail/?venue=${venue.id}">查看據點</a></td>
               </tr>
             `).join("")}
           </tbody>
@@ -178,7 +180,7 @@
       renderResults();
     }
 
-    init();
+    init().catch((err) => showLoadError("results-content", err));
   </script>
 </body>
 </html>

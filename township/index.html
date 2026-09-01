@@ -192,7 +192,7 @@
       document.getElementById("marker-tooltip").hidden = true;
     }
 
-    init();
+    init().catch((err) => showLoadError("township-map", err));
   </script>
 </body>
 </html>

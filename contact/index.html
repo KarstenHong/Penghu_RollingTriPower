@@ -54,7 +54,7 @@
       el.innerHTML = html;
     }
 
-    init();
+    init().catch((err) => showLoadError("content", err));
   </script>
 </body>
 </html>

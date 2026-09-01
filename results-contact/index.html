@@ -239,8 +239,9 @@
       el.innerHTML = html;
     }
 
-    initGallery();
-    initContact();
+    // 兩個分頁各自獨立載入，其中一邊失敗不影響另一邊（例如相簿缺複合索引時，聯絡資訊照樣看得到）
+    initGallery().catch((err) => showLoadError("gallery-content", err));
+    initContact().catch((err) => showLoadError("contact-content", err));
     initTabs();
   </script>
 </body>

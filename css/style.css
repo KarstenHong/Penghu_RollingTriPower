@@ -304,6 +304,10 @@ main p { line-height: 1.7; }
 
 .nav-logo { height: 44px; width: auto; flex-shrink: 0; border-radius: 6px; }
 
+/* 選單內的「管理者登入」：預設不顯示，只有手機版（見下方 640px 斷點）才會出現，
+   桌機維持顯示在頁首右上角 */
+.nav-menu-auth { display: none; }
+
 .nav-toggle,
 .nav-home,
 .nav-admin-link,
@@ -1260,6 +1264,17 @@ svg text {
 
   .table-scroll .admin-table { margin-bottom: 0; min-width: 480px; }
 
+/* 資料載入失敗時的畫面（見 common.js 的 showLoadError） */
+.load-error {
+  padding: 1.5rem 1.2rem;
+  background: #fff6f6;
+  border: 1px solid #f0c9c9;
+  border-radius: 12px;
+  text-align: center;
+}
+
+  .load-error p { margin: 0 0 1rem; color: #a33; }
+
 /* 指導員成長階梯 */
 
 .growth-ladder { display: flex; flex-direction: column; gap: 0.6rem; margin: 1.2rem 0; }
@@ -1294,9 +1309,15 @@ svg text {
     border-radius: 14px;
   }
 
-  .nav-bar { padding: 0.75rem 1rem; }
-  .nav-brand { font-size: 1.05rem; }
-  .nav-logo { height: 34px; width: auto; }
+  .nav-bar { padding: 0.6rem 1rem; }
+  .nav-brand { font-size: 1rem; }
+  .nav-logo { height: 30px; width: auto; }
+
+  /* 未登入時把「管理者登入」從頁首收進「☰ 選單」：一般民眾（主要是長輩）用不到這顆按鈕，
+     它卻會把頁首擠成三行、在 375px 螢幕上吃掉將近一半的畫面高度才看得到內容。
+     已登入的管理者不受影響（那時顯示的是「後台維護／登出」，是正在使用中的功能）。 */
+  .nav-auth-btn:not(.nav-logout-link) { display: none; }
+  .nav-menu-auth { display: block; }
   .nav-links { gap: 0.5rem; right: 1rem; min-width: 200px; }
   .nav-links a { font-size: 0.9rem; padding: 0.25rem 0.45rem; }
 
@@ -1335,6 +1356,64 @@ svg text {
   }
   .map-inset { width: 100px; height: 100px; }
   .map-inset-label { font-size: 0.8rem; bottom: 4px; }
+
+  /* 「參與課程」的結果表格在手機上改成一筆一張卡片。
+     原本 6 欄中文表格擠在 480px 裡，「地板滾球活動據點」這種欄位會被壓成一行一個字的直書，
+     最右邊的「查看據點」按鈕還會被推出畫面外完全看不到。改成卡片後每個欄位獨立一行、
+     欄位名用 data-label 帶出來，長輩不用橫向捲動就能讀完一筆。
+     只作用在 .course-results-table，後台那 8 個共用 .admin-table 的頁面不受影響。 */
+  .course-results-table { min-width: 0; }
+  .table-scroll .course-results-table { min-width: 0; }
+  .course-results-table thead { display: none; }
+  .course-results-table,
+  .course-results-table tbody,
+  .course-results-table tr,
+  .course-results-table td { display: block; width: auto; }
+
+  /* 用 flex 排版是為了讓「據點名稱」能靠 order 提到最前面當卡片標題——
+     桌機表格的欄位順序（鄉市、活動類型、據點名稱…）在卡片上不合理，
+     使用者第一眼要看到的是「哪個據點」，不是「哪個鄉市」 */
+  .course-results-table tr {
+    display: flex;
+    flex-direction: column;
+    background: #fff;
+    border: 1px solid #dbe7ea;
+    border-radius: 12px;
+    padding: 0.9rem 1rem;
+    margin-bottom: 0.8rem;
+    box-shadow: 0 2px 8px rgba(10, 92, 120, 0.06);
+  }
+
+  /* 蓋掉桌機表格的斑馬紋與分隔線，卡片自己有邊框了 */
+  .course-results-table tr:nth-child(even) td,
+  .course-results-table td { background: transparent; border-bottom: none; padding: 0.2rem 0; }
+
+  .course-results-table td::before {
+    content: attr(data-label) "：";
+    font-weight: bold;
+    color: #567;
+  }
+
+  /* 據點名稱當卡片標題，提到最上面、不顯示欄位名 */
+  .course-results-table td.cell-title {
+    order: -1;
+    font-size: 1.15em;
+    font-weight: bold;
+    color: #0a5c78;
+    padding-bottom: 0.5rem;
+    margin-bottom: 0.3rem;
+    border-bottom: 1px solid #eef4f6;
+  }
+  .course-results-table td.cell-title::before { content: none; }
+
+  /* 按鈕獨立一行、放大好點 */
+  .course-results-table td.cell-action { padding-top: 0.7rem; }
+  .course-results-table td.cell-action::before { content: none; }
+  .course-results-table td.cell-action .table-link-button {
+    display: block;
+    text-align: center;
+    padding: 0.6rem;
+  }
 }
 
 /* 動畫效果：只在進場、互動當下播放一次，不做持續循環的晃動，

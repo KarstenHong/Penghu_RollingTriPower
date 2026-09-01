@@ -31,6 +31,11 @@
     let editingAlbum = null;
     let editingPhoto = null;
 
+    // 只在開頁時呼叫一次。gallery 的文件裡直接存著 Base64 原圖（目前 21 張約 5.7MB），
+    // 而 Firestore 客戶端 SDK 沒辦法「只取部分欄位」，一讀就是整份文件全抓。
+    // 早期版本在每次存檔／刪除後都再呼叫一次這個函式，等於每個動作都重新下載整包照片
+    // （連刪 5 張 = 下載約 28MB）。現在改成：異動後直接更新下面的本地 albums/photos 陣列再重畫，
+    // 不再回頭重抓。
     async function reload() {
       [albums, photos] = await Promise.all([getAll("albums"), getAll("gallery")]);
       if (currentAlbumId && !albums.some((a) => a.id === currentAlbumId)) currentAlbumId = null;
@@ -52,9 +57,10 @@
       e.preventDefault();
       const name = document.getElementById("f-album-name").value.trim();
       if (!name) return;
-      await addItem("albums", { name });
+      const id = await addItem("albums", { name });
+      albums.push({ id, name });
       editingAlbum = null;
-      await reload();
+      render();
       showToast("已儲存");
     }
 
@@ -72,8 +78,10 @@
       const toDelete = photos.filter((p) => p.albumId === id);
       for (const p of toDelete) await deleteItem("gallery", p.id);
       await deleteItem("albums", id);
+      photos = photos.filter((p) => p.albumId !== id);
+      albums = albums.filter((a) => a.id !== id);
       if (currentAlbumId === id) currentAlbumId = null;
-      await reload();
+      render();
     }
 
     // ---- 照片 ----
@@ -92,7 +100,8 @@
       const confirmed = await showConfirmDialog("確定要刪除這張照片嗎？", { confirmLabel: "刪除", danger: true });
       if (!confirmed) return;
       await deleteItem("gallery", id);
-      await reload();
+      photos = photos.filter((p) => p.id !== id);
+      render();
     }
 
     // 編輯既有照片時只換一張圖；新增時可以一次選多個檔案，逐張壓縮後各自存成一筆，
@@ -128,6 +137,8 @@
             }
           }
           await setItem("gallery", editingPhoto.id, { albumId: currentAlbumId, imageUrl, caption, date });
+          const existing = photos.find((p) => p.id === editingPhoto.id);
+          if (existing) Object.assign(existing, { albumId: currentAlbumId, imageUrl, caption, date });
         } else {
           // 逐張處理，單張失敗（例如格式不支援）只跳過那一張、繼續處理其他張，不會讓整批上傳中斷
           const failed = [];
@@ -144,12 +155,13 @@
               failed.push(`${files[i].name}：壓縮後還是太大`);
               continue;
             }
-            await addItem("gallery", { albumId: currentAlbumId, imageUrl, caption, date });
+            const newId = await addItem("gallery", { albumId: currentAlbumId, imageUrl, caption, date });
+            photos.push({ id: newId, albumId: currentAlbumId, imageUrl, caption, date });
           }
           if (failed.length) alert(`以下照片已略過：\n${failed.join("\n")}`);
         }
         editingPhoto = null;
-        await reload();
+        render();
         showToast("已儲存");
       } finally {
         saveBtn.disabled = false;
