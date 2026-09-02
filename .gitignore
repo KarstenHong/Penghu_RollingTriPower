@@ -9,3 +9,9 @@ Thumbs.db
 .firebaserc
 firebase.json
 firestore.rules
+
+# 內部文件與交接資料 — 同樣不進版控（GitHub Pages 會把 repo 根目錄整包公開，
+# 這些是給接手的人／AI 讀的內部說明，不是網站內容）
+技術規格.md
+使用者說明.md
+*.pptx
