@@ -15,3 +15,9 @@ firestore.rules
 技術規格.md
 使用者說明.md
 *.pptx
+
+# 本機開發工具 — 同樣不進版控（GitHub Pages 會把根目錄整包公開，這些不是網站內容）
+# serve.js            本地預覽伺服器（node serve.js）
+# _audit-overrides.js 檢查 animated.css 有沒有無條件蓋掉 style.css 的響應式設定
+serve.js
+_audit-overrides.js
